@@ -12,9 +12,9 @@ customer_router = APIRouter()
 
 
 @customer_router.get('/api/customer', tags=['customer'], response_model=List[Customer], status_code=200, dependencies=[Depends(JWTBearer())])
-def get_customers() -> List[Customer]:
+def get_customers(start:int | None = None, length:int | None = None, query:str | None = None) -> List[Customer]:
     db = Session()
-    result = CustomerService(db).get_records()
+    result = CustomerService(db).get_records(start, length, query)
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
 
 @customer_router.get('/api/customer/{id}', tags=['customer'], response_model=Customer, status_code=200)
@@ -32,7 +32,6 @@ async def create_customer(customer: Customer, req: Request) -> dict:
     result = CustomerService(db).create_record(customer, user_id)
     print(result)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
-
 
 @customer_router.put('/api/customer/{id}', tags=['customer'], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
 async def update_customer(id: int, customer: Customer,  req: Request) -> dict:

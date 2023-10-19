@@ -1,14 +1,62 @@
-from sqlalchemy import func
+from sqlalchemy import desc, func
+from sqlalchemy.orm.session import Session
 from models.customer import Customer as CustomerModel
 from schemas.customer import Customer
-from datetime import datetime
+from utils.base64_manager import base64_decode
+from utils.json_manager import json_parse
 
 class CustomerService():
-    def __init__(self, db) -> None:
+    def __init__(self, db:Session) -> None:
         self.db = db
     
-    def get_records(self):
-        result = self.db.query(CustomerModel).filter(CustomerModel.deleted_at == None).all()
+    def get_records(self, start: int | None, length: int | None, query: str | None):
+        model = self.db.query(CustomerModel).filter(CustomerModel.deleted_at == None)
+        if query:
+            json_query = base64_decode(query)
+            json = json_parse(json_query)
+
+            if 'Sorts' in json and len(json['Sorts']) > 0:
+                for sort in json['Sorts']:
+                    property_name = sort['propertyName']
+                    descending = sort['descending']
+
+                    if descending == False:
+                        model = model.order_by(property_name)
+                    else: 
+                        model = model.order_by(desc(property_name))
+
+            if 'Filters' in json and len(json['Filters']):
+                for filter in json['Filters']:
+                    property_name = filter['propertyName']
+                    type_filer = filter['type']
+                    value_filter = filter['value']
+
+                    if type_filer == 'eq':
+                        model = model.filter(getattr(CustomerModel, property_name) == value_filter)
+                    elif type_filer == 'neq':
+                        model = model.filter(getattr(CustomerModel, property_name) != value_filter)
+                    elif type_filer == 'gt':
+                        model = model.filter(getattr(CustomerModel, property_name) > value_filter)
+                    elif type_filer == 'lt':
+                        model = model.filter(getattr(CustomerModel, property_name) < value_filter)
+                    elif type_filer == 'gte':
+                        model = model.filter(getattr(CustomerModel, property_name) >= value_filter)
+                    elif type_filer == 'lte':
+                        model = model.filter(getattr(CustomerModel, property_name) <= value_filter)
+                    elif type_filer == 'like':
+                        search = "%{}%".format(value_filter)
+                        model = model.filter(getattr(CustomerModel, property_name).like(search))
+                    elif type_filer == 'contains':
+                        search = "%{}%".format(value_filter)
+                        model = model.filter(getattr(CustomerModel, property_name).like(search))
+                        
+        if length:
+            model = model.limit(length)
+
+        if start: 
+            model = model.offset(start)
+        
+        result = model.all()
         return result
     
     def get_record(self, id:int):
