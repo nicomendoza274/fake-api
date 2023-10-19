@@ -9,12 +9,12 @@ class Customer(BaseModel):
     address: str
     city: str
     phone: str
-    created_at: Optional[datetime] = None
-    created_by: Optional[int] = None
-    updated_at: Optional[datetime] = None
-    updated_by: Optional[int] = None
-    deleted_at: Optional[datetime] = None
-    deleted_by: Optional[int] = None
+    created_at: Optional[datetime]
+    created_by: Optional[int]
+    updated_at: Optional[datetime]
+    updated_by: Optional[int]
+    deleted_at: Optional[datetime]
+    deleted_by: Optional[int]
 
     class Config:
         schema_extra = {

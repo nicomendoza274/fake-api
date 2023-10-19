@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from config.database import Session
@@ -6,7 +6,7 @@ from typing import List
 from middlewares.jwt_bearer import JWTBearer
 from schemas.customer import Customer
 from services.customer_service import CustomerService
-from models.customer import Customer as CustomerModel
+from utils.jwt_manager import get_user_id
 
 customer_router = APIRouter()
 
@@ -25,31 +25,34 @@ def get_customer(id: int) -> Customer:
         return JSONResponse(status_code=404, content={'message' : "No encontrado"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
 
-@customer_router.post('/api/customer', tags=['customer'], response_model=dict, status_code=201)
-def create_customer(customer: Customer) -> dict:
+@customer_router.post('/api/customer', tags=['customer'], response_model=dict, status_code=201, dependencies=[Depends(JWTBearer())])
+async def create_customer(customer: Customer, req: Request) -> dict:
+    user_id = await get_user_id(req)
     db = Session()
-    result = CustomerService(db).create_record(customer)
+    result = CustomerService(db).create_record(customer, user_id)
     print(result)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
-@customer_router.put('/api/customer/{id}', tags=['customer'], response_model=dict, status_code=200)
-def update_customer(id: int, customer: Customer) -> dict:
+@customer_router.put('/api/customer/{id}', tags=['customer'], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
+async def update_customer(id: int, customer: Customer,  req: Request) -> dict:
+    user_id = await get_user_id(req)
     db = Session()
     result = CustomerService(db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={'message' : "No encontrado"})
 
-    result = CustomerService(db).update_record(id, customer)
+    result = CustomerService(db).update_record(id, customer, user_id)
     print(jsonable_encoder(result))
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
 
-@customer_router.delete('/api/customer/{id}', tags=['customer'], response_model=dict, status_code=200)
-def delete_customer(id: int) -> dict:
+@customer_router.delete('/api/customer/{id}', tags=['customer'], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
+async def delete_customer(id: int, req: Request) -> dict:
+    user_id = await get_user_id(req)
     db = Session()
     result = CustomerService(db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={'message' : "No encontrado"})
 
-    CustomerService(db).delete_record(id)
+    CustomerService(db).delete_record(id, user_id)
     return JSONResponse(content={"message" : "ok"})

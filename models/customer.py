@@ -1,5 +1,5 @@
 from config.database import Base
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, func
 
 class Customer(Base):
     __tablename__ = 'customers'
@@ -10,9 +10,9 @@ class Customer(Base):
     address = Column(String)
     city = Column(String)
     phone = Column(String)
-    created_at = Column(DateTime)
+    created_at = Column(DateTime(timezone=True), default=func.now())
     created_by = Column(Integer)
-    updated_at = Column(DateTime)
+    updated_at = Column(DateTime(timezone=True))
     updated_by = Column(Integer)
-    deleted_at = Column(DateTime)
+    deleted_at = Column(DateTime(timezone=True))
     deleted_by = Column(Integer)
