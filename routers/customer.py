@@ -11,11 +11,17 @@ from utils.jwt_manager import get_user_id
 customer_router = APIRouter()
 
 
-@customer_router.get('/api/customer', tags=['customer'], response_model=List[Customer], status_code=200, dependencies=[Depends(JWTBearer())])
-def get_customers(start:int | None = None, length:int | None = None, query:str | None = None) -> List[Customer]:
+@customer_router.get('/api/customer', tags=['customer'], status_code=200, dependencies=[Depends(JWTBearer())])
+def get_customers(start:int | None = 0, length:int | None = 15, query:str | None = None) -> List[Customer]:
     db = Session()
     result = CustomerService(db).get_records(start, length, query)
-    return JSONResponse(status_code=200, content=jsonable_encoder(result))
+    response = {
+        "count": len(result),
+        "start": start,
+        "length": length,
+        "data": jsonable_encoder(result)
+    }
+    return JSONResponse(status_code=200, content=response)
 
 @customer_router.get('/api/customer/{id}', tags=['customer'], response_model=Customer, status_code=200)
 def get_customer(id: int) -> Customer:
