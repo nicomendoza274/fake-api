@@ -14,9 +14,10 @@ class CustomerService():
         if query:
             json_query = base64_decode(query)
             json = json_parse(json_query)
+            json = {key.lower(): value for key, value in json.items()}
 
-            if 'Sorts' in json and len(json['Sorts']) > 0:
-                for sort in json['Sorts']:
+            if 'sorts' in json and len(json['sorts']) > 0:
+                for sort in json['sorts']:
                     property_name = sort['propertyName']
                     descending = sort['descending']
 
@@ -25,8 +26,8 @@ class CustomerService():
                     else: 
                         model = model.order_by(desc(property_name))
 
-            if 'Filters' in json and len(json['Filters']):
-                for filter in json['Filters']:
+            if 'filters' in json and len(json['filters']) > 0:
+                for filter in json['filters']:
                     property_name = filter['propertyName']
                     type_filer = filter['type']
                     value_filter = filter['value']
@@ -49,7 +50,12 @@ class CustomerService():
                     elif type_filer == 'contains':
                         search = "%{}%".format(value_filter)
                         model = model.filter(getattr(CustomerModel, property_name).like(search))
-                        
+
+            if 'search' in json:
+                search = json['search']
+                search = "%{}%".format(search)
+                model = model.filter(getattr(CustomerModel, 'name').ilike(search))
+
         if length:
             model = model.limit(length)
 
