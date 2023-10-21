@@ -27,14 +27,18 @@ def get_customers(
     response = {
         "count": len(result),
         "start": start,
-        "length": length,
+        "length": len(result) if length == 0 else length,
         "data": jsonable_encoder(result),
     }
     return JSONResponse(status_code=200, content=response)
 
 
 @customer_router.get(
-    "/api/customer/{id}", tags=["customer"], response_model=Customer, status_code=200
+    "/api/customer/{id}",
+    tags=["customer"],
+    response_model=Customer,
+    status_code=200,
+    dependencies=[Depends(JWTBearer())],
 )
 def get_customer(id: int) -> Customer:
     db = Session()
