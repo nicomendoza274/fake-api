@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
 
 class Customer(BaseModel):
     customer_id: Optional[int] = None
@@ -24,6 +26,6 @@ class Customer(BaseModel):
                 "internal_id": "ASD123456",
                 "address": "Caseros 123",
                 "city": "Salta",
-                "phone": "3875123456"
+                "phone": "3875123456",
             }
         }

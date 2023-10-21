@@ -1,10 +1,12 @@
+from sqlalchemy import Column, DateTime, Integer, String, func
+
 from config.database import Base
-from sqlalchemy import Column, Integer, String, DateTime, func
+
 
 class Customer(Base):
-    __tablename__ = 'customers'
+    __tablename__ = "customers"
 
-    customer_id = Column(Integer, primary_key= True)
+    customer_id = Column(Integer, primary_key=True)
     name = Column(String)
     internal_id = Column(String)
     address = Column(String)
