@@ -21,3 +21,4 @@ class JWTBearer(HTTPBearer):
         )
         if not result:
             raise HTTPException(status_code=403, detail="Credenciales son invalidas")
+        return result

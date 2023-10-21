@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from config.database import Session
 from middlewares.jwt_bearer import JWTBearer
+from models.user import User as UserModel
 from schemas.customer import Customer
 from services.customer_service import CustomerService
 from utils.jwt_manager import get_user_id
@@ -55,8 +56,8 @@ def get_customer(id: int) -> Customer:
     status_code=201,
     dependencies=[Depends(JWTBearer())],
 )
-async def create_customer(customer: Customer, req: Request) -> dict:
-    user_id = await get_user_id(req)
+def create_customer(customer: Customer, user: UserModel = Depends(JWTBearer())) -> dict:
+    user_id = user.user_id
     db = Session()
     result = CustomerService(db).create_record(customer, user_id)
     print(result)
@@ -70,8 +71,10 @@ async def create_customer(customer: Customer, req: Request) -> dict:
     status_code=200,
     dependencies=[Depends(JWTBearer())],
 )
-async def update_customer(id: int, customer: Customer, req: Request) -> dict:
-    user_id = await get_user_id(req)
+def update_customer(
+    id: int, customer: Customer, user: UserModel = Depends(JWTBearer())
+) -> dict:
+    user_id = user.user_id
     db = Session()
     result = CustomerService(db).get_record(id)
     if not result:
@@ -89,8 +92,11 @@ async def update_customer(id: int, customer: Customer, req: Request) -> dict:
     status_code=200,
     dependencies=[Depends(JWTBearer())],
 )
-async def delete_customer(id: int, req: Request) -> dict:
-    user_id = await get_user_id(req)
+def delete_customer(
+    id: int,
+    user: UserModel = Depends(JWTBearer()),
+) -> dict:
+    user_id = user.user_id
     db = Session()
     result = CustomerService(db).get_record(id)
     if not result:

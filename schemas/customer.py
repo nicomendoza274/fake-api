@@ -19,7 +19,7 @@ class Customer(BaseModel):
     deleted_by: Optional[int]
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "customer_id": 0,
                 "name": "Nombre",
