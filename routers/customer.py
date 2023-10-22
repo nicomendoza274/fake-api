@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from config.database import Session
+from config.database import Session, get_db
 from middlewares.jwt_bearer import JWTBearer
 from models.user import User as UserModel
 from schemas.customer import Customer
@@ -20,9 +20,11 @@ customer_router = APIRouter()
     dependencies=[Depends(JWTBearer())],
 )
 def get_customers(
-    start: int | None = 0, length: int | None = 15, query: str | None = None
+    start: int | None = 0,
+    length: int | None = 15,
+    query: str | None = None,
+    db: Session = Depends(get_db),
 ) -> List[Customer]:
-    db = Session()
     result = CustomerService(db).get_records(start, length, query)
     response = {
         "count": len(result),
@@ -40,8 +42,7 @@ def get_customers(
     status_code=200,
     dependencies=[Depends(JWTBearer())],
 )
-def get_customer(id: int) -> Customer:
-    db = Session()
+def get_customer(id: int, db: Session = Depends(get_db)) -> Customer:
     result = CustomerService(db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "No encontrado"})
@@ -55,9 +56,12 @@ def get_customer(id: int) -> Customer:
     status_code=201,
     dependencies=[Depends(JWTBearer())],
 )
-def create_customer(customer: Customer, user: UserModel = Depends(JWTBearer())) -> dict:
+def create_customer(
+    customer: Customer,
+    user: UserModel = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
+) -> dict:
     user_id = user.user_id
-    db = Session()
     result = CustomerService(db).create_record(customer, user_id)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
@@ -70,16 +74,17 @@ def create_customer(customer: Customer, user: UserModel = Depends(JWTBearer())) 
     dependencies=[Depends(JWTBearer())],
 )
 def update_customer(
-    id: int, customer: Customer, user: UserModel = Depends(JWTBearer())
+    id: int,
+    customer: Customer,
+    user: UserModel = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
 ) -> dict:
     user_id = user.user_id
-    db = Session()
     result = CustomerService(db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "No encontrado"})
 
     result = CustomerService(db).update_record(id, customer, user_id)
-    print(jsonable_encoder(result))
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
 
 
@@ -91,11 +96,9 @@ def update_customer(
     dependencies=[Depends(JWTBearer())],
 )
 def delete_customer(
-    id: int,
-    user: UserModel = Depends(JWTBearer()),
+    id: int, user: UserModel = Depends(JWTBearer()), db: Session = Depends(get_db)
 ) -> dict:
     user_id = user.user_id
-    db = Session()
     result = CustomerService(db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "No encontrado"})

@@ -16,5 +16,5 @@ class JWTBearer(HTTPBearer):
 
         if not result:
             raise HTTPException(status_code=403, detail="Credenciales son invalidas")
-
+        db.close()
         return result
