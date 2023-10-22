@@ -38,3 +38,12 @@ On Windows:
 ```sh
  uvicorn main:app --reload
 ```
+## Docker
+if you prefer to use docker follow these steps, it is important that you have docker installed on your computer
+```sh
+docker compose build
+```
+```sh
+docker compose up
+```
+Once the project is up and running, you can access it through your browser or API client.
