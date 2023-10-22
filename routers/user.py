@@ -24,7 +24,7 @@ def login(user: User, db: Session = Depends(get_db)):
     result: UserModel = UserService(db).login_user(user)
     if not result:
         return JSONResponse(
-            status_code=401, content={"message": "usuario o contraseña incorrectos"}
+            status_code=401, content={"message": "incorrect username or password"}
         )
     token: str = create_token(
         {"user_id": result.user_id, "email": result.email, "hash": result.hash}

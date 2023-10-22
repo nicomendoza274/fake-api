@@ -45,7 +45,7 @@ def get_customers(
 def get_customer(id: int, db: Session = Depends(get_db)) -> Customer:
     result = CustomerService(db).get_record(id)
     if not result:
-        return JSONResponse(status_code=404, content={"message": "No encontrado"})
+        return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
 
 
@@ -82,7 +82,7 @@ def update_customer(
     user_id = user.user_id
     result = CustomerService(db).get_record(id)
     if not result:
-        return JSONResponse(status_code=404, content={"message": "No encontrado"})
+        return JSONResponse(status_code=404, content={"message": "Not Found"})
 
     result = CustomerService(db).update_record(id, customer, user_id)
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
@@ -101,7 +101,7 @@ def delete_customer(
     user_id = user.user_id
     result = CustomerService(db).get_record(id)
     if not result:
-        return JSONResponse(status_code=404, content={"message": "No encontrado"})
+        return JSONResponse(status_code=404, content={"message": "Not Found"})
 
     CustomerService(db).delete_record(id, user_id)
-    return JSONResponse(content={"message": "ok"})
+    return JSONResponse(content={"message": "deleted"})

@@ -15,6 +15,6 @@ class JWTBearer(HTTPBearer):
         result: UserModel = UserService(db).get_user_by_credentials(credentials)
 
         if not result:
-            raise HTTPException(status_code=403, detail="Credenciales son invalidas")
+            raise HTTPException(status_code=403, detail="Invalid Credentials")
         db.close()
         return result
