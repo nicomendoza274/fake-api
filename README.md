@@ -1,4 +1,4 @@
-# PyNotes-API
+# Fake-API
 Welcome to the Fake-API repository! This is a simple guide to help you get started with setting up and running the Fake-API project.
 
 ## Actual version
