@@ -1,4 +1,10 @@
 import base64
+import hashlib
+
+
+def encrypt_string(hash_string):
+    sha_signature = hashlib.sha256(hash_string.encode()).hexdigest()
+    return sha_signature
 
 
 def base64_decode(value: str):

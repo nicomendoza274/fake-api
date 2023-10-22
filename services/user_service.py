@@ -2,7 +2,7 @@ from sqlalchemy.orm.session import Session
 
 from models.user import User as UserModel
 from schemas.user import User
-from services.encrypt import encrypt_string
+from utils.encrypt import encrypt_string
 
 
 class UserService:

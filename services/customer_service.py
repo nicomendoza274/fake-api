@@ -3,7 +3,7 @@ from sqlalchemy.orm.session import Session
 
 from models.customer import Customer as CustomerModel
 from schemas.customer import Customer
-from utils.base64_manager import base64_decode
+from utils.encrypt import base64_decode
 from utils.json_manager import json_parse
 
 
