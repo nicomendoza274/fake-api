@@ -1,10 +1,11 @@
 from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from config.database import Session
 from models.user import User as UserModel
 from schemas.user import User, UserCreateModel
-from services.encrypt import encrypt_string
+from services.user_service import UserService
 from utils.jwt_manager import create_token
 
 user_router = APIRouter()
@@ -15,22 +16,14 @@ user_router = APIRouter()
 )
 def create_user(user: User):
     db = Session()
-    new_user = UserModel(email=user.email, hash=encrypt_string(user.password))
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
+    result = UserService(db).create_user(user)
+    return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
 @user_router.post("/api/auth", tags=["Auth"], status_code=200)
 def login(user: User):
     db = Session()
-    hash = encrypt_string(user.password)
-    result: UserModel = (
-        db.query(UserModel)
-        .filter(UserModel.email == user.email, UserModel.hash == hash)
-        .first()
-    )
+    result: UserModel = UserService(db).login_user(user)
     if not result:
         return JSONResponse(
             status_code=401, content={"message": "usuario o contraseña incorrectos"}

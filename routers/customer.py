@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
@@ -9,7 +9,6 @@ from middlewares.jwt_bearer import JWTBearer
 from models.user import User as UserModel
 from schemas.customer import Customer
 from services.customer_service import CustomerService
-from utils.jwt_manager import get_user_id
 
 customer_router = APIRouter()
 
@@ -60,7 +59,6 @@ def create_customer(customer: Customer, user: UserModel = Depends(JWTBearer())) 
     user_id = user.user_id
     db = Session()
     result = CustomerService(db).create_record(customer, user_id)
-    print(result)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
