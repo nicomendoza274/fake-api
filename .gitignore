@@ -20,6 +20,7 @@ venv
 docs.zip
 archive.zip
 database.sqlite
+.env
 
 # vim temporary files
 *~
