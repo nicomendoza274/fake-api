@@ -12,7 +12,7 @@ class BaseService:
         return result
 
     def create_record(self, data):
-        new_record = self.Model(**data.dict())
+        new_record = self.Model(**data.model_dump())
         self.db.add(new_record)
         self.db.commit()
         return

@@ -92,7 +92,7 @@ class CustomerService:
         return result
 
     def create_record(self, data: Customer, user_id: int):
-        new_record = CustomerModel(**data.dict())
+        new_record = CustomerModel(**data.model_dump())
         new_record.created_by = user_id
         self.db.add(new_record)
         self.db.commit()
