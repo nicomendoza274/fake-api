@@ -13,10 +13,7 @@ class UserService:
     def get_user_by_credentials(self, credentials: dict):
         result: UserModel = (
             self.db.query(UserModel)
-            .filter(
-                UserModel.email == credentials["email"],
-                UserModel.hash == credentials["hash"],
-            )
+            .filter(UserModel.email == credentials["email"])
             .first()
         )
         return result

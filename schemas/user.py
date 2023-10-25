@@ -13,7 +13,6 @@ class UserLogin(User):
 
 class UserCreate(User):
     user_id: int
-    hash: str
 
 
 class UserLoged(User):
