@@ -1,3 +1,4 @@
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy import desc, func
 from sqlalchemy.orm.session import Session
 
@@ -81,7 +82,8 @@ class CustomerService:
             model = model.offset(start)
 
         result = model.all()
-        return result
+        customers = [Customer.model_validate(jsonable_encoder(el)) for el in result]
+        return customers
 
     def get_record(self, id: int):
         result = (
@@ -89,7 +91,8 @@ class CustomerService:
             .filter(CustomerModel.deleted_at == None, CustomerModel.customer_id == id)
             .first()
         )
-        return result
+        customer = Customer.model_validate(jsonable_encoder(result))
+        return customer
 
     def create_record(self, data: Customer, user_id: int):
         new_record = CustomerModel(**data.model_dump())
@@ -97,24 +100,26 @@ class CustomerService:
         self.db.add(new_record)
         self.db.commit()
         self.db.refresh(new_record)
-        return new_record
+        customer = Customer.model_validate(jsonable_encoder(new_record))
+        return customer
 
     def update_record(self, id: int, data: Customer, user_id: int):
-        customer: CustomerModel = (
+        result: CustomerModel = (
             self.db.query(CustomerModel)
             .filter(CustomerModel.deleted_at == None, CustomerModel.customer_id == id)
             .first()
         )
-        customer.address = data.address
-        customer.city = data.city
-        customer.internal_id = data.internal_id
-        customer.name = data.name
-        customer.phone = data.phone
-        customer.updated_by = user_id
-        customer.updated_at = func.now()
+        result.address = data.address
+        result.city = data.city
+        result.internal_id = data.internal_id
+        result.name = data.name
+        result.phone = data.phone
+        result.updated_by = user_id
+        result.updated_at = func.now()
 
         self.db.commit()
-        self.db.refresh(customer)
+        self.db.refresh(result)
+        customer = Customer.model_validate(jsonable_encoder(result))
         return customer
 
     def delete_record(self, id: int, user_id: int):

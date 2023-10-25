@@ -24,8 +24,9 @@ def get_customers(
     length: int | None = 15,
     query: str | None = None,
     db: Session = Depends(get_db),
-) -> List[Customer]:
+):
     result = CustomerService(db).get_records(start, length, query)
+
     response = {
         "count": len(result),
         "start": start,
