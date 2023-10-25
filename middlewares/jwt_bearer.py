@@ -12,7 +12,7 @@ class JWTBearer(HTTPBearer):
         db = Session()
         auth = await super().__call__(request)
         credentials = validate_token(auth.credentials)
-        result: UserModel = UserService(db).get_user_by_credentials(credentials)
+        result = UserService(db).get_user_by_credentials(credentials)
 
         if not result:
             raise HTTPException(status_code=403, detail="Invalid Credentials")
