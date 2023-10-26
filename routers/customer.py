@@ -40,6 +40,7 @@ def get_customers(
     "/api/customer/{id}",
     tags=["customer"],
     status_code=200,
+    response_model=Customer | dict,
     dependencies=[Depends(JWTBearer())],
 )
 def get_customer(id: int, db: Session = Depends(get_db)):
@@ -53,6 +54,7 @@ def get_customer(id: int, db: Session = Depends(get_db)):
     "/api/customer",
     tags=["customer"],
     status_code=201,
+    response_model=Customer | dict,
     dependencies=[Depends(JWTBearer())],
 )
 def create_customer(
@@ -69,6 +71,7 @@ def create_customer(
     "/api/customer/{id}",
     tags=["customer"],
     status_code=200,
+    response_model=Customer | dict,
     dependencies=[Depends(JWTBearer())],
 )
 def update_customer(

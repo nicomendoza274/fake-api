@@ -11,14 +11,16 @@ user_router = APIRouter()
 
 
 @user_router.post(
-    "/api/users", tags=["Auth"], response_model=UserCreate, status_code=200
+    "/api/user", tags=["Auth"], response_model=UserCreate, status_code=200
 )
 def create_user(user: UserLogin, db: Session = Depends(get_db)):
     result = UserService(db).create_user(user)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
-@user_router.post("/api/auth", tags=["Auth"], status_code=200)
+@user_router.post(
+    "/api/auth", tags=["Auth"], response_model=UserCreate, status_code=200
+)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     result = UserService(db).login_user(user)
     if not result:
