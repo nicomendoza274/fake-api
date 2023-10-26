@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from schemas.camel import CamelModel
 
 
-class Customer(BaseModel):
+class Customer(CamelModel):
     customer_id: Optional[int] = None
     name: str
     internal_id: str
@@ -21,9 +21,9 @@ class Customer(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "customer_id": 0,
+                "customerId": 0,
                 "name": "Nombre",
-                "internal_id": "ASD123456",
+                "internalId": "ASD123456",
                 "address": "Caseros 123",
                 "city": "Salta",
                 "phone": "3875123456",

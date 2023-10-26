@@ -1,14 +1,20 @@
 from typing import Optional
 
-from pydantic import BaseModel
+from schemas.camel import CamelModel
 
 
-class User(BaseModel):
+class User(CamelModel):
     email: str
+
+
+class UserLogin(User):
     password: str
 
 
-class UserCreateModel(BaseModel):
+class UserCreate(User):
     user_id: int
-    email: str
-    hash: str
+
+
+class UserLoged(User):
+    user_id: int
+    token: str
