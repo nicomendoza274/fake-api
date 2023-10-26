@@ -68,20 +68,19 @@ def create_customer(
 
 
 @customer_router.put(
-    "/api/customer/{id}",
+    "/api/customer",
     tags=["customer"],
     status_code=200,
     response_model=Customer | dict,
     dependencies=[Depends(JWTBearer())],
 )
 def update_customer(
-    id: int,
     customer: Customer,
     user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
     user_id = user.user_id
-    result = CustomerService(db).update_record(id, customer, user_id)
+    result = CustomerService(db).update_record(customer, user_id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))

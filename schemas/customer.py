@@ -5,7 +5,7 @@ from schemas.camel import CamelModel
 
 
 class Customer(CamelModel):
-    customer_id: Optional[int] = None
+    customer_id: int
     name: str
     internal_id: str
     address: str

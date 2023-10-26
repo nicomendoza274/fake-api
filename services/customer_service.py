@@ -101,16 +101,20 @@ class CustomerService:
     def create_record(self, data: Customer, user_id: int):
         new_record = CustomerModel(**data.model_dump())
         new_record.created_by = user_id
+        new_record.customer_id = None
         self.db.add(new_record)
         self.db.commit()
         self.db.refresh(new_record)
         customer = Customer.model_validate(jsonable_encoder(new_record))
         return customer
 
-    def update_record(self, id: int, data: Customer, user_id: int):
+    def update_record(self, data: Customer, user_id: int):
         result: CustomerModel = (
             self.db.query(CustomerModel)
-            .filter(CustomerModel.deleted_at == None, CustomerModel.customer_id == id)
+            .filter(
+                CustomerModel.deleted_at == None,
+                CustomerModel.customer_id == data.customer_id,
+            )
             .first()
         )
 
