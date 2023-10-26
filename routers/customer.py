@@ -39,11 +39,10 @@ def get_customers(
 @customer_router.get(
     "/api/customer/{id}",
     tags=["customer"],
-    response_model=Customer,
     status_code=200,
     dependencies=[Depends(JWTBearer())],
 )
-def get_customer(id: int, db: Session = Depends(get_db)) -> Customer:
+def get_customer(id: int, db: Session = Depends(get_db)):
     result = CustomerService(db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
@@ -53,7 +52,6 @@ def get_customer(id: int, db: Session = Depends(get_db)) -> Customer:
 @customer_router.post(
     "/api/customer",
     tags=["customer"],
-    response_model=dict,
     status_code=201,
     dependencies=[Depends(JWTBearer())],
 )
@@ -61,7 +59,7 @@ def create_customer(
     customer: Customer,
     user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
-) -> dict:
+):
     user_id = user.user_id
     result = CustomerService(db).create_record(customer, user_id)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
@@ -70,7 +68,6 @@ def create_customer(
 @customer_router.put(
     "/api/customer/{id}",
     tags=["customer"],
-    response_model=dict,
     status_code=200,
     dependencies=[Depends(JWTBearer())],
 )
@@ -79,13 +76,11 @@ def update_customer(
     customer: Customer,
     user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
-) -> dict:
+):
     user_id = user.user_id
-    result = CustomerService(db).get_record(id)
+    result = CustomerService(db).update_record(id, customer, user_id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-    result = CustomerService(db).update_record(id, customer, user_id)
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
 
 
@@ -98,11 +93,12 @@ def update_customer(
 )
 def delete_customer(
     id: int, user: UserModel = Depends(JWTBearer()), db: Session = Depends(get_db)
-) -> dict:
+):
     user_id = user.user_id
-    result = CustomerService(db).get_record(id)
+
+    result = CustomerService(db).delete_record(id, user_id)
+
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
 
-    CustomerService(db).delete_record(id, user_id)
-    return JSONResponse(content={"message": "deleted"})
+    return JSONResponse(content=result)

@@ -91,6 +91,10 @@ class CustomerService:
             .filter(CustomerModel.deleted_at == None, CustomerModel.customer_id == id)
             .first()
         )
+
+        if not result:
+            return None
+
         customer = Customer.model_validate(jsonable_encoder(result))
         return customer
 
@@ -109,6 +113,10 @@ class CustomerService:
             .filter(CustomerModel.deleted_at == None, CustomerModel.customer_id == id)
             .first()
         )
+
+        if not result:
+            return None
+
         result.address = data.address
         result.city = data.city
         result.internal_id = data.internal_id
@@ -128,7 +136,11 @@ class CustomerService:
             .filter(CustomerModel.deleted_at == None, CustomerModel.customer_id == id)
             .first()
         )
+
+        if not customer:
+            return None
+
         customer.deleted_at = func.now()
         customer.deleted_by = user_id
         self.db.commit()
-        return
+        return {"message": "deleted"}

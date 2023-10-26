@@ -33,5 +33,10 @@ class UserService:
             .filter(UserModel.email == user.email, UserModel.hash == hash)
             .first()
         )
+
+        if not result:
+            return None
+
         userCreate = UserCreate.model_validate(jsonable_encoder(result))
+
         return userCreate
