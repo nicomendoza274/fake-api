@@ -40,3 +40,8 @@ class UserService:
         userCreate = UserCreate.model_validate(jsonable_encoder(result))
 
         return userCreate
+
+    def get_users(self):
+        result = self.db.query(UserModel).filter().all()
+        users = [UserCreate.model_validate(jsonable_encoder(el)) for el in result]
+        return users

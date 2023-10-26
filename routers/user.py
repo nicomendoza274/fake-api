@@ -33,3 +33,13 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         status_code=200,
         content=jsonable_encoder(user_response),
     )
+
+
+@user_router.get(
+    "/api/user", tags=["Auth"], response_model=list[UserCreate], status_code=200
+)
+def get_users(
+    db: Session = Depends(get_db),
+):
+    result = UserService(db).get_users()
+    return JSONResponse(status_code=200, content=jsonable_encoder(result))
