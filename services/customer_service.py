@@ -75,6 +75,8 @@ class CustomerService:
                 search = "%{}%".format(search)
                 model = model.filter(getattr(CustomerModel, "name").ilike(search))
 
+        total_count = len(model.all())
+
         if length:
             model = model.limit(length)
 
@@ -83,7 +85,15 @@ class CustomerService:
 
         result = model.all()
         customers = [Customer.model_validate(jsonable_encoder(el)) for el in result]
-        return customers
+
+        response = {
+            "count": total_count,
+            "start": start,
+            "length": len(result) if length == 0 else length,
+            "data": jsonable_encoder(customers),
+        }
+
+        return response
 
     def get_record(self, id: int):
         result = (

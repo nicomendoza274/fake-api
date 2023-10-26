@@ -25,14 +25,7 @@ def get_customers(
     query: str | None = None,
     db: Session = Depends(get_db),
 ):
-    result = CustomerService(db).get_records(start, length, query)
-
-    response = {
-        "count": len(result),
-        "start": start,
-        "length": len(result) if length == 0 else length,
-        "data": jsonable_encoder(result),
-    }
+    response = CustomerService(db).get_records(start, length, query)
     return JSONResponse(status_code=200, content=response)
 
 
