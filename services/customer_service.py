@@ -6,6 +6,7 @@ from models.customer import Customer as CustomerModel
 from schemas.customer import Customer
 from utils.encrypt import base64_decode
 from utils.json_manager import json_parse
+from utils.snake_case import to_snake_case
 
 
 class CustomerService:
@@ -21,7 +22,7 @@ class CustomerService:
 
             if "sorts" in json and len(json["sorts"]) > 0:
                 for sort in json["sorts"]:
-                    property_name = sort["propertyName"]
+                    property_name = to_snake_case(sort["propertyName"])
                     descending = sort["descending"]
 
                     if descending == False:
@@ -31,7 +32,7 @@ class CustomerService:
 
             if "filters" in json and len(json["filters"]) > 0:
                 for filter in json["filters"]:
-                    property_name = filter["propertyName"]
+                    property_name = to_snake_case(filter["propertyName"])
                     type_filer = filter["type"]
                     value_filter = filter["value"]
 

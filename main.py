@@ -26,7 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.add_middleware(ErrorHandler)
+app.add_middleware(ErrorHandler)
 app.include_router(user_router)
 app.include_router(customer_router)
 
