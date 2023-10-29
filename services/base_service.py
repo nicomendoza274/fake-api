@@ -52,10 +52,7 @@ class BaseService:
     def get_record(self, id: int):
         result = self.db.query(self.sqlModel).get(id)
 
-        if result.deleted_at != None:
-            return None
-
-        if not result:
+        if not result or result.deleted_at != None:
             return None
 
         customer = self.model.model_validate(jsonable_encoder(result))
@@ -73,10 +70,7 @@ class BaseService:
     def update_record(self, data, user_id: int, id: int):
         result = self.db.query(self.sqlModel).get(id)
 
-        if result.deleted_at != None:
-            return None
-
-        if not result:
+        if not result or result.deleted_at != None:
             return None
 
         model_to_dict = data.model_dump()
@@ -95,10 +89,7 @@ class BaseService:
     def delete_record(self, id: int, user_id: int):
         result = self.db.query(self.sqlModel).get(id)
 
-        if result.deleted_at != None:
-            return None
-
-        if not result:
+        if not result or result.deleted_at != None:
             return None
 
         result.deleted_at = func.now()
