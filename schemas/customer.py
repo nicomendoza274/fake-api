@@ -5,7 +5,7 @@ from schemas.camel import CamelModel
 
 
 class Customer(CamelModel):
-    customer_id: int
+    customer_id: int | None
     name: str
     internal_id: str
     address: str
@@ -29,3 +29,12 @@ class Customer(CamelModel):
                 "phone": "3875123456",
             }
         }
+
+
+class CuastomerUpdate(CamelModel):
+    customer_id: int
+    name: str
+    internal_id: str
+    address: str
+    city: str
+    phone: str

@@ -1,4 +1,6 @@
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy import func
+from sqlalchemy.orm.session import Session
 
 from classes.query import Query
 from utils.encrypt import base64_decode
@@ -6,25 +8,26 @@ from utils.json_manager import json_parse
 
 
 class BaseService:
-    # def __init__(self, db, model) -> None:
-    #     self.db = db
-    #     self.model = model
+    def __init__(self, db: Session, schema, model) -> None:
+        self.db = db
+        self.schema = schema
+        self.model = model
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
-        model = self.db.query(self.model).filter(self.model.deleted_at == None)
+        model = self.db.query(self.schema).filter(self.schema.deleted_at == None)
         if query:
             json_query = base64_decode(query)
             json = json_parse(json_query)
             json = {key.lower(): value for key, value in json.items()}
 
             if "sorts" in json and len(json["sorts"]) > 0:
-                model = Query(model, self.model).sorts(json)
+                model = Query(model, self.schema).sorts(json)
 
             if "filters" in json and len(json["filters"]) > 0:
-                model = Query(model, self.model).filters(json)
+                model = Query(model, self.schema).filters(json)
 
             if "search" in json:
-                model = Query(model, self.model).search(json, "name")
+                model = Query(model, self.schema).search(json, "name")
 
         total_count = len(model.all())
 
@@ -47,23 +50,58 @@ class BaseService:
         return response
 
     def get_record(self, id: int):
-        result = self.db.query(self.model).filter(self.model.id == id).first()
-        return result
+        result = self.db.query(self.schema).get(id)
 
-    def create_record(self, data):
-        new_record = self.model(**data.model_dump())
+        if result.deleted_at != None:
+            return None
+
+        if not result:
+            return None
+
+        customer = self.model.model_validate(jsonable_encoder(result))
+        return customer
+
+    def create_record(self, data, user_id: int):
+        new_record = self.schema(**data.model_dump())
+        new_record.created_by = user_id
         self.db.add(new_record)
         self.db.commit()
-        return
+        self.db.refresh(new_record)
+        entity = self.model.model_validate(jsonable_encoder(new_record))
+        return entity
 
-    def update_record(self, id: int, data):
-        # record = self.db.query(self.Model).filter(self.Model.id == id).first()
-        self.db.update(id, data)
-        self.db.commit()
-        return
+    def update_record(self, data, user_id: int, id: int):
+        result = self.db.query(self.schema).get(id)
 
-    def delete_record(self, id: int):
-        result = self.db.query(self.model).filter(self.model.id == id).first()
-        self.db.delete(result)
+        if result.deleted_at != None:
+            return None
+
+        if not result:
+            return None
+
+        model_to_dict = data.model_dump()
+
+        for key, value in model_to_dict.items():
+            setattr(result, key, value)
+
+        result.updated_by = user_id
+        result.updated_at = func.now()
+
         self.db.commit()
-        return
+        self.db.refresh(result)
+        entity = self.model.model_validate(jsonable_encoder(result))
+        return entity
+
+    def delete_record(self, id: int, user_id: int):
+        result = self.db.query(self.schema).get(id)
+
+        if result.deleted_at != None:
+            return None
+
+        if not result:
+            return None
+
+        result.deleted_at = func.now()
+        result.deleted_by = user_id
+        self.db.commit()
+        return {"message": "deleted"}

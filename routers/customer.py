@@ -1,13 +1,12 @@
-from typing import List
-
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm.session import Session
 
-from config.database import Session, get_db
+from config.database import get_db
 from middlewares.jwt_bearer import JWTBearer
 from models.user import User as UserModel
-from schemas.customer import Customer
+from schemas.customer import CuastomerUpdate, Customer
 from services.customer_service import CustomerService
 
 customer_router = APIRouter()
@@ -25,7 +24,7 @@ def get_customers(
     query: str | None = None,
     db: Session = Depends(get_db),
 ):
-    response = CustomerService(db).get_records(start, length, query)
+    response = CustomerService(db=db).get_records(start, length, query)
     return JSONResponse(status_code=200, content=response)
 
 
@@ -37,7 +36,7 @@ def get_customers(
     dependencies=[Depends(JWTBearer())],
 )
 def get_customer(id: int, db: Session = Depends(get_db)):
-    result = CustomerService(db).get_record(id)
+    result = CustomerService(db=db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
@@ -55,8 +54,9 @@ def create_customer(
     user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
+    customer.customer_id = None
     user_id = user.user_id
-    result = CustomerService(db).create_record(customer, user_id)
+    result = CustomerService(db=db).create_record(customer, user_id)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
@@ -68,12 +68,14 @@ def create_customer(
     dependencies=[Depends(JWTBearer())],
 )
 def update_customer(
-    customer: Customer,
+    customer: CuastomerUpdate,
     user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
     user_id = user.user_id
-    result = CustomerService(db).update_record(customer, user_id)
+    result = CustomerService(db=db).update_record(
+        customer, user_id, customer.customer_id
+    )
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
@@ -91,7 +93,7 @@ def delete_customer(
 ):
     user_id = user.user_id
 
-    result = CustomerService(db).delete_record(id, user_id)
+    result = CustomerService(db=db).delete_record(id, user_id)
 
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
