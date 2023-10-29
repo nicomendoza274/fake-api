@@ -8,5 +8,5 @@ from services.base_service import BaseService
 class CustomerService(BaseService):
     def __init__(self, db: Session):
         self.db = db
-        self.schema = CustomerModel
+        self.sqlModel = CustomerModel
         self.model = Customer

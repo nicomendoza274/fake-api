@@ -8,26 +8,26 @@ from utils.json_manager import json_parse
 
 
 class BaseService:
-    def __init__(self, db: Session, schema, model) -> None:
+    def __init__(self, db: Session, sqlModel, model) -> None:
         self.db = db
-        self.schema = schema
+        self.sqlModel = sqlModel
         self.model = model
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
-        model = self.db.query(self.schema).filter(self.schema.deleted_at == None)
+        model = self.db.query(self.sqlModel).filter(self.sqlModel.deleted_at == None)
         if query:
             json_query = base64_decode(query)
             json = json_parse(json_query)
             json = {key.lower(): value for key, value in json.items()}
 
             if "sorts" in json and len(json["sorts"]) > 0:
-                model = Query(model, self.schema).sorts(json)
+                model = Query(model, self.sqlModel).sorts(json)
 
             if "filters" in json and len(json["filters"]) > 0:
-                model = Query(model, self.schema).filters(json)
+                model = Query(model, self.sqlModel).filters(json)
 
             if "search" in json:
-                model = Query(model, self.schema).search(json, "name")
+                model = Query(model, self.sqlModel).search(json, "name")
 
         total_count = len(model.all())
 
@@ -50,7 +50,7 @@ class BaseService:
         return response
 
     def get_record(self, id: int):
-        result = self.db.query(self.schema).get(id)
+        result = self.db.query(self.sqlModel).get(id)
 
         if result.deleted_at != None:
             return None
@@ -62,7 +62,7 @@ class BaseService:
         return customer
 
     def create_record(self, data, user_id: int):
-        new_record = self.schema(**data.model_dump())
+        new_record = self.sqlModel(**data.model_dump())
         new_record.created_by = user_id
         self.db.add(new_record)
         self.db.commit()
@@ -71,7 +71,7 @@ class BaseService:
         return entity
 
     def update_record(self, data, user_id: int, id: int):
-        result = self.db.query(self.schema).get(id)
+        result = self.db.query(self.sqlModel).get(id)
 
         if result.deleted_at != None:
             return None
@@ -93,7 +93,7 @@ class BaseService:
         return entity
 
     def delete_record(self, id: int, user_id: int):
-        result = self.db.query(self.schema).get(id)
+        result = self.db.query(self.sqlModel).get(id)
 
         if result.deleted_at != None:
             return None
