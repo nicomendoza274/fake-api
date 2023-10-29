@@ -5,6 +5,7 @@ from starlette.responses import RedirectResponse
 from config.database import Base, engine
 from middlewares.error_handler import ErrorHandler
 from routers.customer import customer_router
+from routers.product import product_router
 from routers.user import user_router
 
 Base.metadata.create_all(bind=engine)
@@ -29,6 +30,7 @@ app.add_middleware(
 # app.add_middleware(ErrorHandler)
 app.include_router(user_router)
 app.include_router(customer_router)
+app.include_router(product_router)
 
 
 @app.get("/")
