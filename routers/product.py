@@ -72,7 +72,7 @@ def update_product(
     db: Session = Depends(get_db),
 ):
     user_id = user.user_id
-    result = ProductService(db=db).update_record(product, user_id)
+    result = ProductService(db=db).update_record(product, user_id, product.product_id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
