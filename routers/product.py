@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm.session import Session
 
-from config.database import Session, get_db
+from config.database import get_db
 from middlewares.jwt_bearer import JWTBearer
 from models.user import User as UserModel
 from schemas.product import Product, ProductUpdate
