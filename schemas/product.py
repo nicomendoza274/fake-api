@@ -1,9 +1,12 @@
+from typing import Optional
+
 from schemas.base_schema import BaseSchema
 from schemas.camel import CamelModel
 
 
 class Product(CamelModel, BaseSchema):
     product_id: int
+    category_id: Optional[int]
     name: str
     price: float
 
@@ -15,5 +18,6 @@ class Product(CamelModel, BaseSchema):
 
 class ProductUpdate(CamelModel):
     product_id: int
+    category_id: Optional[int]
     name: str
     price: float
