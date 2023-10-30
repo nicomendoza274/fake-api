@@ -1,22 +1,14 @@
-from datetime import datetime
-from typing import Optional
-
+from schemas.base_schema import BaseSchema
 from schemas.camel import CamelModel
 
 
-class Customer(CamelModel):
-    customer_id: int
+class Customer(CamelModel, BaseSchema):
+    customer_id: int | None
     name: str
     internal_id: str
     address: str
     city: str
     phone: str
-    created_at: Optional[datetime] = None
-    created_by: Optional[int] = None
-    updated_at: Optional[datetime] = None
-    updated_by: Optional[int] = None
-    deleted_at: Optional[datetime] = None
-    deleted_by: Optional[int] = None
 
     class Config:
         json_schema_extra = {
@@ -29,3 +21,12 @@ class Customer(CamelModel):
                 "phone": "3875123456",
             }
         }
+
+
+class CuastomerUpdate(CamelModel):
+    customer_id: int
+    name: str
+    internal_id: str
+    address: str
+    city: str
+    phone: str

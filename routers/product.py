@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm.session import Session
 
-from config.database import Session, get_db
+from config.database import get_db
 from middlewares.jwt_bearer import JWTBearer
 from models.user import User as UserModel
-from schemas.product import Product
+from schemas.product import Product, ProductUpdate
 from services.product_service import ProductService
 
 product_router = APIRouter()
@@ -23,7 +24,7 @@ def get_products(
     query: str | None = None,
     db: Session = Depends(get_db),
 ):
-    response = ProductService(db).get_records(start, length, query)
+    response = ProductService(db=db).get_records(start, length, query)
     return JSONResponse(status_code=200, content=response)
 
 
@@ -35,7 +36,7 @@ def get_products(
     dependencies=[Depends(JWTBearer())],
 )
 def get_product(id: int, db: Session = Depends(get_db)):
-    result = ProductService(db).get_record(id)
+    result = ProductService(db=db).get_record(id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
@@ -53,8 +54,9 @@ def create_product(
     user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
+    product.product_id = None
     user_id = user.user_id
-    result = ProductService(db).create_record(product, user_id)
+    result = ProductService(db=db).create_record(product, user_id)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
@@ -66,12 +68,12 @@ def create_product(
     dependencies=[Depends(JWTBearer())],
 )
 def update_product(
-    product: Product,
+    product: ProductUpdate,
     user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
 ):
     user_id = user.user_id
-    result = ProductService(db).update_record(product, user_id)
+    result = ProductService(db=db).update_record(product, user_id, product.product_id)
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
@@ -89,7 +91,7 @@ def delete_product(
 ):
     user_id = user.user_id
 
-    result = ProductService(db).delete_record(id, user_id)
+    result = ProductService(db=db).delete_record(id, user_id)
 
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
