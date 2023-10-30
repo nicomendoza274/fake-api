@@ -2,7 +2,7 @@
 Welcome to the Fake-API repository! This is a simple guide to help you get started with setting up and running the Fake-API project.
 
 ## Actual version
-The actual version is [v1.1.0](https://github.com/nicomendoza274/fake-api/releases/tag/v1.1.0).
+The actual version is [v1.1.1](https://github.com/nicomendoza274/fake-api/releases/tag/v1.1.0).
 
 ## Getting Started
 

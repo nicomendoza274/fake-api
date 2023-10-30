@@ -65,3 +65,4 @@ class Query:
         search = json["search"]
         search = "%{}%".format(search)
         self.db_query = self.db_query.filter(getattr(self.model, value).ilike(search))
+        return self.db_query
