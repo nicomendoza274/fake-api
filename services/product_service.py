@@ -29,7 +29,7 @@ class ProductService(BaseService):
                 ProductModel.category_id == CategoryModel.category_id,
                 isouter=True,
             )
-            .filter(ProductModel.deleted_at == None, CategoryModel.deleted_at == None)
+            .filter(ProductModel.deleted_at == None)
         )
         if query:
             json_query = base64_decode(query)
