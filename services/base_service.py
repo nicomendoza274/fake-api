@@ -86,6 +86,22 @@ class BaseService:
         entity = self.model.model_validate(jsonable_encoder(result))
         return entity
 
+    def tooggle_active(self, data, user_id: int, id: int):
+        result = self.db.query(self.sqlModel).get(id)
+
+        if not result or result.deleted_at != None:
+            return None
+
+        result.is_active = data.is_active
+        result.updated_by = user_id
+        result.updated_at = func.now()
+
+        self.db.commit()
+        self.db.refresh(result)
+
+        entity = self.model.model_validate(jsonable_encoder(result))
+        return entity
+
     def delete_record(self, id: int, user_id: int):
         result = self.db.query(self.sqlModel).get(id)
 
