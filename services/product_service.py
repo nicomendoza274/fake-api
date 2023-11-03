@@ -1,5 +1,7 @@
+from typing import List
+
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import desc
+from sqlalchemy import desc, func
 from sqlalchemy.orm.session import Session
 
 from classes.query import Query
@@ -76,6 +78,7 @@ class ProductService(BaseService):
                 name=product.name,
                 price=product.price,
                 category=None,
+                is_active=product.is_active,
                 created_at=product.created_at,
                 created_by=product.created_by,
                 updated_at=product.updated_at,
@@ -99,3 +102,16 @@ class ProductService(BaseService):
         }
 
         return response
+
+    def delete_records(self, ids: List[int], user_id: int):
+        for id in ids:
+            result = self.db.query(self.sqlModel).get(id)
+
+            if not result or result.deleted_at != None:
+                break
+
+            result.deleted_at = func.now()
+            result.deleted_by = user_id
+
+        self.db.commit()
+        return {"message": "deleted"}
