@@ -9,12 +9,16 @@ from utils.jwt_manager import validate_token
 
 class JWTBearer(HTTPBearer):
     async def __call__(self, request: Request):
-        db = Session()
-        auth = await super().__call__(request)
-        credentials = validate_token(auth.credentials)
-        result = UserService(db).get_user_by_credentials(credentials)
+        try:
+            db = Session()
+            auth = await super().__call__(request)
 
-        if not result:
+            credentials = validate_token(auth.credentials)
+            result = UserService(db).get_user_by_credentials(credentials)
+
+            if not result:
+                raise HTTPException(status_code=403, detail="Invalid Credentials")
+            db.close()
+            return result
+        except:
             raise HTTPException(status_code=403, detail="Invalid Credentials")
-        db.close()
-        return result
