@@ -1,5 +1,5 @@
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import func
+from sqlalchemy import func, inspect
 from sqlalchemy.orm.session import Session
 
 from classes.query import Query
@@ -15,6 +15,8 @@ class BaseService:
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
         model = self.db.query(self.sqlModel).filter(self.sqlModel.deleted_at == None)
+        pk = inspect(self.sqlModel).primary_key[0].name
+        model.order_by(pk)
         if query:
             json_query = base64_decode(query)
             json = json_parse(json_query)

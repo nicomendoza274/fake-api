@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, inspect
 from sqlalchemy.orm.session import Session
 
 from classes.query import Query
@@ -31,6 +31,10 @@ class ProductService(BaseService):
             )
             .filter(ProductModel.deleted_at == None)
         )
+
+        pk = inspect(ProductModel).primary_key[0].name
+        model.order_by(pk)
+
         if query:
             json_query = base64_decode(query)
             json = json_parse(json_query)
