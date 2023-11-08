@@ -16,7 +16,7 @@ class BaseService:
     def get_records(self, start: int | None, length: int | None, query: str | None):
         model = self.db.query(self.sqlModel).filter(self.sqlModel.deleted_at == None)
         pk = inspect(self.sqlModel).primary_key[0].name
-        model.order_by(pk)
+
         if query:
             json_query = base64_decode(query)
             json = json_parse(json_query)
@@ -31,6 +31,7 @@ class BaseService:
             if "search" in json:
                 model = Query(model, self.sqlModel).search(json, "name")
 
+        model = model.order_by(pk)
         total_count = len(model.all())
 
         if length:

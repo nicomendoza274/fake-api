@@ -33,7 +33,6 @@ class ProductService(BaseService):
         )
 
         pk = inspect(ProductModel).primary_key[0].name
-        model.order_by(pk)
 
         if query:
             json_query = base64_decode(query)
@@ -62,6 +61,7 @@ class ProductService(BaseService):
             if "search" in json:
                 model = Query(model, self.sqlModel).search(json, "name")
 
+        model = model.order_by(pk)
         total_count = len(model.all())
 
         if length:
