@@ -4,7 +4,7 @@ from fastapi.security import HTTPBearer
 from config.database import Session
 from models.user import User as UserModel
 from services.user_service import UserService
-from utils.jwt_manager import validate_token
+from utils.encrypt import validate_token
 
 
 class JWTBearer(HTTPBearer):

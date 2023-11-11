@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from config.database import Session, get_db
 from schemas.user import UserCreate, UserLoged, UserLogin
 from services.user_service import UserService
-from utils.jwt_manager import create_token
+from utils.encrypt import create_token
 
 user_router = APIRouter()
 
