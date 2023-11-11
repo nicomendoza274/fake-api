@@ -18,7 +18,11 @@ class ProductBase(CamelModel):
 class Product(ProductBase, BaseSchema):
     class Config:
         json_schema_extra = {
-            "example": {"product_id": 0, "name": "Nombre", "price": 1999.5}
+            "example": {
+                "product_id": 0, 
+                "name": "Benjamin Lopez", 
+                "price": 1999.5
+            }
         }
 
 

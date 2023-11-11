@@ -2,14 +2,17 @@ from schemas.base_schema import BaseSchema
 from schemas.camel import CamelModel
 
 
-class Customer(CamelModel, BaseSchema):
-    customer_id: int | None
+class CategoryModel(CamelModel):
+    customer_id: int
     name: str
     internal_id: str
     address: str
     city: str
     phone: str
 
+
+class Customer(CategoryModel, BaseSchema):
+    pass
     class Config:
         json_schema_extra = {
             "example": {
@@ -24,9 +27,4 @@ class Customer(CamelModel, BaseSchema):
 
 
 class CuastomerUpdate(CamelModel):
-    customer_id: int
-    name: str
-    internal_id: str
-    address: str
-    city: str
-    phone: str
+    pass
