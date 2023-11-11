@@ -11,8 +11,23 @@ The actual version is [v1.2.3](https://github.com/nicomendoza274/fake-api/releas
 ```sh 
 git clone git@github.com:nicomendoza274/fake-api.git
 ```
-**Create enviroment file**
-rename .env.example by .env
+**Create enviroment file** rename .env.example by .env
+```
+mv .evn.example .env
+```
+
+If you want to an example database you can download in this [link](https://drive.google.com/file/d/1LUsCQlQcj-b1CaZxvnM992xXn1HrZNF_/view?usp=sharing) and paste into root of the repository
+
+## Docker
+if you prefer to use docker follow these steps, it is important that you have docker installed on your computer
+```sh
+docker compose build
+```
+```sh
+docker compose up
+```
+Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
+
 
 ## Instalation
 Follow these steps to set up and run the project on your local machine:
@@ -21,7 +36,7 @@ Follow these steps to set up and run the project on your local machine:
 
 **Create a Virtual Environment:**
 ```sh
- python3 -m venv env
+ python3 -m venv venv
 ```
 **Activate the Virtual Environment:**
 On macOS/Linux:
@@ -40,12 +55,5 @@ On Windows:
 ```sh
  uvicorn main:app --reload
 ```
-## Docker
-if you prefer to use docker follow these steps, it is important that you have docker installed on your computer
-```sh
-docker compose build
-```
-```sh
-docker compose up
-```
-Once the project is up and running, you can access it through your browser or API client.
+
+Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
