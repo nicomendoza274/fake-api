@@ -26,7 +26,7 @@ docker compose build
 ```sh
 docker compose up
 ```
-Once the project is up and running, you can access it through your browser or API client.
+Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
 
 
 ## Instalation
@@ -55,3 +55,5 @@ On Windows:
 ```sh
  uvicorn main:app --reload
 ```
+
+Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
