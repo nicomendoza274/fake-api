@@ -102,6 +102,27 @@ def toggle_active(
 
 
 @product_router.delete(
+    "/api/product/multiple",
+    tags=["product"],
+    response_model=dict,
+    status_code=200,
+    dependencies=[Depends(JWTBearer())],
+)
+async def delete_multiple(
+    ids: List[int] = Query(...),
+    user: UserModel = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
+):
+    user_id = user.user_id
+    result = ProductService(db=db).delete_multiple(ids, user_id)
+
+    if not result:
+        return JSONResponse(status_code=404, content={"message": "Not Found"})
+
+    return JSONResponse(content=result)
+
+
+@product_router.delete(
     "/api/product/{id}",
     tags=["product"],
     response_model=dict,
@@ -119,25 +140,3 @@ def delete_product(
         return JSONResponse(status_code=404, content={"message": "Not Found"})
 
     return JSONResponse(content=result)
-
-
-# @product_router.delete(
-#     "/api/product/multiple",
-#     tags=["product"],
-#     response_model=dict,
-#     status_code=200,
-#     dependencies=[Depends(JWTBearer())],
-# )
-# async def delete_multiple(
-#     ids: List[int] = Query(...),
-#     user: UserModel = Depends(JWTBearer()),
-#     db: Session = Depends(get_db),
-# ):
-
-#     user_id = user.user_id
-#     result = ProductService(db=db).delete_records(ids, user_id)
-
-#     if not result:
-#         return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-#     return JSONResponse(content=result)
