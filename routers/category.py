@@ -85,7 +85,7 @@ def update_category(
 
 @category_router.delete(
     "/api/category/multiple",
-    tags=["prcategoryoduct"],
+    tags=["category"],
     response_model=dict,
     status_code=200,
     dependencies=[Depends(JWTBearer())],
