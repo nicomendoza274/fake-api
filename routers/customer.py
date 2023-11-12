@@ -1,5 +1,8 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from fastapi.encoders import jsonable_encoder
+from fastapi.params import Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm.session import Session
 
@@ -79,6 +82,27 @@ def update_customer(
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
+
+
+@customer_router.delete(
+    "/api/customer/multiple",
+    tags=["customer"],
+    response_model=dict,
+    status_code=200,
+    dependencies=[Depends(JWTBearer())],
+)
+async def delete_multiple(
+    ids: List[int] = Query(...),
+    user: UserModel = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
+):
+    user_id = user.user_id
+    result = CustomerService(db=db).delete_multiple(ids, user_id)
+
+    if not result:
+        return JSONResponse(status_code=404, content={"message": "Not Found"})
+
+    return JSONResponse(content=result)
 
 
 @customer_router.delete(

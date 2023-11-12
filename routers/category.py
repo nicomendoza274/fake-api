@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import List
+
+from fastapi import APIRouter, Depends, Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm.session import Session
@@ -79,6 +81,27 @@ def update_category(
     if not result:
         return JSONResponse(status_code=404, content={"message": "Not Found"})
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
+
+
+@category_router.delete(
+    "/api/category/multiple",
+    tags=["prcategoryoduct"],
+    response_model=dict,
+    status_code=200,
+    dependencies=[Depends(JWTBearer())],
+)
+async def delete_multiple(
+    ids: List[int] = Query(...),
+    user: UserModel = Depends(JWTBearer()),
+    db: Session = Depends(get_db),
+):
+    user_id = user.user_id
+    result = CategoryService(db=db).delete_multiple(ids, user_id)
+
+    if not result:
+        return JSONResponse(status_code=404, content={"message": "Not Found"})
+
+    return JSONResponse(content=result)
 
 
 @category_router.delete(

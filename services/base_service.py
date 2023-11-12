@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import func, inspect
 from sqlalchemy.orm.session import Session
@@ -104,6 +106,17 @@ class BaseService:
 
         entity = self.model.model_validate(jsonable_encoder(result))
         return entity
+
+    def delete_multiple(self, ids: List[int], user_id: int):
+        for id in ids:
+            result = self.db.query(self.sqlModel).get(id)
+
+            if result and result.deleted_at == None:
+                result.deleted_at = func.now()
+                result.deleted_by = user_id
+
+        self.db.commit()
+        return {"message": "deleted"}
 
     def delete_record(self, id: int, user_id: int):
         result = self.db.query(self.sqlModel).get(id)
