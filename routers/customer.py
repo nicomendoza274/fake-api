@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.params import Query
 from fastapi.responses import JSONResponse
@@ -19,15 +19,19 @@ customer_router = APIRouter()
     "/api/customer",
     tags=["customer"],
     status_code=200,
-    dependencies=[Depends(JWTBearer())],
 )
 def get_customers(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
-    response = CustomerService(db=db).get_records(start, length, query)
+    if not user:
+        return Response(status_code=401)
+
+    response = CustomerService(db).get_records(start, length, query)
+
     return JSONResponse(status_code=200, content=response)
 
 
@@ -36,13 +40,16 @@ def get_customers(
     tags=["customer"],
     status_code=200,
     response_model=Customer | dict,
-    dependencies=[Depends(JWTBearer())],
 )
-def get_customer(id: int, db: Session = Depends(get_db)):
+def get_customer(
+    id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
+):
+    if not user:
+        return Response(status_code=401)
+
     result = CustomerService(db=db).get_record(id)
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-    return JSONResponse(status_code=200, content=jsonable_encoder(result))
+
+    return CustomerService(db).response(result)
 
 
 @customer_router.post(
@@ -50,16 +57,19 @@ def get_customer(id: int, db: Session = Depends(get_db)):
     tags=["customer"],
     status_code=201,
     response_model=Customer | dict,
-    dependencies=[Depends(JWTBearer())],
 )
 def create_customer(
     customer: Customer,
-    user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     customer.customer_id = None
     user_id = user.user_id
     result = CustomerService(db=db).create_record(customer, user_id)
+
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
@@ -68,20 +78,21 @@ def create_customer(
     tags=["customer"],
     status_code=200,
     response_model=Customer | dict,
-    dependencies=[Depends(JWTBearer())],
 )
 def update_customer(
     customer: CuastomerUpdate,
-    user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     user_id = user.user_id
     result = CustomerService(db=db).update_record(
         customer, user_id, customer.customer_id
     )
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-    return JSONResponse(status_code=200, content=jsonable_encoder(result))
+
+    return CustomerService(db).response(result)
 
 
 @customer_router.delete(
@@ -89,20 +100,19 @@ def update_customer(
     tags=["customer"],
     response_model=dict,
     status_code=200,
-    dependencies=[Depends(JWTBearer())],
 )
 async def delete_multiple(
     ids: List[int] = Query(...),
-    user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     user_id = user.user_id
     result = CustomerService(db=db).delete_multiple(ids, user_id)
 
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-    return JSONResponse(content=result)
+    return CustomerService(db).response(result)
 
 
 @customer_router.delete(
@@ -110,16 +120,16 @@ async def delete_multiple(
     tags=["customer"],
     response_model=dict,
     status_code=200,
-    dependencies=[Depends(JWTBearer())],
 )
 def delete_customer(
-    id: int, user: UserModel = Depends(JWTBearer()), db: Session = Depends(get_db)
+    id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
-    user_id = user.user_id
+    if not user:
+        return Response(status_code=401)
 
+    user_id = user.user_id
     result = CustomerService(db=db).delete_record(id, user_id)
 
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-    return JSONResponse(content=result)
+    return CustomerService(db).response(result)
