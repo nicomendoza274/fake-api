@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm.session import Session
@@ -18,15 +18,19 @@ product_router = APIRouter()
     "/api/product",
     tags=["product"],
     status_code=200,
-    dependencies=[Depends(JWTBearer())],
 )
 def get_products(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
-    response = ProductService(db=db).get_records(start, length, query)
+    if not user:
+        return Response(status_code=401)
+
+    response = ProductService(db).get_records(start, length, query)
+
     return JSONResponse(status_code=200, content=response)
 
 
@@ -35,13 +39,16 @@ def get_products(
     tags=["product"],
     status_code=200,
     response_model=Product | dict,
-    dependencies=[Depends(JWTBearer())],
 )
-def get_product(id: int, db: Session = Depends(get_db)):
-    result = ProductService(db=db).get_record(id)
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-    return JSONResponse(status_code=200, content=jsonable_encoder(result))
+def get_product(
+    id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
+):
+    if not user:
+        return Response(status_code=401)
+
+    result = ProductService(db).get_record(id)
+
+    return ProductService(db).response(result)
 
 
 @product_router.post(
@@ -49,16 +56,19 @@ def get_product(id: int, db: Session = Depends(get_db)):
     tags=["product"],
     status_code=201,
     response_model=Product | dict,
-    dependencies=[Depends(JWTBearer())],
 )
 def create_product(
     product: Product,
-    user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     product.product_id = None
     user_id = user.user_id
-    result = ProductService(db=db).create_record(product, user_id)
+    result = ProductService(db).create_record(product, user_id)
+
     return JSONResponse(status_code=201, content=jsonable_encoder(result))
 
 
@@ -67,18 +77,19 @@ def create_product(
     tags=["product"],
     status_code=200,
     response_model=Product | dict,
-    dependencies=[Depends(JWTBearer())],
 )
 def update_product(
     product: ProductUpdate,
-    user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     user_id = user.user_id
-    result = ProductService(db=db).update_record(product, user_id, product.product_id)
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-    return JSONResponse(status_code=200, content=jsonable_encoder(result))
+    result = ProductService(db).update_record(product, user_id, product.product_id)
+
+    return ProductService(db).response(result)
 
 
 @product_router.put(
@@ -86,19 +97,20 @@ def update_product(
     tags=["product"],
     status_code=200,
     response_model=Product | dict,
-    dependencies=[Depends(JWTBearer())],
 )
 def toggle_active(
     id: int,
     data: ProductActiveToggle,
-    user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     user_id = user.user_id
-    result = ProductService(db=db).tooggle_active(data, user_id, id)
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-    return JSONResponse(status_code=200, content=jsonable_encoder(result))
+    result = ProductService(db).tooggle_active(data, user_id, id)
+
+    return ProductService(db).response(result)
 
 
 @product_router.delete(
@@ -110,16 +122,16 @@ def toggle_active(
 )
 async def delete_multiple(
     ids: List[int] = Query(...),
-    user: UserModel = Depends(JWTBearer()),
     db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     user_id = user.user_id
-    result = ProductService(db=db).delete_multiple(ids, user_id)
+    result = ProductService(db).delete_multiple(ids, user_id)
 
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-    return JSONResponse(content=result)
+    return ProductService(db).response(result)
 
 
 @product_router.delete(
@@ -127,16 +139,16 @@ async def delete_multiple(
     tags=["product"],
     response_model=dict,
     status_code=200,
-    dependencies=[Depends(JWTBearer())],
 )
 def delete_product(
-    id: int, user: UserModel = Depends(JWTBearer()), db: Session = Depends(get_db)
+    id: int,
+    db: Session = Depends(get_db),
+    user: UserModel = Depends(JWTBearer()),
 ):
+    if not user:
+        return Response(status_code=401)
+
     user_id = user.user_id
+    result = ProductService(db).delete_record(id, user_id)
 
-    result = ProductService(db=db).delete_record(id, user_id)
-
-    if not result:
-        return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-    return JSONResponse(content=result)
+    return ProductService(db).response(result)

@@ -1,6 +1,7 @@
 from typing import List
 
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from sqlalchemy import func, inspect
 from sqlalchemy.orm.session import Session
 
@@ -128,3 +129,9 @@ class BaseService:
         result.deleted_by = user_id
         self.db.commit()
         return {"message": "deleted"}
+
+    def response(self, result):
+        if not result:
+            return JSONResponse(status_code=404, content={"message": "Not Found"})
+
+        return JSONResponse(status_code=200, content=jsonable_encoder(result))
