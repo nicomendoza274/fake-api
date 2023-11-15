@@ -20,7 +20,7 @@ origins = [
 ]
 
 app.title = "Fake API"
-app.version = "1.3.1"
+app.version = "1.4.0"
 
 app.add_middleware(
     CORSMiddleware,
