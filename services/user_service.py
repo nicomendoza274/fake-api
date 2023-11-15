@@ -63,7 +63,7 @@ class UserService:
         self.db.refresh(new_user)
 
         new_user_rol = UserRoleModel(role_id=user.role_id, user_id=new_user.user_id)
-        new_user_rol.created_by = new_user.user_id
+        # new_user_rol.created_by = new_user.user_id
 
         self.db.add(new_user_rol)
         self.db.commit()
