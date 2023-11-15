@@ -132,6 +132,16 @@ class BaseService:
 
     def response(self, result):
         if not result:
-            return JSONResponse(status_code=404, content={"message": "Not Found"})
+            content = {
+                "errors": [
+                    {
+                        "code": "GEN-4000",
+                        "exception": "Not Found Exception",
+                        "message": "The requested resource does not exist.",
+                    }
+                ]
+            }
+
+            return JSONResponse(status_code=404, content=content)
 
         return JSONResponse(status_code=200, content=jsonable_encoder(result))
