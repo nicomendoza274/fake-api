@@ -27,5 +27,5 @@ class Customer(CategoryBase, BaseSchema):
         }
 
 
-class CuastomerUpdate(CategoryBase):
+class CustomerUpdate(CategoryBase):
     pass

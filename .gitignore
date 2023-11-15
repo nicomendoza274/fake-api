@@ -21,6 +21,7 @@ docs.zip
 archive.zip
 database.sqlite
 .env
+*.sqlite
 
 # vim temporary files
 *~
