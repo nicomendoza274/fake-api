@@ -9,7 +9,7 @@ from sqlalchemy.orm.session import Session
 from config.database import get_db
 from middlewares.jwt_bearer import JWTBearer
 from models.user import User as UserModel
-from schemas.customer import CuastomerUpdate, Customer
+from schemas.customer import Customer, CustomerUpdate
 from services.customer_service import CustomerService
 
 customer_router = APIRouter()
@@ -80,7 +80,7 @@ def create_customer(
     response_model=Customer | dict,
 )
 def update_customer(
-    customer: CuastomerUpdate,
+    customer: CustomerUpdate,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
