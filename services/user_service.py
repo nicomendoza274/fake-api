@@ -1,9 +1,20 @@
+import random
+
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm.session import Session
 
 from models.user import User as UserModel
+from models.user_code import UserCode as UserCodeModel
 from models.user_role import UserRole as UserRoleModel
-from schemas.user import UserCreate, UserCreated, UserList, UserLoged, UserLogin
+from schemas.user import (
+    UserCreate,
+    UserCreated,
+    UserList,
+    UserLoged,
+    UserLogin,
+    UserSendCode,
+)
+from utils.email import send_email
 from utils.encrypt import create_token, encrypt_string
 
 
@@ -77,6 +88,31 @@ class UserService:
             role_id=user.role_id,
         )
         return userCreate
+
+    async def send_code(self, user: UserSendCode):
+        result = self.db.query(UserModel).filter(UserModel.email == user.email).first()
+
+        if not result:
+            return None
+
+        code = random.randint(100000, 999999)
+
+        user_Code = UserCodeModel(user_id=result.user_id, code=code)
+
+        # Send Email
+        subject = "Fake API - Change Password"
+        recipient = [user.email]
+        message = {}
+        message["fullName"] = f"{result.first_name} {result.last_name}"
+        message["code"] = code
+
+        await send_email(subject, recipient, message)
+
+        self.db.add(user_Code)
+        self.db.commit()
+        self.db.refresh(user_Code)
+
+        return {"data": {"success": True}}
 
     def login_user(self, user: UserLogin):
         hash = encrypt_string(user.password)

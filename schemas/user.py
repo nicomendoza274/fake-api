@@ -50,3 +50,12 @@ class UserList(User):
     first_name: str
     last_name: str
     role_id: Optional[int] = None
+
+
+class UserSendCode(User):
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "test@gmail.com",
+            }
+        }
