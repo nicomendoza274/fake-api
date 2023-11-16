@@ -1,6 +1,7 @@
 import random
+from datetime import timedelta
 
-from fastapi.encoders import jsonable_encoder
+from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
 from models.user import User as UserModel
@@ -13,6 +14,7 @@ from schemas.user import (
     UserLoged,
     UserLogin,
     UserSendCode,
+    UserValidateCode,
 )
 from utils.email import send_email
 from utils.encrypt import create_token, encrypt_string
@@ -111,6 +113,30 @@ class UserService:
         self.db.add(user_Code)
         self.db.commit()
         self.db.refresh(user_Code)
+
+        return {"data": {"success": True}}
+
+    def validate_code(self, user: UserValidateCode):
+        tomorrow = timestamp = func.now() + timedelta(hours=1)
+        result: UserCodeModel = (
+            self.db.query(UserCodeModel)
+            .join(UserModel, UserModel.user_id == UserCodeModel.user_id)
+            .filter(
+                UserCodeModel.deleted_at == None,
+                tomorrow < UserCodeModel.created_at,
+                UserCodeModel.code == user.code,
+                UserModel.email == user.email,
+            )
+            .first()
+        )
+
+        if not result:
+            return None
+
+        result.deleted_at = func.now()
+
+        self.db.commit()
+        self.db.refresh(result)
 
         return {"data": {"success": True}}
 

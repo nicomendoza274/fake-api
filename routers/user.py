@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from config.database import Session, get_db
-from schemas.user import UserCreate, UserLogin, UserSendCode
+from schemas.user import UserCreate, UserLogin, UserSendCode, UserValidateCode
 from services.user_service import UserService
 
 user_router = APIRouter()
@@ -40,6 +40,29 @@ async def send_code(user: UserSendCode, db: Session = Depends(get_db)):
         return JSONResponse(status_code=401, content=content)
 
     return JSONResponse(status_code=200, content=result)
+
+
+@user_router.put("/api/users/validate-code", tags=["Users"])
+def validate_code(user: UserValidateCode, db: Session = Depends(get_db)):
+    result = UserService(db).validate_code(user)
+
+    if not result:
+        content = {
+            "Errors": [
+                {
+                    "Code": "GEN-1000",
+                    "Exception": "UnauthorizedAccessException",
+                    "Message": "One or more attributes of the request do not match the expected values.",
+                }
+            ]
+        }
+
+        return JSONResponse(status_code=400, content=content)
+
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(result),
+    )
 
 
 @user_router.post("/api/auth", tags=["Auth"], status_code=200)

@@ -59,3 +59,15 @@ class UserSendCode(User):
                 "email": "test@gmail.com",
             }
         }
+
+
+class UserValidateCode(User):
+    code: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "test@gmail.com",
+                "code": "000000",
+            }
+        }
