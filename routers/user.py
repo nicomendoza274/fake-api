@@ -9,7 +9,7 @@ from services.user_service import UserService
 user_router = APIRouter()
 
 
-@user_router.get("/api/user", tags=["Auth"], status_code=200)
+@user_router.get("/api/user", tags=["User"], status_code=200)
 def get_users(
     db: Session = Depends(get_db),
 ):
@@ -17,7 +17,7 @@ def get_users(
     return JSONResponse(status_code=200, content=jsonable_encoder(result))
 
 
-@user_router.post("/api/user", tags=["Auth"], status_code=200)
+@user_router.post("/api/user", tags=["User"], status_code=200)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     result = UserService(db).create_user(user)
     return JSONResponse(status_code=201, content=jsonable_encoder(result))

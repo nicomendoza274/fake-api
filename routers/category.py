@@ -16,7 +16,7 @@ category_router = APIRouter()
 
 @category_router.get(
     "/api/category",
-    tags=["category"],
+    tags=["Category"],
     status_code=200,
 )
 def get_categories(
@@ -36,7 +36,7 @@ def get_categories(
 
 @category_router.get(
     "/api/category/{id}",
-    tags=["category"],
+    tags=["Category"],
     status_code=200,
     response_model=Category | dict,
 )
@@ -53,7 +53,7 @@ def get_category(
 
 @category_router.post(
     "/api/category",
-    tags=["category"],
+    tags=["Category"],
     status_code=201,
     response_model=Category | dict,
 )
@@ -74,7 +74,7 @@ def create_category(
 
 @category_router.put(
     "/api/category",
-    tags=["category"],
+    tags=["Category"],
     status_code=200,
     response_model=Category | dict,
 )
@@ -94,7 +94,7 @@ def update_category(
 
 @category_router.delete(
     "/api/category/multiple",
-    tags=["category"],
+    tags=["Category"],
     response_model=dict,
     status_code=200,
 )
@@ -114,7 +114,7 @@ async def delete_multiple(
 
 @category_router.delete(
     "/api/category/{id}",
-    tags=["category"],
+    tags=["Category"],
     response_model=dict,
     status_code=200,
 )
