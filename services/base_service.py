@@ -6,6 +6,8 @@ from sqlalchemy import func, inspect
 from sqlalchemy.orm.session import Session
 
 from classes.query import Query
+from constants.error import GEN_4000
+from schemas.error import Errors
 from utils.encrypt import base64_decode
 from utils.json_manager import json_parse
 
@@ -132,15 +134,7 @@ class BaseService:
 
     def response(self, result):
         if not result:
-            content = {
-                "errors": [
-                    {
-                        "code": "GEN-4000",
-                        "exception": "Not Found Exception",
-                        "message": "The requested resource does not exist.",
-                    }
-                ]
-            }
+            content = Errors(Errors=[GEN_4000]).model_dump()
 
             return JSONResponse(status_code=404, content=content)
 

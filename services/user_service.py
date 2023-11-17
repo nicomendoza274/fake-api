@@ -5,9 +5,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
+from constants.error import GEN_4000
 from models.user import User as UserModel
 from models.user_code import UserCode as UserCodeModel
 from models.user_role import UserRole as UserRoleModel
+from schemas.error import Errors
 from schemas.user import (
     UserCreate,
     UserCreated,
@@ -97,15 +99,7 @@ class UserService:
         result = self.db.query(UserModel).filter(UserModel.email == user.email).first()
 
         if not result:
-            content = {
-                "Errors": [
-                    {
-                        "Code": "GEN-4000",
-                        "Exception": "NotFoundException",
-                        "Message": "The requested resource does not exist.",
-                    }
-                ]
-            }
+            content = Errors(Errors=[GEN_4000]).model_dump()
             return JSONResponse(status_code=401, content=content)
 
         code = random.randint(100000, 999999)
@@ -142,16 +136,7 @@ class UserService:
         )
 
         if not result:
-            content = {
-                "Errors": [
-                    {
-                        "Code": "GEN-4000",
-                        "Exception": "NotFoundException",
-                        "Message": "The requested resource does not exist.",
-                    }
-                ]
-            }
-
+            content = Errors(Errors=[GEN_4000]).model_dump()
             return JSONResponse(status_code=400, content=content)
 
         result.deleted_at = func.now()
@@ -173,16 +158,7 @@ class UserService:
         )
 
         if not result:
-            content = {
-                "Errors": [
-                    {
-                        "Code": "GEN-4000",
-                        "Exception": "NotFoundException",
-                        "Message": "The requested resource does not exist.",
-                    }
-                ]
-            }
-
+            content = Errors(Errors=[GEN_4000]).model_dump()
             return JSONResponse(status_code=401, content=content)
 
         result.hash = encrypt_string(user.newPassword)

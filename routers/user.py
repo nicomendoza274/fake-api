@@ -3,6 +3,8 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from config.database import Session, get_db
+from constants.error import GEN_2002
+from schemas.error import Errors
 from schemas.user import (
     UserCreate,
     UserForgotChangePassword,
@@ -51,16 +53,7 @@ def validate_code(user: UserForgotChangePassword, db: Session = Depends(get_db))
 def login(user: UserLogin, db: Session = Depends(get_db)):
     result = UserService(db).login_user(user)
     if not result:
-        content = {
-            "Errors": [
-                {
-                    "Code": "GEN-2002",
-                    "Exception": "InvalidCredentialException",
-                    "Message": "The provided credentials (username or password) are incorrect.",
-                }
-            ]
-        }
-
+        content = Errors(Errors=[GEN_2002]).model_dump()
         return JSONResponse(status_code=401, content=content)
 
     return JSONResponse(
