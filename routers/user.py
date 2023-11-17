@@ -44,7 +44,7 @@ def validate_code(user: UserValidateCode, db: Session = Depends(get_db)):
 
 
 @user_router.put("/api/users/forgot-change-password", tags=["Users"])
-def validate_code(user: UserForgotChangePassword, db: Session = Depends(get_db)):
+def change_password(user: UserForgotChangePassword, db: Session = Depends(get_db)):
     result = UserService(db).forgot_change_password(user)
     return result
 
