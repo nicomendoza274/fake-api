@@ -10,6 +10,7 @@ from models.user_role import UserRole as UserRoleModel
 from schemas.user import (
     UserCreate,
     UserCreated,
+    UserForgotChangePassword,
     UserList,
     UserLoged,
     UserLogin,
@@ -134,6 +135,27 @@ class UserService:
             return None
 
         result.deleted_at = func.now()
+
+        self.db.commit()
+        self.db.refresh(result)
+
+        return {"data": {"success": True}}
+
+    def forgot_change_password(self, user: UserForgotChangePassword):
+        result: UserModel = (
+            self.db.query(UserModel)
+            .join(UserCodeModel, UserModel.user_id == UserCodeModel.user_id)
+            .filter(
+                UserCodeModel.code == user.code,
+                UserModel.email == user.email,
+            )
+            .first()
+        )
+
+        if not result:
+            return None
+
+        result.hash = encrypt_string(user.newPassword)
 
         self.db.commit()
         self.db.refresh(result)

@@ -3,7 +3,13 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
 from config.database import Session, get_db
-from schemas.user import UserCreate, UserLogin, UserSendCode, UserValidateCode
+from schemas.user import (
+    UserCreate,
+    UserForgotChangePassword,
+    UserLogin,
+    UserSendCode,
+    UserValidateCode,
+)
 from services.user_service import UserService
 
 user_router = APIRouter()
@@ -53,6 +59,29 @@ def validate_code(user: UserValidateCode, db: Session = Depends(get_db)):
                     "Code": "GEN-1000",
                     "Exception": "UnauthorizedAccessException",
                     "Message": "One or more attributes of the request do not match the expected values.",
+                }
+            ]
+        }
+
+        return JSONResponse(status_code=400, content=content)
+
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(result),
+    )
+
+
+@user_router.put("/api/users/forgot-change-password", tags=["Users"])
+def validate_code(user: UserForgotChangePassword, db: Session = Depends(get_db)):
+    result = UserService(db).forgot_change_password(user)
+
+    if not result:
+        content = {
+            "Errors": [
+                {
+                    "Code": "GEN-4000",
+                    "Exception": "NotFoundException",
+                    "Message": "The requested resource does not exist.",
                 }
             ]
         }

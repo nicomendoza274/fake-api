@@ -68,6 +68,20 @@ class UserValidateCode(User):
         json_schema_extra = {
             "example": {
                 "email": "test@gmail.com",
-                "code": "000000",
+                "code": "123456",
+            }
+        }
+
+
+class UserForgotChangePassword(User):
+    code: str
+    newPassword: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "test@gmail.com",
+                "code": "123456",
+                "newPassword": "Hola111?",
             }
         }
