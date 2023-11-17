@@ -1,6 +1,7 @@
 import random
 from datetime import timedelta
 
+from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
@@ -96,7 +97,16 @@ class UserService:
         result = self.db.query(UserModel).filter(UserModel.email == user.email).first()
 
         if not result:
-            return None
+            content = {
+                "Errors": [
+                    {
+                        "Code": "GEN-4000",
+                        "Exception": "NotFoundException",
+                        "Message": "The requested resource does not exist.",
+                    }
+                ]
+            }
+            return JSONResponse(status_code=401, content=content)
 
         code = random.randint(100000, 999999)
 
@@ -115,10 +125,10 @@ class UserService:
         self.db.commit()
         self.db.refresh(user_Code)
 
-        return {"data": {"success": True}}
+        return JSONResponse(status_code=200, content={"data": {"success": True}})
 
     def validate_code(self, user: UserValidateCode):
-        tomorrow = timestamp = func.now() + timedelta(hours=1)
+        tomorrow = func.now() + timedelta(hours=1)
         result: UserCodeModel = (
             self.db.query(UserCodeModel)
             .join(UserModel, UserModel.user_id == UserCodeModel.user_id)
@@ -132,14 +142,24 @@ class UserService:
         )
 
         if not result:
-            return None
+            content = {
+                "Errors": [
+                    {
+                        "Code": "GEN-4000",
+                        "Exception": "NotFoundException",
+                        "Message": "The requested resource does not exist.",
+                    }
+                ]
+            }
+
+            return JSONResponse(status_code=400, content=content)
 
         result.deleted_at = func.now()
 
         self.db.commit()
         self.db.refresh(result)
 
-        return {"data": {"success": True}}
+        return JSONResponse(status_code=200, content={"data": {"success": True}})
 
     def forgot_change_password(self, user: UserForgotChangePassword):
         result: UserModel = (
@@ -153,14 +173,24 @@ class UserService:
         )
 
         if not result:
-            return None
+            content = {
+                "Errors": [
+                    {
+                        "Code": "GEN-4000",
+                        "Exception": "NotFoundException",
+                        "Message": "The requested resource does not exist.",
+                    }
+                ]
+            }
+
+            return JSONResponse(status_code=401, content=content)
 
         result.hash = encrypt_string(user.newPassword)
 
         self.db.commit()
         self.db.refresh(result)
 
-        return {"data": {"success": True}}
+        return JSONResponse(status_code=200, content={"data": {"success": True}})
 
     def login_user(self, user: UserLogin):
         hash = encrypt_string(user.password)

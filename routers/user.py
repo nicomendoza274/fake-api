@@ -32,66 +32,19 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
 @user_router.post("/api/users/send-code", tags=["Users"])
 async def send_code(user: UserSendCode, db: Session = Depends(get_db)):
     result = await UserService(db).send_code(user)
-
-    if not result:
-        content = {
-            "Errors": [
-                {
-                    "Code": "GEN-4000",
-                    "Exception": "NotFoundException",
-                    "Message": "The requested resource does not exist.",
-                }
-            ]
-        }
-        return JSONResponse(status_code=401, content=content)
-
-    return JSONResponse(status_code=200, content=result)
+    return result
 
 
 @user_router.put("/api/users/validate-code", tags=["Users"])
 def validate_code(user: UserValidateCode, db: Session = Depends(get_db)):
     result = UserService(db).validate_code(user)
-
-    if not result:
-        content = {
-            "Errors": [
-                {
-                    "Code": "GEN-1000",
-                    "Exception": "UnauthorizedAccessException",
-                    "Message": "One or more attributes of the request do not match the expected values.",
-                }
-            ]
-        }
-
-        return JSONResponse(status_code=400, content=content)
-
-    return JSONResponse(
-        status_code=200,
-        content=jsonable_encoder(result),
-    )
+    return result
 
 
 @user_router.put("/api/users/forgot-change-password", tags=["Users"])
 def validate_code(user: UserForgotChangePassword, db: Session = Depends(get_db)):
     result = UserService(db).forgot_change_password(user)
-
-    if not result:
-        content = {
-            "Errors": [
-                {
-                    "Code": "GEN-4000",
-                    "Exception": "NotFoundException",
-                    "Message": "The requested resource does not exist.",
-                }
-            ]
-        }
-
-        return JSONResponse(status_code=400, content=content)
-
-    return JSONResponse(
-        status_code=200,
-        content=jsonable_encoder(result),
-    )
+    return result
 
 
 @user_router.post("/api/auth", tags=["Auth"], status_code=200)
