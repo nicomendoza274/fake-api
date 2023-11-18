@@ -1,11 +1,12 @@
 import random
 from datetime import timedelta
 
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
-from constants.error import GEN_4000
+from constants.error import GEN_2002, GEN_4000
 from models.user import User as UserModel
 from models.user_code import UserCode as UserCodeModel
 from models.user_role import UserRole as UserRoleModel
@@ -65,7 +66,7 @@ class UserService:
             for el in result
         ]
 
-        return users
+        return JSONResponse(status_code=200, content=jsonable_encoder(users))
 
     def create_user(self, user: UserCreate):
         new_user = UserModel(
@@ -93,7 +94,7 @@ class UserService:
             last_name=new_user.last_name,
             role_id=user.role_id,
         )
-        return userCreate
+        return JSONResponse(status_code=201, content=jsonable_encoder(userCreate))
 
     async def send_code(self, user: UserSendCode):
         result = self.db.query(UserModel).filter(UserModel.email == user.email).first()
@@ -182,7 +183,8 @@ class UserService:
         )
 
         if not result:
-            return None
+            content = Errors(Errors=[GEN_2002]).model_dump()
+            return JSONResponse(status_code=401, content=content)
 
         user_data: UserModel = result[0]
         user_role_data: UserRoleModel = result[1]
@@ -206,4 +208,7 @@ class UserService:
             role_id=userCreate.role_id,
         )
 
-        return user_response
+        return JSONResponse(
+            status_code=200,
+            content=jsonable_encoder(user_response),
+        )
