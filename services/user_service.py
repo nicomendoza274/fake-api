@@ -114,13 +114,17 @@ class UserService:
         message["fullName"] = f"{result.first_name} {result.last_name}"
         message["code"] = code
 
-        await send_email(subject, recipient, message)
-
-        self.db.add(user_Code)
-        self.db.commit()
-        self.db.refresh(user_Code)
-
-        return JSONResponse(status_code=200, content={"data": {"success": True}})
+        try:
+            await send_email(subject, recipient, message)
+            content = {"data": {"success": True}}
+        except:
+            print("Error to sent mail")
+            content = {"data": {"success": True, "error": "Error to send mail"}}
+        finally:
+            self.db.add(user_Code)
+            self.db.commit()
+            self.db.refresh(user_Code)
+            return JSONResponse(status_code=200, content=content)
 
     def validate_code(self, user: UserValidateCode):
         tomorrow = func.now() + timedelta(hours=1)
