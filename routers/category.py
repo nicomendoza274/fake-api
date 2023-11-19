@@ -1,8 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Query, Response
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm.session import Session
 
 from config.database import get_db
@@ -26,12 +24,8 @@ def get_categories(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
-    response = CategoryService(db).get_records(start, length, query)
-
-    return JSONResponse(status_code=200, content=response)
+    response = CategoryService(db, user).get_records(start, length, query)
+    return response
 
 
 @category_router.get(
@@ -43,12 +37,8 @@ def get_categories(
 def get_category(
     id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
 ):
-    if not user:
-        return Response(status_code=401)
-
-    result = CategoryService(db).get_record(id)
-
-    return CategoryService(db).response(result)
+    response = CategoryService(db, user).get_record(id)
+    return response
 
 
 @category_router.post(
@@ -62,14 +52,10 @@ def create_category(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     category.category_id = None
     user_id = user.user_id
-    result = CategoryService(db).create_record(category, user_id)
-
-    return JSONResponse(status_code=201, content=jsonable_encoder(result))
+    response = CategoryService(db, user).create_record(category, user_id)
+    return response
 
 
 @category_router.put(
@@ -83,13 +69,11 @@ def update_category(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = CategoryService(db).update_record(category, user_id, category.category_id)
-
-    return CategoryService(db).response(result)
+    response = CategoryService(db, user).update_record(
+        category, user_id, category.category_id
+    )
+    return response
 
 
 @category_router.delete(
@@ -103,13 +87,9 @@ async def delete_multiple(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = CategoryService(db).delete_multiple(ids, user_id)
-
-    return CategoryService(db).response(result)
+    response = CategoryService(db, user).delete_multiple(ids, user_id)
+    return response
 
 
 @category_router.delete(
@@ -123,10 +103,6 @@ def delete_category(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = CategoryService(db).delete_record(id, user_id)
-
-    return CategoryService(db).response(result)
+    response = CategoryService(db, user).delete_record(id, user_id)
+    return response

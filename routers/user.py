@@ -17,35 +17,35 @@ user_router = APIRouter()
 def get_users(
     db: Session = Depends(get_db),
 ):
-    result = UserService(db).get_users()
-    return result
+    response = UserService(db).get_users()
+    return response
 
 
 @user_router.post("/api/users", tags=["Users"], status_code=200)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    result = UserService(db).create_user(user)
-    return result
+    response = UserService(db).create_user(user)
+    return response
 
 
 @user_router.post("/api/users/send-code", tags=["Users"])
 async def send_code(user: UserSendCode, db: Session = Depends(get_db)):
-    result = await UserService(db).send_code(user)
-    return result
+    response = await UserService(db).send_code(user)
+    return response
 
 
 @user_router.put("/api/users/validate-code", tags=["Users"])
 def validate_code(user: UserValidateCode, db: Session = Depends(get_db)):
-    result = UserService(db).validate_code(user)
-    return result
+    response = UserService(db).validate_code(user)
+    return response
 
 
 @user_router.put("/api/users/forgot-change-password", tags=["Users"])
 def change_password(user: UserForgotChangePassword, db: Session = Depends(get_db)):
-    result = UserService(db).forgot_change_password(user)
-    return result
+    response = UserService(db).forgot_change_password(user)
+    return response
 
 
 @user_router.post("/api/auth", tags=["Auth"], status_code=200)
 def login(user: UserLogin, db: Session = Depends(get_db)):
-    result = UserService(db).login_user(user)
-    return result
+    response = UserService(db).login_user(user)
+    return response

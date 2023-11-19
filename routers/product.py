@@ -1,8 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Query, Response
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm.session import Session
 
 from config.database import get_db
@@ -26,12 +24,8 @@ def get_products(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
-    response = ProductService(db).get_records(start, length, query)
-
-    return JSONResponse(status_code=200, content=response)
+    response = ProductService(db, user).get_records(start, length, query)
+    return response
 
 
 @product_router.get(
@@ -43,12 +37,8 @@ def get_products(
 def get_product(
     id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
 ):
-    if not user:
-        return Response(status_code=401)
-
-    result = ProductService(db).get_record(id)
-
-    return ProductService(db).response(result)
+    response = ProductService(db, user).get_record(id)
+    return response
 
 
 @product_router.post(
@@ -62,14 +52,10 @@ def create_product(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     product.product_id = None
     user_id = user.user_id
-    result = ProductService(db).create_record(product, user_id)
-
-    return JSONResponse(status_code=201, content=jsonable_encoder(result))
+    response = ProductService(db, user).create_record(product, user_id)
+    return response
 
 
 @product_router.put(
@@ -83,13 +69,11 @@ def update_product(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = ProductService(db).update_record(product, user_id, product.product_id)
-
-    return ProductService(db).response(result)
+    response = ProductService(db, user).update_record(
+        product, user_id, product.product_id
+    )
+    return response
 
 
 @product_router.put(
@@ -104,13 +88,9 @@ def toggle_active(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = ProductService(db).tooggle_active(data, user_id, id)
-
-    return ProductService(db).response(result)
+    response = ProductService(db, user).tooggle_active(data, user_id, id)
+    return response
 
 
 @product_router.delete(
@@ -125,13 +105,9 @@ async def delete_multiple(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = ProductService(db).delete_multiple(ids, user_id)
-
-    return ProductService(db).response(result)
+    response = ProductService(db, user).delete_multiple(ids, user_id)
+    return response
 
 
 @product_router.delete(
@@ -145,10 +121,6 @@ def delete_product(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = ProductService(db).delete_record(id, user_id)
-
-    return ProductService(db).response(result)
+    response = ProductService(db, user).delete_record(id, user_id)
+    return response

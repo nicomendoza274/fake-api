@@ -1,10 +1,13 @@
+from fastapi import Response
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from sqlalchemy import desc, inspect
 from sqlalchemy.orm.session import Session
 
 from classes.query import Query
 from models.category import Category as CategoryModel
 from models.product import Product as ProductModel
+from models.user import User as UserModel
 from schemas.category import Category, CategoryUpdate
 from schemas.product import Product, ProductCategory
 from services.base_service import BaseService
@@ -14,12 +17,16 @@ from utils.snake_case import to_snake_case
 
 
 class ProductService(BaseService):
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session, user: UserModel) -> None:
         self.db = db
+        self.current_user = user
         self.sqlModel = ProductModel
         self.model = Product
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
+        if not self.current_user:
+            return Response(status_code=401)
+
         model = (
             self.db.query(ProductModel, CategoryModel)
             .join(
@@ -103,4 +110,4 @@ class ProductService(BaseService):
             "data": jsonable_encoder(entity),
         }
 
-        return response
+        return JSONResponse(status_code=200, content=response)

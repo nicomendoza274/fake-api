@@ -31,7 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.add_middleware(ErrorHandler)
+app.add_middleware(ErrorHandler)
 app.include_router(user_router)
 app.include_router(role_router)
 app.include_router(user_role_router)

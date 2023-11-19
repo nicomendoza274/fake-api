@@ -1,9 +1,7 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Response
-from fastapi.encoders import jsonable_encoder
+from fastapi import APIRouter, Depends
 from fastapi.params import Query
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm.session import Session
 
 from config.database import get_db
@@ -27,12 +25,8 @@ def get_customers(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
-    response = CustomerService(db).get_records(start, length, query)
-
-    return JSONResponse(status_code=200, content=response)
+    response = CustomerService(db, user).get_records(start, length, query)
+    return response
 
 
 @customer_router.get(
@@ -44,12 +38,8 @@ def get_customers(
 def get_customer(
     id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
 ):
-    if not user:
-        return Response(status_code=401)
-
-    result = CustomerService(db=db).get_record(id)
-
-    return CustomerService(db).response(result)
+    response = CustomerService(db, user).get_record(id)
+    return response
 
 
 @customer_router.post(
@@ -63,14 +53,10 @@ def create_customer(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     customer.customer_id = None
     user_id = user.user_id
-    result = CustomerService(db=db).create_record(customer, user_id)
-
-    return JSONResponse(status_code=201, content=jsonable_encoder(result))
+    response = CustomerService(db, user).create_record(customer, user_id)
+    return response
 
 
 @customer_router.put(
@@ -84,15 +70,11 @@ def update_customer(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = CustomerService(db=db).update_record(
+    response = CustomerService(db, user).update_record(
         customer, user_id, customer.customer_id
     )
-
-    return CustomerService(db).response(result)
+    return response
 
 
 @customer_router.delete(
@@ -106,13 +88,9 @@ async def delete_multiple(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = CustomerService(db=db).delete_multiple(ids, user_id)
-
-    return CustomerService(db).response(result)
+    response = CustomerService(db, user).delete_multiple(ids, user_id)
+    return response
 
 
 @customer_router.delete(
@@ -126,10 +104,6 @@ def delete_customer(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = CustomerService(db=db).delete_record(id, user_id)
-
-    return CustomerService(db).response(result)
+    response = CustomerService(db, user).delete_record(id, user_id)
+    return response
