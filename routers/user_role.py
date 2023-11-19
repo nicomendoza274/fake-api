@@ -26,12 +26,8 @@ def get_user_roles(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
-    response = UserRoleService(db).get_records(start, length, query)
-
-    return JSONResponse(status_code=200, content=response)
+    response = UserRoleService(db, user).get_records(start, length, query)
+    return response
 
 
 @user_role_router.get(
@@ -43,12 +39,8 @@ def get_user_roles(
 def get_user_role(
     id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
 ):
-    if not user:
-        return Response(status_code=401)
-
-    result = UserRoleService(db).get_record(id)
-
-    return UserRoleService(db).response(result)
+    response = UserRoleService(db, user).get_record(id)
+    return response
 
 
 @user_role_router.post(
@@ -62,14 +54,10 @@ def create_user_role(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     userRole.user_role_id = None
     user_id = user.user_id
-    result = UserRoleService(db).create_record(userRole, user_id)
-
-    return JSONResponse(status_code=201, content=jsonable_encoder(result))
+    response = UserRoleService(db, user).create_record(userRole, user_id)
+    return response
 
 
 @user_role_router.put(
@@ -83,13 +71,11 @@ def update_user_role(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = UserRoleService(db).update_record(userRole, user_id, userRole.user_role_id)
-
-    return UserRoleService(db).response(result)
+    response = UserRoleService(db, user).update_record(
+        userRole, user_id, userRole.user_role_id
+    )
+    return response
 
 
 @user_role_router.delete(
@@ -103,13 +89,9 @@ async def delete_multiple(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = UserRoleService(db).delete_multiple(ids, user_id)
-
-    return UserRoleService(db).response(result)
+    response = UserRoleService(db, user).delete_multiple(ids, user_id)
+    return response
 
 
 @user_role_router.delete(
@@ -123,10 +105,6 @@ def delete_user_role(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = UserRoleService(db).delete_record(id, user_id)
-
-    return UserRoleService(db).response(result)
+    response = UserRoleService(db, user).delete_record(id, user_id)
+    return response

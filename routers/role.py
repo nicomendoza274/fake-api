@@ -1,8 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Query, Response
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm.session import Session
 
 from config.database import get_db
@@ -26,12 +24,8 @@ def get_roles(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
-    response = RoleService(db).get_records(start, length, query)
-
-    return JSONResponse(status_code=200, content=response)
+    response = RoleService(db, user).get_records(start, length, query)
+    return response
 
 
 @role_router.get(
@@ -43,12 +37,8 @@ def get_roles(
 def get_role(
     id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
 ):
-    if not user:
-        return Response(status_code=401)
-
-    result = RoleService(db).get_record(id)
-
-    return RoleService(db).response(result)
+    response = RoleService(db, user).get_record(id)
+    return response
 
 
 @role_router.post(
@@ -62,14 +52,10 @@ def create_role(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     role.role_id = None
     user_id = user.user_id
-    result = RoleService(db).create_record(role, user_id)
-
-    return JSONResponse(status_code=201, content=jsonable_encoder(result))
+    response = RoleService(db, user).create_record(role, user_id)
+    return response
 
 
 @role_router.put(
@@ -83,13 +69,9 @@ def update_role(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = RoleService(db).update_record(role, user_id, role.role_id)
-
-    return RoleService(db).response(result)
+    response = RoleService(db, user).update_record(role, user_id, role.role_id)
+    return response
 
 
 @role_router.delete(
@@ -103,13 +85,9 @@ async def delete_multiple(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = RoleService(db).delete_multiple(ids, user_id)
-
-    return RoleService(db).response(result)
+    response = RoleService(db, user).delete_multiple(ids, user_id)
+    return response
 
 
 @role_router.delete(
@@ -123,10 +101,6 @@ def delete_role(
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
 ):
-    if not user:
-        return Response(status_code=401)
-
     user_id = user.user_id
-    result = RoleService(db).delete_record(id, user_id)
-
-    return RoleService(db).response(result)
+    response = RoleService(db, user).delete_record(id, user_id)
+    return response

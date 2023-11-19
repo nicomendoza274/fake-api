@@ -1,9 +1,27 @@
+import random
+from datetime import timedelta
+
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
+from constants.error import GEN_2002, GEN_4000
 from models.user import User as UserModel
+from models.user_code import UserCode as UserCodeModel
 from models.user_role import UserRole as UserRoleModel
-from schemas.user import UserCreate, UserCreated, UserList, UserLoged, UserLogin
+from schemas.error import Errors
+from schemas.user import (
+    UserCreate,
+    UserCreated,
+    UserForgotChangePassword,
+    UserList,
+    UserLoged,
+    UserLogin,
+    UserSendCode,
+    UserValidateCode,
+)
+from utils.email import send_email
 from utils.encrypt import create_token, encrypt_string
 
 
@@ -48,7 +66,7 @@ class UserService:
             for el in result
         ]
 
-        return users
+        return JSONResponse(status_code=200, content=jsonable_encoder(users))
 
     def create_user(self, user: UserCreate):
         new_user = UserModel(
@@ -76,7 +94,84 @@ class UserService:
             last_name=new_user.last_name,
             role_id=user.role_id,
         )
-        return userCreate
+        return JSONResponse(status_code=201, content=jsonable_encoder(userCreate))
+
+    async def send_code(self, user: UserSendCode):
+        result = self.db.query(UserModel).filter(UserModel.email == user.email).first()
+
+        if not result:
+            content = Errors(Errors=[GEN_4000]).model_dump()
+            return JSONResponse(status_code=401, content=content)
+
+        code = random.randint(100000, 999999)
+
+        user_Code = UserCodeModel(user_id=result.user_id, code=code)
+
+        # Send Email
+        subject = "Fake API - Change Password"
+        recipient = [user.email]
+        message = {}
+        message["fullName"] = f"{result.first_name} {result.last_name}"
+        message["code"] = code
+
+        try:
+            await send_email(subject, recipient, message)
+            content = {"data": {"success": True}}
+        except:
+            print("Error to sent mail")
+            content = {"data": {"success": True, "error": "Error to send mail"}}
+        finally:
+            self.db.add(user_Code)
+            self.db.commit()
+            self.db.refresh(user_Code)
+            return JSONResponse(status_code=200, content=content)
+
+    def validate_code(self, user: UserValidateCode):
+        tomorrow = func.now() + timedelta(hours=1)
+        result: UserCodeModel = (
+            self.db.query(UserCodeModel)
+            .join(UserModel, UserModel.user_id == UserCodeModel.user_id)
+            .filter(
+                UserCodeModel.deleted_at == None,
+                tomorrow < UserCodeModel.created_at,
+                UserCodeModel.code == user.code,
+                UserModel.email == user.email,
+            )
+            .first()
+        )
+
+        if not result:
+            content = Errors(Errors=[GEN_4000]).model_dump()
+            return JSONResponse(status_code=400, content=content)
+
+        result.deleted_at = func.now()
+
+        self.db.commit()
+        self.db.refresh(result)
+
+        return JSONResponse(status_code=200, content={"data": {"success": True}})
+
+    def forgot_change_password(self, user: UserForgotChangePassword):
+        result: UserModel = (
+            self.db.query(UserModel)
+            .join(UserCodeModel, UserModel.user_id == UserCodeModel.user_id)
+            .filter(
+                UserCodeModel.code == user.code,
+                UserModel.email == user.email,
+            )
+            .first()
+        )
+
+        if not result:
+            content = Errors(Errors=[GEN_4000]).model_dump()
+            return JSONResponse(status_code=401, content=content)
+
+        result.hash = encrypt_string(user.newPassword)
+
+        self.db.commit()
+        self.db.refresh(result)
+
+        return JSONResponse(status_code=200, content={"data": {"success": True}})
 
     def login_user(self, user: UserLogin):
         hash = encrypt_string(user.password)
@@ -92,7 +187,8 @@ class UserService:
         )
 
         if not result:
-            return None
+            content = Errors(Errors=[GEN_2002]).model_dump()
+            return JSONResponse(status_code=401, content=content)
 
         user_data: UserModel = result[0]
         user_role_data: UserRoleModel = result[1]
@@ -116,4 +212,7 @@ class UserService:
             role_id=userCreate.role_id,
         )
 
-        return user_response
+        return JSONResponse(
+            status_code=200,
+            content=jsonable_encoder(user_response),
+        )

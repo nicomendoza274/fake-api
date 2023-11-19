@@ -50,3 +50,38 @@ class UserList(User):
     first_name: str
     last_name: str
     role_id: Optional[int] = None
+
+
+class UserSendCode(User):
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "test@gmail.com",
+            }
+        }
+
+
+class UserValidateCode(User):
+    code: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "test@gmail.com",
+                "code": "123456",
+            }
+        }
+
+
+class UserForgotChangePassword(User):
+    code: str
+    newPassword: str
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "test@gmail.com",
+                "code": "123456",
+                "newPassword": "Hola111?",
+            }
+        }

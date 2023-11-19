@@ -20,6 +20,7 @@ origins = [
 ]
 
 app.title = "Fake API"
+app.description = "This is an imitation API designed to connect with a Frontend"
 app.version = "1.4.0"
 
 app.add_middleware(
@@ -30,7 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.add_middleware(ErrorHandler)
+app.add_middleware(ErrorHandler)
 app.include_router(user_router)
 app.include_router(role_router)
 app.include_router(user_role_router)
