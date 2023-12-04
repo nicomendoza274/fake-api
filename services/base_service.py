@@ -87,6 +87,7 @@ class BaseService:
         self.db.commit()
         self.db.refresh(new_record)
         response = self.model.model_validate(jsonable_encoder(new_record))
+        response = {"data": response}
 
         return JSONResponse(status_code=201, content=jsonable_encoder(response))
 
@@ -171,4 +172,5 @@ class BaseService:
 
             return JSONResponse(status_code=404, content=content)
 
+        result = {"data": result}
         return JSONResponse(status_code=200, content=jsonable_encoder(result))

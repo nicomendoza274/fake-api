@@ -1,8 +1,7 @@
-from fastapi import HTTPException, Request
+from fastapi import Request
 from fastapi.security import HTTPBearer
 
 from config.database import Session
-from models.user import User as UserModel
 from services.user_service import UserService
 from utils.encrypt import validate_token
 

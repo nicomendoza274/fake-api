@@ -1,3 +1,5 @@
+from typing import Callable
+
 from fastapi import Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -77,37 +79,79 @@ class ProductService(BaseService):
 
         result = model.all()
 
-        entity = []
-        for el in result:
-            product: Product = el[0]
-            category: Category = el[1]
-            product_category = ProductCategory(
-                product_id=product.product_id,
-                category_id=product.category_id,
-                name=product.name,
-                price=product.price,
-                category=None,
-                is_active=product.is_active,
-                created_at=product.created_at,
-                created_by=product.created_by,
-                updated_at=product.updated_at,
-                updated_by=product.updated_by,
-                deleted_at=product.deleted_at,
-                deleted_by=product.deleted_by,
-            )
+        map_product_category: Callable[
+            [Product, Category], ProductCategory
+        ] = lambda product, category: ProductCategory(
+            product_id=product.product_id,
+            category_id=product.category_id,
+            name=product.name,
+            price=product.price,
+            category=(
+                CategoryUpdate(category_id=category.category_id, name=category.name)
+                if product.category_id
+                else None
+            ),
+            is_active=product.is_active,
+            created_at=product.created_at,
+            created_by=product.created_by,
+            updated_at=product.updated_at,
+            updated_by=product.updated_by,
+            deleted_at=product.deleted_at,
+            deleted_by=product.deleted_by,
+        )
 
-            if product.category_id:
-                product_category.category = CategoryUpdate(
-                    category_id=category.category_id, name=category.name
-                )
-
-            entity.append(product_category)
+        entity = [map_product_category(el[0], el[1]) for el in result]
 
         response = {
             "count": total_count,
             "start": start,
-            "length": len(result[0]) if length == 0 else length,
+            "length": len(entity) if length == 0 else length,
             "data": jsonable_encoder(entity),
         }
 
         return JSONResponse(status_code=200, content=response)
+
+    def get_record(self, id: int):
+        if not self.current_user:
+            return Response(status_code=401)
+
+        model = (
+            self.db.query(ProductModel, CategoryModel)
+            .join(
+                CategoryModel,
+                ProductModel.category_id == CategoryModel.category_id,
+                isouter=True,
+            )
+            .filter(ProductModel.product_id == id)
+            .first()
+        )
+
+        product = model[0]
+        category = model[1]
+
+        result = ProductCategory(
+            product_id=product.product_id,
+            category_id=product.category_id,
+            name=product.name,
+            price=product.price,
+            category=(
+                CategoryUpdate(category_id=category.category_id, name=category.name)
+                if product.category_id
+                else None
+            ),
+            is_active=product.is_active,
+            created_at=product.created_at,
+            created_by=product.created_by,
+            updated_at=product.updated_at,
+            updated_by=product.updated_by,
+            deleted_at=product.deleted_at,
+            deleted_by=product.deleted_by,
+        )
+
+        if not result or result.deleted_at != None:
+            return self.response(None)
+
+        entity = jsonable_encoder(result)
+        response = self.response(entity)
+
+        return response

@@ -1,5 +1,3 @@
-from typing import Optional
-
 from schemas.base_schema import BaseSchema
 from schemas.camel import CamelModel
 
