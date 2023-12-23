@@ -14,8 +14,8 @@ customer_router = APIRouter()
 
 
 @customer_router.get(
-    "/api/customer",
-    tags=["Customer"],
+    "/api/customers",
+    tags=["Customers"],
     status_code=200,
 )
 def get_customers(
@@ -30,8 +30,8 @@ def get_customers(
 
 
 @customer_router.get(
-    "/api/customer/{id}",
-    tags=["Customer"],
+    "/api/customers/{id}",
+    tags=["Customers"],
     status_code=200,
     response_model=Customer | dict,
 )
@@ -43,8 +43,8 @@ def get_customer(
 
 
 @customer_router.post(
-    "/api/customer",
-    tags=["Customer"],
+    "/api/customers",
+    tags=["Customers"],
     status_code=201,
     response_model=Customer | dict,
 )
@@ -60,8 +60,8 @@ def create_customer(
 
 
 @customer_router.put(
-    "/api/customer",
-    tags=["Customer"],
+    "/api/customers",
+    tags=["Customers"],
     status_code=200,
     response_model=Customer | dict,
 )
@@ -78,8 +78,8 @@ def update_customer(
 
 
 @customer_router.delete(
-    "/api/customer/multiple",
-    tags=["Customer"],
+    "/api/customers/multiple",
+    tags=["Customers"],
     response_model=dict,
     status_code=200,
 )
@@ -94,8 +94,8 @@ async def delete_multiple(
 
 
 @customer_router.delete(
-    "/api/customer/{id}",
-    tags=["Customer"],
+    "/api/customers/{id}",
+    tags=["Customers"],
     response_model=dict,
     status_code=200,
 )

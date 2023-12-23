@@ -13,8 +13,8 @@ product_router = APIRouter()
 
 
 @product_router.get(
-    "/api/product",
-    tags=["Product"],
+    "/api/products",
+    tags=["Products"],
     status_code=200,
 )
 def get_products(
@@ -29,8 +29,8 @@ def get_products(
 
 
 @product_router.get(
-    "/api/product/{id}",
-    tags=["Product"],
+    "/api/products/{id}",
+    tags=["Products"],
     status_code=200,
     response_model=Product | dict,
 )
@@ -42,8 +42,8 @@ def get_product(
 
 
 @product_router.post(
-    "/api/product",
-    tags=["Product"],
+    "/api/products",
+    tags=["Products"],
     status_code=201,
     response_model=Product | dict,
 )
@@ -59,8 +59,8 @@ def create_product(
 
 
 @product_router.put(
-    "/api/product",
-    tags=["Product"],
+    "/api/products",
+    tags=["Products"],
     status_code=200,
     response_model=Product | dict,
 )
@@ -77,8 +77,8 @@ def update_product(
 
 
 @product_router.put(
-    "/api/product/activate/{id}",
-    tags=["Product"],
+    "/api/products/activate/{id}",
+    tags=["Products"],
     status_code=200,
     response_model=Product | dict,
 )
@@ -94,8 +94,8 @@ def toggle_active(
 
 
 @product_router.delete(
-    "/api/product/multiple",
-    tags=["Product"],
+    "/api/products/multiple",
+    tags=["Products"],
     response_model=dict,
     status_code=200,
     dependencies=[Depends(JWTBearer())],
@@ -111,8 +111,8 @@ async def delete_multiple(
 
 
 @product_router.delete(
-    "/api/product/{id}",
-    tags=["Product"],
+    "/api/products/{id}",
+    tags=["Products"],
     response_model=dict,
     status_code=200,
 )

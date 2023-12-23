@@ -13,8 +13,8 @@ role_router = APIRouter()
 
 
 @role_router.get(
-    "/api/role",
-    tags=["Role"],
+    "/api/roles",
+    tags=["Roles"],
     status_code=200,
 )
 def get_roles(
@@ -29,8 +29,8 @@ def get_roles(
 
 
 @role_router.get(
-    "/api/role/{id}",
-    tags=["Role"],
+    "/api/roles/{id}",
+    tags=["Roles"],
     status_code=200,
     response_model=Role | dict,
 )
@@ -42,8 +42,8 @@ def get_role(
 
 
 @role_router.post(
-    "/api/role",
-    tags=["Role"],
+    "/api/roles",
+    tags=["Roles"],
     status_code=201,
     response_model=Role | dict,
 )
@@ -59,8 +59,8 @@ def create_role(
 
 
 @role_router.put(
-    "/api/role",
-    tags=["Role"],
+    "/api/roles",
+    tags=["Roles"],
     status_code=200,
     response_model=Role | dict,
 )
@@ -75,8 +75,8 @@ def update_role(
 
 
 @role_router.delete(
-    "/api/role/multiple",
-    tags=["Role"],
+    "/api/roles/multiple",
+    tags=["Roles"],
     response_model=dict,
     status_code=200,
 )
@@ -91,8 +91,8 @@ async def delete_multiple(
 
 
 @role_router.delete(
-    "/api/role/{id}",
-    tags=["Role"],
+    "/api/roles/{id}",
+    tags=["Roles"],
     response_model=dict,
     status_code=200,
 )
