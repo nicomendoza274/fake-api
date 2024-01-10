@@ -1,5 +1,5 @@
 import random
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -127,7 +127,7 @@ class UserService:
             return JSONResponse(status_code=200, content=content)
 
     def validate_code(self, user: UserValidateCode):
-        tomorrow = func.now() + timedelta(hours=1)
+        tomorrow = datetime.now() + timedelta(hours=1)
         result: UserCodeModel = (
             self.db.query(UserCodeModel)
             .join(UserModel, UserModel.user_id == UserCodeModel.user_id)

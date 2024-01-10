@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from config.database import Base
 
@@ -10,4 +11,4 @@ class User(Base):
     email = Column(String)
     first_name = Column(String)
     last_name = Column(String)
-    hash = Column(String, nullable=False)
+    hash: Mapped[str] = mapped_column(String, nullable=False)

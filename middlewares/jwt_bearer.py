@@ -12,6 +12,9 @@ class JWTBearer(HTTPBearer):
             db = Session()
             auth = await super().__call__(request)
 
+            if not auth:
+                return None
+
             credentials = validate_token(auth.credentials)
             result = UserService(db).get_user_by_credentials(credentials)
 

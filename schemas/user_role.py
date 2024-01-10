@@ -3,7 +3,7 @@ from schemas.camel import CamelModel
 
 
 class UserRoleBase(CamelModel):
-    user_role_id: int
+    user_role_id: int | None
     role_id: int
     user_id: int
 
