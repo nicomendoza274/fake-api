@@ -1,9 +1,10 @@
 import random
 from datetime import datetime, timedelta
+from typing import cast
 
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from sqlalchemy import func
+from sqlalchemy import DateTime, func
 from sqlalchemy.orm.session import Session
 
 from constants.error import GEN_2002, GEN_4000
@@ -144,7 +145,7 @@ class UserService:
             content = Errors(Errors=[GEN_4000]).model_dump()
             return JSONResponse(status_code=400, content=content)
 
-        result.deleted_at = func.now()
+        result.deleted_at = cast(DateTime, func.now())
 
         self.db.commit()
         self.db.refresh(result)

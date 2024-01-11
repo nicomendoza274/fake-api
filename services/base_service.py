@@ -30,7 +30,7 @@ class BaseService:
 
         if query:
             json_query = base64_decode(query)
-            json = json_parse(json_query)
+            json = json_parse(value=json_query)
             json = {key.lower(): value for key, value in json.items()}
 
             if "sorts" in json and len(json["sorts"]) > 0:
@@ -91,8 +91,8 @@ class BaseService:
 
         return JSONResponse(status_code=201, content=jsonable_encoder(response))
 
-    def update_record(self, data, user_id: int, id: int):
-        if not self.current_user:
+    def update_record(self, data, user_id: int, id: int | None):
+        if not self.current_user or not id:
             return Response(status_code=401)
 
         result = self.db.query(self.sqlModel).get(id)
