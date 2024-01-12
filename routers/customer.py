@@ -9,15 +9,14 @@ from models.user import User as UserModel
 from schemas.customer import Customer, CustomerUpdate
 from services.customer_service import CustomerService
 
-customer_router = APIRouter()
-
-
-@customer_router.get(
-    "/api/customers",
+customer_router = APIRouter(
+    prefix="/api/customers",
     tags=["Customers"],
-    status_code=200,
 )
-def get_customers(
+
+
+@customer_router.get("")
+def list(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
@@ -28,26 +27,16 @@ def get_customers(
     return response
 
 
-@customer_router.get(
-    "/api/customers/{id}",
-    tags=["Customers"],
-    status_code=200,
-    response_model=Customer | dict,
-)
-def get_customer(
+@customer_router.get("/{id}", response_model=Customer | dict)
+def get(
     id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
 ):
     response = CustomerService(db, user).get_record(id)
     return response
 
 
-@customer_router.post(
-    "/api/customers",
-    tags=["Customers"],
-    status_code=201,
-    response_model=Customer | dict,
-)
-def create_customer(
+@customer_router.post("", status_code=201, response_model=Customer | dict)
+def create(
     customer: Customer,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
@@ -58,13 +47,8 @@ def create_customer(
     return response
 
 
-@customer_router.put(
-    "/api/customers",
-    tags=["Customers"],
-    status_code=200,
-    response_model=Customer | dict,
-)
-def update_customer(
+@customer_router.put("", status_code=200, response_model=Customer | dict)
+def update(
     customer: CustomerUpdate,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
@@ -76,12 +60,7 @@ def update_customer(
     return response
 
 
-@customer_router.delete(
-    "/api/customers/multiple",
-    tags=["Customers"],
-    response_model=dict,
-    status_code=200,
-)
+@customer_router.delete("/multiple", response_model=dict)
 async def delete_multiple(
     ids: List[int] = Query(...),
     db: Session = Depends(get_db),
@@ -92,13 +71,8 @@ async def delete_multiple(
     return response
 
 
-@customer_router.delete(
-    "/api/customers/{id}",
-    tags=["Customers"],
-    response_model=dict,
-    status_code=200,
-)
-def delete_customer(
+@customer_router.delete("/{id}", response_model=dict)
+def delete(
     id: int,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),

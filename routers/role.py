@@ -9,15 +9,14 @@ from models.user import User as UserModel
 from schemas.role import Role, RoleUpdate
 from services.role_service import RoleService
 
-role_router = APIRouter()
-
-
-@role_router.get(
-    "/api/roles",
+role_router = APIRouter(
+    prefix="/api/roles",
     tags=["Roles"],
-    status_code=200,
 )
-def get_roles(
+
+
+@role_router.get("")
+def list(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
@@ -28,26 +27,14 @@ def get_roles(
     return response
 
 
-@role_router.get(
-    "/api/roles/{id}",
-    tags=["Roles"],
-    status_code=200,
-    response_model=Role | dict,
-)
-def get_role(
-    id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
-):
+@role_router.get("/{id}", response_model=Role | dict)
+def get(id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())):
     response = RoleService(db, user).get_record(id)
     return response
 
 
-@role_router.post(
-    "/api/roles",
-    tags=["Roles"],
-    status_code=201,
-    response_model=Role | dict,
-)
-def create_role(
+@role_router.post("", status_code=201, response_model=Role | dict)
+def create(
     role: Role,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
@@ -58,13 +45,8 @@ def create_role(
     return response
 
 
-@role_router.put(
-    "/api/roles",
-    tags=["Roles"],
-    status_code=200,
-    response_model=Role | dict,
-)
-def update_role(
+@role_router.put("", response_model=Role | dict)
+def update(
     role: RoleUpdate,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
@@ -74,12 +56,7 @@ def update_role(
     return response
 
 
-@role_router.delete(
-    "/api/roles/multiple",
-    tags=["Roles"],
-    response_model=dict,
-    status_code=200,
-)
+@role_router.delete("/multiple", response_model=dict)
 async def delete_multiple(
     ids: List[int] = Query(...),
     db: Session = Depends(get_db),
@@ -90,13 +67,8 @@ async def delete_multiple(
     return response
 
 
-@role_router.delete(
-    "/api/roles/{id}",
-    tags=["Roles"],
-    response_model=dict,
-    status_code=200,
-)
-def delete_role(
+@role_router.delete("/{id}", response_model=dict)
+def delete(
     id: int,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
