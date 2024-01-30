@@ -98,7 +98,7 @@ class BaseService:
         result = self.db.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None:
-            return None
+            return self.response(None)
 
         model_to_dict = data.model_dump()
 
