@@ -9,15 +9,14 @@ from models.user import User as UserModel
 from schemas.product import Product, ProductActiveToggle, ProductUpdate
 from services.product_service import ProductService
 
-product_router = APIRouter()
-
-
-@product_router.get(
-    "/api/product",
-    tags=["Product"],
-    status_code=200,
+product_router = APIRouter(
+    prefix="/api/products",
+    tags=["Products"],
 )
-def get_products(
+
+
+@product_router.get("")
+def list(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
@@ -28,26 +27,14 @@ def get_products(
     return response
 
 
-@product_router.get(
-    "/api/product/{id}",
-    tags=["Product"],
-    status_code=200,
-    response_model=Product | dict,
-)
-def get_product(
-    id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())
-):
+@product_router.get("/{id}", response_model=Product | dict)
+def get(id: int, db: Session = Depends(get_db), user: UserModel = Depends(JWTBearer())):
     response = ProductService(db, user).get_record(id)
     return response
 
 
-@product_router.post(
-    "/api/product",
-    tags=["Product"],
-    status_code=201,
-    response_model=Product | dict,
-)
-def create_product(
+@product_router.post("", status_code=201, response_model=Product | dict)
+def create(
     product: Product,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
@@ -58,13 +45,8 @@ def create_product(
     return response
 
 
-@product_router.put(
-    "/api/product",
-    tags=["Product"],
-    status_code=200,
-    response_model=Product | dict,
-)
-def update_product(
+@product_router.put("", response_model=Product | dict)
+def update(
     product: ProductUpdate,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),
@@ -76,12 +58,7 @@ def update_product(
     return response
 
 
-@product_router.put(
-    "/api/product/activate/{id}",
-    tags=["Product"],
-    status_code=200,
-    response_model=Product | dict,
-)
+@product_router.put("/activate/{id}", response_model=Product | dict)
 def toggle_active(
     id: int,
     data: ProductActiveToggle,
@@ -93,13 +70,7 @@ def toggle_active(
     return response
 
 
-@product_router.delete(
-    "/api/product/multiple",
-    tags=["Product"],
-    response_model=dict,
-    status_code=200,
-    dependencies=[Depends(JWTBearer())],
-)
+@product_router.delete("/multiple", response_model=dict)
 async def delete_multiple(
     ids: List[int] = Query(...),
     db: Session = Depends(get_db),
@@ -110,13 +81,8 @@ async def delete_multiple(
     return response
 
 
-@product_router.delete(
-    "/api/product/{id}",
-    tags=["Product"],
-    response_model=dict,
-    status_code=200,
-)
-def delete_product(
+@product_router.delete("/{id}", response_model=dict)
+def delete(
     id: int,
     db: Session = Depends(get_db),
     user: UserModel = Depends(JWTBearer()),

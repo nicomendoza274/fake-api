@@ -8,7 +8,7 @@ from schemas.category import CategoryUpdate
 
 
 class ProductBase(CamelModel):
-    product_id: int
+    product_id: int | None
     category_id: Optional[int]
     name: str
     price: float
@@ -18,11 +18,7 @@ class ProductBase(CamelModel):
 class Product(ProductBase, BaseSchema):
     class Config:
         json_schema_extra = {
-            "example": {
-                "product_id": 0, 
-                "name": "Benjamin Lopez", 
-                "price": 1999.5
-            }
+            "example": {"product_id": 0, "name": "Benjamin Lopez", "price": 1999.5}
         }
 
 

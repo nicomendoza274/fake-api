@@ -126,6 +126,9 @@ class ProductService(BaseService):
             .first()
         )
 
+        if not model:
+            return Response(status_code=401)
+
         product = model[0]
         category = model[1]
 

@@ -1,5 +1,5 @@
 services:
-  pynotes-api:
+  fake-api:
     build:
       context: .
       dockerfile: Dockerfile

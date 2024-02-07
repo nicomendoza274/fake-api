@@ -3,7 +3,7 @@ from schemas.camel import CamelModel
 
 
 class CategoryBase(CamelModel):
-    customer_id: int
+    customer_id: int | None
     name: str
     internal_id: str
     address: str

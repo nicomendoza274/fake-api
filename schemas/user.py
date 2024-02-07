@@ -1,5 +1,7 @@
 from typing import Optional
 
+from sqlalchemy import Column
+
 from schemas.camel import CamelModel
 
 
@@ -16,7 +18,7 @@ class UserLoged(User):
     first_name: str
     last_name: str
     token: str
-    role_id: Optional[int] = None
+    role_id: int | None = None
 
 
 class UserCreate(User):
@@ -42,7 +44,7 @@ class UserCreated(User):
     user_id: int
     first_name: str
     last_name: str
-    role_id: Optional[int] = None
+    role_id: int | None = None
 
 
 class UserList(User):

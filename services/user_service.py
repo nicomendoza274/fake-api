@@ -1,9 +1,10 @@
 import random
-from datetime import timedelta
+from datetime import datetime, timedelta
+from typing import cast
 
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from sqlalchemy import func
+from sqlalchemy import DateTime, func
 from sqlalchemy.orm.session import Session
 
 from constants.error import GEN_2002, GEN_4000
@@ -127,7 +128,7 @@ class UserService:
             return JSONResponse(status_code=200, content=content)
 
     def validate_code(self, user: UserValidateCode):
-        tomorrow = func.now() + timedelta(hours=1)
+        tomorrow = datetime.now() + timedelta(hours=1)
         result: UserCodeModel = (
             self.db.query(UserCodeModel)
             .join(UserModel, UserModel.user_id == UserCodeModel.user_id)
@@ -144,7 +145,7 @@ class UserService:
             content = Errors(Errors=[GEN_4000]).model_dump()
             return JSONResponse(status_code=400, content=content)
 
-        result.deleted_at = func.now()
+        result.deleted_at = cast(datetime, func.now())
 
         self.db.commit()
         self.db.refresh(result)

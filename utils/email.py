@@ -6,19 +6,22 @@ from dotenv import load_dotenv
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 
 load_dotenv()
+
+DEFAULT_PORT: int = 587
+
 MAIL_USERNAME = os.getenv("MAIL_USERNAME")
 MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_FROM = os.getenv("MAIL_FROM")
-MAIL_PORT = os.getenv("MAIL_PORT")
+MAIL_PORT = os.getenv("MAIL_PORT", DEFAULT_PORT)
 MAIL_SERVER = os.getenv("MAIL_SERVER")
 
 
 conf = ConnectionConfig(
-    MAIL_USERNAME=MAIL_USERNAME,
-    MAIL_PASSWORD=MAIL_PASSWORD,
-    MAIL_FROM=MAIL_FROM,
-    MAIL_PORT=MAIL_PORT,
-    MAIL_SERVER=MAIL_SERVER,
+    MAIL_USERNAME=str(MAIL_USERNAME),
+    MAIL_PASSWORD=str(MAIL_PASSWORD),
+    MAIL_FROM=str(MAIL_FROM),
+    MAIL_PORT=int(MAIL_PORT),
+    MAIL_SERVER=str(MAIL_SERVER),
     MAIL_STARTTLS=True,
     MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True,
@@ -28,7 +31,7 @@ conf = ConnectionConfig(
 
 
 async def send_email(subject: str, recipient: List, message: dict):
-    message = MessageSchema(
+    msg = MessageSchema(
         subject=subject,
         recipients=recipient,
         template_body=message,
@@ -36,4 +39,4 @@ async def send_email(subject: str, recipient: List, message: dict):
     )
 
     fm = FastMail(conf)
-    await fm.send_message(message, template_name="body.html")
+    await fm.send_message(msg, template_name="body.html")
