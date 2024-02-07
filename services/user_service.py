@@ -145,7 +145,7 @@ class UserService:
             content = Errors(Errors=[GEN_4000]).model_dump()
             return JSONResponse(status_code=400, content=content)
 
-        result.deleted_at = cast(DateTime, func.now())
+        result.deleted_at = cast(datetime, func.now())
 
         self.db.commit()
         self.db.refresh(result)
