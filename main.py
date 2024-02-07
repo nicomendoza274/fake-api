@@ -24,7 +24,7 @@ origins = [
 
 app.title = "Fake API"
 app.description = "This is an imitation API designed to connect with a Frontend"
-app.version = "1.5.1"
+app.version = "1.6.0"
 
 app.add_middleware(
     CORSMiddleware,
