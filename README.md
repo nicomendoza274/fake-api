@@ -4,73 +4,87 @@ Welcome to the Fake-API repository! This is a simple guide to help you get start
 
 ## Actual version
 
-The actual version is [v1.5.1](https://github.com/nicomendoza274/fake-api/releases/tag/v1.5.1).
+The actual version is [v2.0.0](https://github.com/nicomendoza274/fake-api/releases/tag/v2.0.0).
 
 ## Getting Started
 
-**Clone the repository:**
+- **Clone the repository:**
 
-```sh
-git clone git@github.com:nicomendoza274/fake-api.git
-```
+    ```sh
+    git clone git@github.com:nicomendoza274/fake-api.git
+    ```
 
-**Create enviroment file** rename .env.example by .env
-
-```
-mv .evn.example .env
-```
-
-If you want to an example database you can download in this [link](https://drive.google.com/file/d/1LUsCQlQcj-b1CaZxvnM992xXn1HrZNF_/view?usp=sharing) and paste into root of the repository
-
-## Docker
-
-if you prefer to use docker follow these steps, it is important that you have docker installed on your computer
-
-```sh
-docker compose build
-```
-
-```sh
-docker compose up
-```
-
-Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
-
-## Instalation
+## Installation
 
 Follow these steps to set up and run the project on your local machine:
 
-**Install Python 3.10+**
+- **Install Python 3.10+**
 
-**Create a Virtual Environment:**
+- **Create a Virtual Environment:**
 
-```sh
- python3 -m venv venv
-```
+    ```sh
+    python3 -m venv venv
+    ```
 
-**Activate the Virtual Environment:**
-On macOS/Linux:
+- **Activate the Virtual Environment:**
+    On macOS/Linux:
 
-```sh
- source venv/bin/activate
-```
+    ```sh
+    source venv/bin/activate
+    ```
 
-On Windows:
+    On Windows:
 
-```sh
- .\venv\Scripts\activate
-```
+    ```sh
+    .\venv\Scripts\activate
+    ```
 
-**Install Dependencies:**
+- **Install Dependencies:**
 
-```sh
- pip install -r requirements.txt
-```
+    ```sh
+    pip install -r requirements.txt
+    ```
 
-**Run the Project:**
+- **Create environment files in root**
 
-```sh
- uvicorn main:app --reload
-```
+  `.env.dev`, `.env.ds`, `.env.qa`, `.env.prod`
 
-Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
+  ```sh
+  #Auth
+  MY_SECRET_KEY=[SECRET_KEY]
+
+  #Database
+  DB_URI=postgresql://user:pass@host:port/db
+
+  # Mail
+  MAIL_USERNAME=emailaddress@test.com
+  MAIL_PASSWORD=password
+  MAIL_FROM=emailaddress@test.com
+  MAIL_PORT=587
+  MAIL_SERVER=smtp.gmail.com
+
+  ```
+
+- **Move to src folder**
+
+  ```sh
+  cd src/
+  ```
+
+- **Run the Project:**
+
+  Development
+
+  ```sh
+  uvicorn main:app --env-file ../.env.dev --reload
+  ```
+
+  QA
+
+  ```sh
+  uvicorn main:app --env-file ../.env.qa --reload
+  ```
+
+    > Or select your **profile debugger** and press **F5**. **F5** run QA default.
+
+    Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
