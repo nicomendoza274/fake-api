@@ -40,10 +40,7 @@ from schemas.user import (
 
 class UserService(BaseService):
     def __init__(self, db: Session, user: User | None):
-        self.db = db
-        self.current_user = user
-        self.sqlModel = User
-        self.response_schema = UserResponseDTO
+        super().__init__(db, user, User, UserResponseDTO)
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
         result = (

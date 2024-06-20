@@ -7,7 +7,4 @@ from schemas.category import CategoryResponseDTO
 
 class CategoryService(BaseService):
     def __init__(self, db: Session, user: User) -> None:
-        self.db = db
-        self.current_user = user
-        self.sqlModel = Category
-        self.response_schema = CategoryResponseDTO
+        super().__init__(db, user, Category, CategoryResponseDTO)

@@ -7,7 +7,4 @@ from schemas.role import RoleResponseDTO
 
 class RoleService(BaseService):
     def __init__(self, db: Session, user: User) -> None:
-        self.db = db
-        self.current_user = user
-        self.sqlModel = Role
-        self.response_schema = RoleResponseDTO
+        super().__init__(db, user, Role, RoleResponseDTO)

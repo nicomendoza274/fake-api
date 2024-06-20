@@ -17,15 +17,20 @@ from core.utils.query import str_to_query
 
 class BaseService:
     def __init__(
-        self, db: Session, current_user: UserModel | None, sqlModel, response_schema
+        self,
+        db: Session,
+        current_user: UserModel | None,
+        sqlModel,
+        response_schema,
     ) -> None:
         self.db = db
         self.current_user = current_user
         self.sqlModel = sqlModel
         self.response_schema = response_schema
+        self.result = self.db.query(self.sqlModel)
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
-        result = self.db.query(self.sqlModel).filter(self.sqlModel.deleted_at == None)
+        result = self.result.filter(self.sqlModel.deleted_at == None)
         pk = inspect(self.sqlModel).primary_key[0].name
 
         query_model = QueryCriterionService(self.sqlModel)
