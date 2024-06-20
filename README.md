@@ -51,7 +51,7 @@ Follow these steps to set up and run the project on your local machine:
 
   ```sh
   #Auth
-  MY_SECRET_KEY=[SECRET_KEY]
+  SECRET_KEY=[SECRET_KEY]
 
   #Database
   DB_URI=postgresql://user:pass@host:port/db
