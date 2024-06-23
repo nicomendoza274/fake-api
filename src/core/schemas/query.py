@@ -20,3 +20,8 @@ class QueryCriteria(CamelModel):
     sorts: List[SortCriteria] | None = None
     filters: List[FilterCriteria] | None = None
     search: str | None = None
+
+
+class PropertyModel(CamelModel):
+    property: str
+    model: Any

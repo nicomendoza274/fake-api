@@ -27,3 +27,11 @@ def str_to_query(query: str | None) -> QueryCriteria | None:
     except:
         raise GenericError(GEN_1000)
     return query_criteria
+
+
+def get_property_values(property_name: str) -> tuple[str, str]:
+    if "." not in property_name:
+        return "", property_name
+
+    first_properties, last_property = property_name.rsplit(".", 1)
+    return first_properties, last_property
