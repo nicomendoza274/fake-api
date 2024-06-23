@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from core.database.database import Base
 from core.models.audit_model import AuditModel
+from core.models.user import UserModel
 
 
 class UserCode(Base, AuditModel):
@@ -25,14 +26,10 @@ class UserRole(Base, AuditModel):
     )
 
 
-class User(Base, AuditModel):
+class User(Base, UserModel, AuditModel):
     __tablename__ = "users"
 
-    user_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    email: Mapped[str]
-    first_name: Mapped[str]
-    last_name: Mapped[str]
-    hash: Mapped[str]
+    pass
 
 
 class Role(Base, AuditModel):
