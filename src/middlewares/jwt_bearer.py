@@ -3,7 +3,7 @@ from fastapi.security import HTTPBearer
 
 from core.classes.generic_errors import GenericError
 from core.constants.generic_errors import GEN_2000, GEN_2001, GEN_4000
-from core.database.database import Session
+from core.database.database import session
 from core.utils.encrypt import validate_token
 from services.user import UserService
 
@@ -11,7 +11,7 @@ from services.user import UserService
 class JWTBearer(HTTPBearer):
     async def __call__(self, request: Request):
         try:
-            db = Session()
+            db = session()
             auth = await super().__call__(request)
 
             if not auth:

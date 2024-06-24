@@ -1,8 +1,8 @@
 from sqlalchemy import BigInteger, ForeignKey, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.database.database import Base
 from core.models.audit_model import AuditModel
+from core.models.base import Base
 from core.models.user import UserModel
 
 
