@@ -6,14 +6,13 @@ class RoleBaseSchema(CamelModel):
     role_id: int | None
     name: str
 
-
-class RoleResponseDTO(RoleBaseSchema, AuditSchema):
     class Config:
         from_attributes = True
+
+
+class RoleResponseDTO(RoleBaseSchema, AuditSchema):
+    pass
 
 
 class RoleDTO(RoleBaseSchema):
     role_id: int | None = None
-
-    class Config:
-        from_attributes = True

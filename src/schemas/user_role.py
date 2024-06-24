@@ -7,14 +7,13 @@ class UserRoleBaseSchema(CamelModel):
     role_id: int
     user_id: int
 
-
-class UserRoleResponseDTO(UserRoleBaseSchema, AuditSchema):
     class Config:
         from_attributes = True
+
+
+class UserRoleResponseDTO(UserRoleBaseSchema, AuditSchema):
+    pass
 
 
 class UserRoleDTO(UserRoleBaseSchema):
     user_role_id: int | None = None
-
-    class Config:
-        from_attributes = True

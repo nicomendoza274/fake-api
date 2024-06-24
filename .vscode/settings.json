@@ -21,6 +21,7 @@
     "nicomendoza",
     "nullable",
     "postgresql",
+    "primaryjoin",
     "pydantic",
     "pytz",
     "sessionmaker",

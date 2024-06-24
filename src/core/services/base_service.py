@@ -4,40 +4,44 @@ from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from sqlalchemy import func, inspect
+from sqlalchemy.orm.query import Query
 from sqlalchemy.orm.session import Session
 
 from core.classes.generic_errors import GenericError
 from core.constants.generic_errors import GEN_4000
 from core.models.user import UserModel
+from core.schemas.query import PropertyModel
 from core.schemas.response import MultipleResponseData, ResponseData
 from core.schemas.success_schema import SuccessDTO
 from core.services.query import QueryCriterionService
-from core.utils.query import str_to_query
 
 
 class BaseService:
     def __init__(
-        self, db: Session, current_user: UserModel | None, sqlModel, response_schema
+        self,
+        db: Session,
+        current_user: UserModel | None,
+        sqlModel,
+        response_schema,
     ) -> None:
         self.db = db
         self.current_user = current_user
         self.sqlModel = sqlModel
         self.response_schema = response_schema
+        self.result = self.db.query(self.sqlModel)
+        self.default_sort = inspect(self.sqlModel).primary_key[0].name  # PK
+        self.property_model_list: List[PropertyModel] = []
+        self.property_search = [getattr(self.sqlModel, "name")] if hasattr(self.sqlModel, "name") else []
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
-        result = self.db.query(self.sqlModel).filter(self.sqlModel.deleted_at == None)
-        pk = inspect(self.sqlModel).primary_key[0].name
+        result = self.result
 
-        query_model = QueryCriterionService(self.sqlModel)
+        query_model = QueryCriterionService(self.sqlModel, query)
 
-        query_criteria = str_to_query(query)
-
-        result = query_model.sorts(query_criteria, result)
-        result = query_model.filters(query_criteria, result)
-        result = query_model.search(query_criteria, "name", result)
-
-        result = result.order_by(pk)
-        total_count = len(result.all())
+        result = self.filter_list(query_model, result)
+        result = self.search_list(query_model, result)
+        result = self.sort_list(query_model, result)
+        result = self.sort_by_pk(result)
 
         if length:
             result = result.limit(length)
@@ -46,6 +50,8 @@ class BaseService:
             result = result.offset(start)
 
         result = result.all()
+        total_count = len(result)
+
         data_response_list = [self.response_schema.model_validate(el) for el in result]
 
         response = self.get_multiple_response(
@@ -172,3 +178,16 @@ class BaseService:
             )
         )
         return JSONResponse(status_code=status_code, content=response)
+
+    def filter_list(self, query_model: QueryCriterionService, result: Query) -> Query:
+        result = result.filter(self.sqlModel.deleted_at == None)
+        return query_model.filters(result, self.property_model_list)
+
+    def search_list(self, query_model: QueryCriterionService, result: Query) -> Query:
+        return query_model.search(result, self.property_search)
+
+    def sort_list(self, query_model: QueryCriterionService, result: Query) -> Query:
+        return query_model.sorts(result, self.property_model_list)
+
+    def sort_by_pk(self, result: Query) -> Query:
+        return result.order_by(self.default_sort)

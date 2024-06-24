@@ -15,7 +15,7 @@ app = FastAPI()
 
 app.title = "Fake API"
 app.description = "This is a template API"
-app.version = "2.0.0"
+app.version = "2.1.0"
 
 app_prefix = "/api"
 

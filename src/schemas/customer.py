@@ -10,11 +10,12 @@ class CategoryBaseSchema(CamelModel):
     city: str
     phone: str
 
-
-class CustomerResponseDTO(CategoryBaseSchema, AuditSchema):
-
     class Config:
         from_attributes = True
+
+
+class CustomerResponseDTO(CategoryBaseSchema, AuditSchema):
+    pass
 
 
 class CustomerDTO(CategoryBaseSchema):

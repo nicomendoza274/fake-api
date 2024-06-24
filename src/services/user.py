@@ -24,7 +24,6 @@ from core.services.email import (
 )
 from core.services.query import QueryCriterionService
 from core.utils.encrypt import create_token, encrypt_string
-from core.utils.query import str_to_query
 from models.models import User, UserCode, UserRole
 from schemas.user import (
     UserDTO,
@@ -40,10 +39,7 @@ from schemas.user import (
 
 class UserService(BaseService):
     def __init__(self, db: Session, user: User | None):
-        self.db = db
-        self.current_user = user
-        self.sqlModel = User
-        self.response_schema = UserResponseDTO
+        super().__init__(db, user, User, UserResponseDTO)
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
         result = (
@@ -65,14 +61,12 @@ class UserService(BaseService):
             )
         )
 
-        query_model = QueryCriterionService(self.sqlModel)
+        query_model = QueryCriterionService(self.sqlModel, query)
 
-        query_criteria = str_to_query(query)
-
-        result = query_model.sorts(query_criteria, result)
-        result = query_model.filters(query_criteria, result)
-        result = query_model.search(query_criteria, "name", result)
-        result = result.order_by("user_id")
+        result = self.filter_list(query_model, result)
+        result = self.search_list(query_model, result)
+        result = self.sort_list(query_model, result)
+        result = self.sort_by_pk(result)
 
         if length:
             result = result.limit(length)

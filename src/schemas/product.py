@@ -4,7 +4,7 @@ from fastapi import Query
 
 from core.schemas.audit_schema import AuditSchema
 from core.schemas.camel import CamelModel
-from schemas.category import CategoryDTO, CategoryResponseDTO
+from schemas.category import CategoryDTO
 
 
 class ProductBaseSchema(CamelModel):
@@ -14,12 +14,12 @@ class ProductBaseSchema(CamelModel):
     price: float
     is_active: bool
 
+    class Config:
+        from_attributes = True
+
 
 class ProductResponseDTO(ProductBaseSchema, AuditSchema):
     category: CategoryDTO | None
-
-    class Config:
-        from_attributes = True
 
 
 class ProductDTO(ProductBaseSchema):

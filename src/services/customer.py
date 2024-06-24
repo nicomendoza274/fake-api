@@ -7,7 +7,4 @@ from schemas.customer import CustomerResponseDTO
 
 class CustomerService(BaseService):
     def __init__(self, db: Session, user: User):
-        self.db = db
-        self.current_user = user
-        self.sqlModel = Customer
-        self.response_schema = CustomerResponseDTO
+        super().__init__(db, user, Customer, CustomerResponseDTO)
