@@ -10,20 +10,17 @@ class UserBaseSchema(CamelModel):
     email: str
     role_id: int | None = None
 
+    class Config:
+        from_attributes = True
+
 
 class UserResponseDTO(UserBaseSchema):
     user_id: int
-
-    class Config:
-        from_attributes = True
 
 
 class UserDTO(UserBaseSchema):
     password: str
     user_id: int | None = None
-
-    class Config:
-        from_attributes = True
 
 
 class UserJWT(CamelModel):
