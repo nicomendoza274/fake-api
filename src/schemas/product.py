@@ -1,7 +1,3 @@
-from typing import List
-
-from fastapi import Query
-
 from core.schemas.audit_schema import AuditSchema
 from core.schemas.camel import CamelModel
 from schemas.category import CategoryDTO

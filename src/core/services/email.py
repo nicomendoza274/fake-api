@@ -1,7 +1,7 @@
 from typing import List
 
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
-from pydantic import DirectoryPath
+from pydantic import DirectoryPath, SecretStr
 
 from core.classes.settings import settings
 
@@ -28,7 +28,7 @@ class EmailService:
     ):
         self.conf = ConnectionConfig(
             MAIL_USERNAME=user_name,
-            MAIL_PASSWORD=password,
+            MAIL_PASSWORD=SecretStr(password),
             MAIL_FROM=mail_from,
             MAIL_PORT=mail_port,
             MAIL_SERVER=mail_server,
