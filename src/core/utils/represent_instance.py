@@ -1,7 +1,7 @@
 from sqlalchemy import inspect
 
 
-def represent_instance(instance):
+def represent_instance(instance) -> str:
     attributes = ", ".join(
         f"{attribute}={getattr(instance, attribute)}"
         for attribute in inspect(instance).attrs.keys()

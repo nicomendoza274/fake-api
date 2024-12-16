@@ -1,9 +1,10 @@
-from core.schemas.audit_schema import AuditSchema
+from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
+
 from core.schemas.camel import CamelModel
 
 
-class CategoryBaseSchema(CamelModel):
-    customer_id: int | None
+class CategoryBase(CamelModel):
     name: str
     internal_id: str
     address: str
@@ -14,9 +15,9 @@ class CategoryBaseSchema(CamelModel):
         from_attributes = True
 
 
-class CustomerResponseDTO(CategoryBaseSchema, AuditSchema):
-    pass
+class CustomerResponseDTO(CategoryBase):
+    customer_id: int
 
 
-class CustomerDTO(CategoryBaseSchema):
-    customer_id: int | None = None
+class CustomerDTO(CategoryBase):
+    customer_id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)

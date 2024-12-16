@@ -1,65 +1,52 @@
-from datetime import datetime
+from pydantic import Field, model_validator
+from pydantic.json_schema import SkipJsonSchema
 
 from core.schemas.camel import CamelModel
+from core.schemas.file import FileDTO
+from core.utils.encrypt import encrypt_string
 
 
-class UserBaseSchema(CamelModel):
-    user_id: int | None
+class UserBase(CamelModel):
     first_name: str
     last_name: str
     email: str
     role_id: int | None = None
+    picture_id: int | None = None
 
     class Config:
         from_attributes = True
 
 
-class UserResponseDTO(UserBaseSchema):
+class UserResponseDTO(UserBase):
     user_id: int
+    picture: FileDTO | None = None
 
 
-class UserDTO(UserBaseSchema):
+class UserDTO(UserBase):
+    user_id: SkipJsonSchema[int] | None = Field(default=None, exclude=True)
     password: str
-    user_id: int | None = None
+    hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
+
+    @model_validator(mode="after")
+    def compute_hash(cls, values):
+        values.hash = encrypt_string(values.password)
+        return values
 
 
-class UserJWT(CamelModel):
-    user_id: int
-    email: str
-    role_id: int | None = None
-
-    class Config:
-        from_attributes = True
-
-
-class UserLoginDTO(CamelModel):
-    email: str
-    password: str
-
-
-class UserLoggedDTO(CamelModel):
-    user_id: int
+class UserUpdateDTO(CamelModel):
     first_name: str
     last_name: str
     email: str
-    token: str | None = None
-    expiration_date: datetime | None = None
-    role_id: int | None = None
-
-    class Config:
-        from_attributes = True
+    picture_id: int | None = None
 
 
-class UserSendCodeDTO(CamelModel):
-    email: str
+class UserChangePasswordDTO(CamelModel):
+    new_password: str
+    hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
 
+    # model_config = {"json_schema_extra": {"examples": [{"newPassword": "string"}]}}
 
-class UserValidateCodeDTO(CamelModel):
-    code: str
-    email: str
-
-
-class UserForgotChangePasswordDTO(CamelModel):
-    code: str
-    email: str
-    newPassword: str
+    @model_validator(mode="after")
+    def compute_hash(cls, values):
+        values.hash = encrypt_string(values.new_password)
+        return values

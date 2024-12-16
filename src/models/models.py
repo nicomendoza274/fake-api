@@ -1,12 +1,12 @@
 from sqlalchemy import BigInteger, ForeignKey, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.models.audit_model import AuditModel
-from core.models.base import Base
+from core.models.base import BaseAuditModel
+from core.models.file import FileModel
 from core.models.user import UserModel
 
 
-class UserCode(Base, AuditModel):
+class UserCode(BaseAuditModel):
     __tablename__ = "user_codes"
 
     user_code_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -15,7 +15,7 @@ class UserCode(Base, AuditModel):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), nullable=True)
 
 
-class UserRole(Base, AuditModel):
+class UserRole(BaseAuditModel):
     __tablename__ = "user_roles"
 
     user_role_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -26,27 +26,36 @@ class UserRole(Base, AuditModel):
     )
 
 
-class User(Base, UserModel, AuditModel):
+class User(UserModel, BaseAuditModel):
     __tablename__ = "users"
 
-    pass
+    picture_id: Mapped[int | None] = mapped_column(
+        ForeignKey("files.file_id"), nullable=True
+    )
+
+    picture: Mapped[FileModel] = relationship(
+        primaryjoin=and_(
+            FileModel.file_id == picture_id,
+            FileModel.deleted_at == None,
+        )
+    )
 
 
-class Role(Base, AuditModel):
+class Role(BaseAuditModel):
     __tablename__ = "roles"
 
     role_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str]
 
 
-class Category(Base, AuditModel):
+class Category(BaseAuditModel):
     __tablename__ = "categories"
 
     category_id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
 
 
-class Customer(Base, AuditModel):
+class Customer(BaseAuditModel):
     __tablename__ = "customers"
 
     customer_id: Mapped[int] = mapped_column(primary_key=True)
@@ -57,7 +66,7 @@ class Customer(Base, AuditModel):
     phone: Mapped[str]
 
 
-class Product(Base, AuditModel):
+class Product(BaseAuditModel):
     __tablename__ = "products"
 
     product_id: Mapped[int] = mapped_column(primary_key=True)
@@ -67,6 +76,17 @@ class Product(Base, AuditModel):
 
     category_id: Mapped[int | None] = mapped_column(
         ForeignKey("categories.category_id"), nullable=True
+    )
+
+    picture_id: Mapped[int | None] = mapped_column(
+        ForeignKey("files.file_id"), nullable=True
+    )
+
+    picture: Mapped[FileModel] = relationship(
+        primaryjoin=and_(
+            FileModel.file_id == picture_id,
+            FileModel.deleted_at == None,
+        )
     )
 
     category: Mapped["Category"] = relationship(

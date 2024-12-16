@@ -1,2 +1,2 @@
 def run_test():
-    print("Execute test function")
+    print("Execute test tasks")

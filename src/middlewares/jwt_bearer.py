@@ -1,7 +1,7 @@
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, status
 from fastapi.security import HTTPBearer
 
-from core.classes.generic_errors import GenericError
+from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_2000, GEN_2001, GEN_4000
 from core.database.database import session
 from core.utils.encrypt import validate_token
@@ -15,16 +15,16 @@ class JWTBearer(HTTPBearer):
             auth = await super().__call__(request)
 
             if not auth:
-                raise GenericError(GEN_2001)
+                raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
 
             credentials = validate_token(auth.credentials)
             result = UserService(db, None).get_user_by_credentials(credentials)
 
             if not result:
-                raise GenericError(GEN_4000)
+                raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
             db.close()
             return result
         except HTTPException:
-            raise GenericError(GEN_2001)
+            raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
         except:
-            raise GenericError(GEN_2000)
+            raise HandleException([GEN_2000], status.HTTP_401_UNAUTHORIZED)

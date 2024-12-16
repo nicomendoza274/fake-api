@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Error(BaseModel):
     Code: str
     Exception: str
     Message: str
-    Status: int | None = None
+    Status: int = Field(..., exclude=True)
 
 
 class Errors(BaseModel):

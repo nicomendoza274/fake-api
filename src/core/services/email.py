@@ -43,7 +43,7 @@ class EmailService:
         recipient: list,
         message: dict,
         template_name: str,
-    ):
+    ) -> None:
         msg = MessageSchema(
             subject=subject,
             recipients=recipient,

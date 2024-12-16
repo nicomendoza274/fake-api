@@ -1,53 +1,29 @@
-import random
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import cast
-
-import pytz
 from fastapi import status
-from pydantic import TypeAdapter
 from sqlalchemy import func
 from sqlalchemy.orm.session import Session
 
-from core.classes.generic_errors import GenericError
-from core.constants.generic_errors import GEN_2002, GEN_4000
-from core.schemas.email import EmailMessage
-from core.schemas.success_schema import SuccessDTO
+from core.classes.handle_exception import HandleException
+from core.constants.generic_errors import GEN_2001, GEN_4000
+from core.schemas.query import QueryCriteria
 from core.services.base_service import BaseService
-from core.services.email import (
-    MAIL_FROM,
-    MAIL_PASSWORD,
-    MAIL_PORT,
-    MAIL_SERVER,
-    MAIL_USERNAME,
-    EmailService,
-)
 from core.services.query import QueryCriterionService
-from core.utils.encrypt import create_token, encrypt_string
-from models.models import User, UserCode, UserRole
-from schemas.user import (
-    UserDTO,
-    UserForgotChangePasswordDTO,
-    UserJWT,
-    UserLoggedDTO,
-    UserLoginDTO,
-    UserResponseDTO,
-    UserSendCodeDTO,
-    UserValidateCodeDTO,
-)
+from models.models import User, UserRole
+from schemas.user import UserChangePasswordDTO, UserDTO, UserResponseDTO
 
 
-class UserService(BaseService):
+class UserService(BaseService[User, UserResponseDTO, UserDTO]):
     def __init__(self, db: Session, user: User | None):
         super().__init__(db, user, User, UserResponseDTO)
 
-    def get_records(self, start: int | None, length: int | None, query: str | None):
-        result = (
+    def get_records(
+        self,
+        start: int | None,
+        length: int | None,
+        query_criteria: QueryCriteria | None,
+    ) -> tuple[list[UserResponseDTO], int]:
+        results = (
             self.db.query(
-                User.user_id,
-                User.email,
-                User.first_name,
-                User.last_name,
+                User,
                 UserRole.role_id,
             )
             .join(
@@ -61,41 +37,36 @@ class UserService(BaseService):
             )
         )
 
-        query_model = QueryCriterionService(self.sqlModel, query)
+        query_model = QueryCriterionService(self.sqlModel, query_criteria)
 
-        result = self.filter_list(query_model, result)
-        result = self.search_list(query_model, result)
-        result = self.sort_list(query_model, result)
-        result = self.sort_by_pk(result)
+        results = self.filter_list(query_model, results)
+        results = self.search_list(query_model, results)
+        results = self.sort_list(query_model, results)
+        results = self.sort_by_pk(results)
+
+        total_count = len(results.all())
 
         if length:
-            result = result.limit(length)
+            results = results.limit(length)
 
         if start:
-            result = result.offset(start)
+            results = results.offset(start)
 
-        result = result.all()
-        total_count = len(result)
+        results = results.all()
 
-        user_list_adapter = TypeAdapter(list[UserResponseDTO])
-        user_list_mapped = user_list_adapter.validate_python(result)
+        mapped_users: list[UserResponseDTO] = []
+        for result in results:
+            user_data, user_role_id = result
+            mapped_user = UserResponseDTO.model_validate(user_data)
+            mapped_user.role_id = user_role_id
+            mapped_users.append(mapped_user)
 
-        response = self.get_multiple_response(
-            count=total_count,
-            start=start,
-            length=len(result) if length == 0 else length,
-            data=user_list_mapped,
-        )
+        return mapped_users, total_count
 
-        return response
-
-    def get_record(self, id: int):
+    def get_record(self, id: int) -> UserResponseDTO:
         result = (
             self.db.query(
-                User.user_id,
-                User.email,
-                User.first_name,
-                User.last_name,
+                User,
                 UserRole.role_id,
             )
             .join(
@@ -112,21 +83,24 @@ class UserService(BaseService):
         )
 
         if not result:
-            raise GenericError(GEN_4000)
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
-        data_response = UserResponseDTO.model_validate(result)
-        response = self.get_response(data_response)
+        user_data, user_role_id = result
 
-        return response
+        data_response = UserResponseDTO.model_validate(user_data)
+        data_response.role_id = user_role_id
 
-    def create_record(self, user: UserDTO):
-        hash = encrypt_string(user.password)
-        new_user = User(
-            email=user.email,
-            hash=hash,
-            first_name=user.first_name,
-            last_name=user.last_name,
-        )
+        return data_response
+
+    def create_record(self, user: UserDTO) -> None:
+
+        dto_dict = user.model_dump()
+        user_dict = {
+            key: value
+            for key, value in dto_dict.items()
+            if key in User.__table__.columns
+        }
+        new_user = User(**user_dict)
 
         if self.current_user:
             new_user.created_by = self.current_user.user_id
@@ -144,172 +118,17 @@ class UserService(BaseService):
         userCreate = UserResponseDTO.model_validate(new_user)
         userCreate.role_id = user.role_id
 
-        response = self.get_response(userCreate, status.HTTP_201_CREATED)
         self.db.commit()
-        return response
+        return
 
-    def update_record(self, user: UserDTO):
+    def update_record(self, user: UserDTO, id: int) -> None:
 
-        hash = encrypt_string(user.password)
-        user_data: User | None = (
-            self.db.query(User)
-            .filter(
-                User.deleted_at == None,
-                User.user_id == user.user_id,
-            )
-            .first()
-        )
+        if not self.current_user:
+            raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
 
-        if not user_data or not user.user_id:
-            raise GenericError(GEN_4000)
-
-        user_role_data: UserRole | None = (
-            self.db.query(UserRole)
-            .join(User, UserRole.user_id == User.user_id)
-            .filter(
-                UserRole.deleted_at == None,
-                User.deleted_at == None,
-                UserRole.user_id == user.user_id,
-            )
-            .first()
-        )
-
-        if not user_role_data:
-            raise GenericError(GEN_4000)
-
-        if self.current_user:
-            user_data.updated_by = self.current_user.user_id
-
-        user_data.updated_at = func.now()
-        user_data.first_name = user.first_name
-        user_data.last_name = user.last_name
-        user_data.email = user.email
-        user_data.hash = hash
-        user_role_data.role_id = user.role_id
-
-        user_updated = UserResponseDTO.model_validate(user)
-        user_updated.role_id = user.role_id
-
-        response = self.get_response(user_updated)
-        self.db.commit()
-        return response
-
-    def delete_record(self, id: int):
-        user_data = self.db.query(User).get(id)
-
-        if not user_data or user_data.deleted_at != None:
-            raise GenericError(GEN_4000)
-
-        user_data.deleted_at = func.now()
-        if self.current_user:
-            user_data.deleted_by = self.current_user.user_id
-
-        response = self.get_response(SuccessDTO())
-
-        self.db.commit()
-        return response
-
-    async def send_code(self, user: UserSendCodeDTO):
-        result = (
-            self.db.query(User)
-            .filter(User.email == user.email, User.deleted_at == None)
-            .first()
-        )
-
-        if not result:
-            raise GenericError(GEN_4000)
-
-        code = random.randint(100000, 999999)
-
-        user_Code = UserCode(user_id=result.user_id, code=code)
-
-        # Send Email
-        subject = "Fake API - Change Password"
-        fullName = f"{result.first_name} {result.last_name}"
-        recipient = [user.email]
-        message = EmailMessage(fullName=fullName, code=code).model_dump()
-
-        TEMPLATE_FOLDER = Path(__file__).parent.parent / "templates"
-        TEMPLATE_NAME = "forgot.html"
-
-        try:
-            # Send Email
-            await EmailService(
-                MAIL_USERNAME,
-                MAIL_PASSWORD,
-                MAIL_FROM,
-                MAIL_PORT,
-                MAIL_SERVER,
-                TEMPLATE_FOLDER,
-            ).send_email(subject, recipient, message, TEMPLATE_NAME)
-            content = SuccessDTO()
-        except:
-            print("Error to sent mail")
-            content = {"success": True, "error": "Error to send mail"}
-
-        self.db.add(user_Code)
-        self.db.commit()
-        self.db.refresh(user_Code)
-        response = self.get_response(content)
-        return response
-
-    def validate_code(self, user: UserValidateCodeDTO):
-        now = datetime.now(pytz.utc) - timedelta(hours=1)
-        result: UserCode | None = (
-            self.db.query(UserCode)
-            .join(User, User.user_id == UserCode.user_id)
-            .filter(
-                UserCode.deleted_at == None,
-                now < UserCode.created_at,
-                UserCode.code == user.code,
-                User.email == user.email,
-            )
-            .first()
-        )
-
-        if not result:
-            raise GenericError(GEN_4000)
-
-        result.deleted_at = cast(datetime, func.now())
-
-        self.db.commit()
-        self.db.refresh(result)
-        content = SuccessDTO()
-        response = self.get_response(content)
-
-        return response
-
-    def forgot_change_password(self, user: UserForgotChangePasswordDTO):
-        result: User | None = (
-            self.db.query(User)
-            .join(UserCode, User.user_id == UserCode.user_id)
-            .filter(
-                UserCode.code == user.code,
-                User.email == user.email,
-            )
-            .first()
-        )
-
-        if not result:
-            raise GenericError(GEN_4000)
-
-        result.hash = encrypt_string(user.newPassword)
-
-        self.db.commit()
-        self.db.refresh(result)
-        content = SuccessDTO()
-        response = self.get_response(content)
-
-        return response
-
-    def login_user(self, user: UserLoginDTO):
-        hash = encrypt_string(user.password)
         result = (
             self.db.query(
-                User.user_id,
-                User.email,
-                User.first_name,
-                User.last_name,
+                User,
                 UserRole.role_id,
             )
             .join(
@@ -318,34 +137,93 @@ class UserService(BaseService):
                 isouter=True,
             )
             .filter(
-                User.email == user.email,
-                User.hash == hash,
                 User.deleted_at == None,
                 UserRole.deleted_at == None,
+                User.user_id == id,
             )
             .first()
         )
 
         if not result:
-            raise GenericError(GEN_2002)
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
-        user_create = UserJWT.model_validate(result)
+        user_data, _ = result
 
-        token, token_expires = create_token(user_create.model_dump())
+        updated_by = self.current_user.user_id if self.current_user else None
 
-        user_response = UserLoggedDTO.model_validate(result)
-        user_response.token = token
-        user_response.expiration_date = token_expires
+        user_data.updated_at = func.now()
+        user_data.updated_by = updated_by
+        user_data.first_name = user.first_name
+        user_data.last_name = user.last_name
+        user_data.email = user.email
+        user_data.role_id = user.role_id
+        user_data.picture_id = user.picture_id
+        user_data.hash = user.hash
 
-        response = self.get_response(user_response)
+        self.db.commit()
+        return
 
-        return response
+    def delete_record(self, id: int) -> None:
+        user_data = self.db.query(User).get(id)
+
+        if not user_data or user_data.deleted_at != None:
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
+
+        user_data.deleted_at = func.now()
+        if self.current_user:
+            user_data.deleted_by = self.current_user.user_id
+
+        self.db.commit()
+        return
+
+    def change_password(self, user: UserChangePasswordDTO):
+
+        if not self.current_user:
+            raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
+
+        result = (
+            self.db.query(
+                User,
+                UserRole.role_id,
+            )
+            .join(
+                UserRole,
+                User.user_id == UserRole.user_id,
+                isouter=True,
+            )
+            .filter(
+                User.deleted_at == None,
+                UserRole.deleted_at == None,
+                User.user_id == self.current_user.user_id,
+            )
+            .first()
+        )
+
+        if not result:
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
+
+        user_data, role_id = result
+
+        user_data.hash = user.hash
+        user_data.updated_at = func.now()
+
+        if self.current_user:
+            user_data.updated_by = self.current_user.user_id
+
+        self.db.flush()
+        self.db.refresh(user_data)
+
+        user_update_password = UserResponseDTO.model_validate(user_data)
+        user_update_password.role_id = role_id
+
+        self.db.commit()
+        return
 
     def get_user_by_credentials(self, credentials: dict):
         result: User | None = (
             self.db.query(User)
             .filter(
-                User.email == credentials["email"],
+                User.user_id == credentials["user_id"],
                 User.deleted_at == None,
             )
             .first()

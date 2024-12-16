@@ -3,15 +3,15 @@ from sqlalchemy import desc, or_
 from sqlalchemy.orm.query import Query
 
 from core.enums.filter_criteria import FilterCriteriaEnum
-from core.schemas.query import PropertyModel
-from core.utils.query import get_property_values, str_to_query
+from core.schemas.query import PropertyModel, QueryCriteria
+from core.utils.query import get_property_values
 
 
 class QueryCriterionService:
 
-    def __init__(self, sql_model, query: str | None) -> None:
+    def __init__(self, sql_model, query_criteria: QueryCriteria | None) -> None:
         self.sql_model = sql_model
-        self.query_criteria = str_to_query(query)
+        self.query_criteria = query_criteria
 
     def filters(self, result: Query, property_model_list: list[PropertyModel]) -> Query:
         if not self.query_criteria or not self.query_criteria.filters:
@@ -61,8 +61,8 @@ class QueryCriterionService:
             elif type_filter == FilterCriteriaEnum.CONTAINS.value:
                 filter_criteria = model_property.like(f"%{value_filter}%")
 
-            if filter_criteria:
-                filters.append(filter_criteria)
+            # if filter_criteria:
+            filters.append(filter_criteria)
 
         result = result.filter(*filters)
 

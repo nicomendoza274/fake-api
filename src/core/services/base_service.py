@@ -1,26 +1,31 @@
+from typing import Generic, Type, TypeVar
+
 from fastapi import status
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 from sqlalchemy import func, inspect
 from sqlalchemy.orm.query import Query
 from sqlalchemy.orm.session import Session
 
-from core.classes.generic_errors import GenericError
+from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_4000
+from core.models.base import BaseAuditModel
 from core.models.user import UserModel
-from core.schemas.query import PropertyModel
-from core.schemas.response import MultipleResponseData, ResponseData
-from core.schemas.success_schema import SuccessDTO
+from core.schemas.active_toggle import ActiveToggleDTO
+from core.schemas.camel import CamelModel
+from core.schemas.query import PropertyModel, QueryCriteria
 from core.services.query import QueryCriterionService
 
+T = TypeVar("T", bound=BaseAuditModel)
+K = TypeVar("K", bound=CamelModel)
+W = TypeVar("W", bound=CamelModel)
 
-class BaseService:
+
+class BaseService(Generic[T, K, W]):
     def __init__(
         self,
         db: Session,
         current_user: UserModel | None,
-        sqlModel,
-        response_schema,
+        sqlModel: Type[T],
+        response_schema: Type[K] | None = None,
     ) -> None:
         self.db = db
         self.current_user = current_user
@@ -33,15 +38,25 @@ class BaseService:
             [getattr(self.sqlModel, "name")] if hasattr(self.sqlModel, "name") else []
         )
 
-    def get_records(self, start: int | None, length: int | None, query: str | None):
+    def get_records(
+        self,
+        start: int | None,
+        length: int | None,
+        query_criteria: QueryCriteria | None,
+    ) -> tuple[list[K], int]:
+        if not self.response_schema:
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
+
         result = self.result
 
-        query_model = QueryCriterionService(self.sqlModel, query)
+        query_model = QueryCriterionService(self.sqlModel, query_criteria)
 
         result = self.filter_list(query_model, result)
         result = self.search_list(query_model, result)
         result = self.sort_list(query_model, result)
         result = self.sort_by_pk(result)
+
+        total_count = len(result.all())
 
         if length:
             result = result.limit(length)
@@ -50,49 +65,34 @@ class BaseService:
             result = result.offset(start)
 
         result = result.all()
-        total_count = len(result)
 
         data_response_list = [self.response_schema.model_validate(el) for el in result]
 
-        response = self.get_multiple_response(
-            count=total_count,
-            start=start,
-            length=len(result) if length == 0 else length,
-            data=data_response_list,
-        )
+        return data_response_list, total_count
 
-        return response
-
-    def get_record(self, id: int):
+    def get_record(self, id: int) -> K:
         result = self.db.query(self.sqlModel).get(id)
 
-        if not result or result.deleted_at != None:
-            raise GenericError(GEN_4000)
+        if not result or result.deleted_at != None or not self.response_schema:
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
         data_response = self.response_schema.model_validate(result)
-        response = self.get_response(data_response)
 
-        return response
+        return data_response
 
-    def create_record(self, data):
+    def create_record(self, data: W) -> None:
         new_record = self.sqlModel(**data.model_dump())
         if self.current_user:
             new_record.created_by = self.current_user.user_id
         self.db.add(new_record)
-        self.db.flush()
-        self.db.refresh(new_record)
-        data_response = self.response_schema.model_validate(new_record)
-
-        response = self.get_response(data_response, status.HTTP_201_CREATED)
         self.db.commit()
-        return response
+        return
 
-    def update_record(self, data, id: int | None):
-
+    def update_record(self, data: W, id: int | None) -> None:
         result = self.db.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None:
-            raise GenericError(GEN_4000)
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
         model_to_dict = data.model_dump()
 
@@ -101,35 +101,26 @@ class BaseService:
 
         if self.current_user:
             result.updated_by = self.current_user.user_id
+
         result.updated_at = func.now()
-
-        self.db.flush()
-        self.db.refresh(result)
-        data_response = self.response_schema.model_validate(result)
-
-        response = self.get_response(data_response)
         self.db.commit()
-        return response
+        return
 
-    def toggle_active(self, data, id: int):
+    def toggle_active(self, data: ActiveToggleDTO, id: int) -> None:
         result = self.db.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None:
-            raise GenericError(GEN_4000)
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
         result.is_active = data.is_active
         if self.current_user:
             result.updated_by = self.current_user.user_id
         result.updated_at = func.now()
-        self.db.flush()
-        self.db.refresh(result)
 
-        data_response = self.response_schema.model_validate(result)
-        response = self.get_response(data_response)
         self.db.commit()
-        return response
+        return
 
-    def delete_multiple(self, ids: list[int]):
+    def delete_multiple(self, ids: list[int]) -> None:
         for id in ids:
             result = self.db.query(self.sqlModel).get(id)
 
@@ -138,46 +129,21 @@ class BaseService:
                 if self.current_user:
                     result.deleted_by = self.current_user.user_id
 
-        response = self.get_response(SuccessDTO())
         self.db.commit()
-        return response
+        return
 
-    def delete_record(self, id: int):
+    def delete_record(self, id: int) -> None:
         result = self.db.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None:
-            raise GenericError(GEN_4000)
+            raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
         result.deleted_at = func.now()
         if self.current_user:
             result.deleted_by = self.current_user.user_id
 
-        response = self.get_response(SuccessDTO())
-
         self.db.commit()
-        return response
-
-    def get_response(self, data, status_code=status.HTTP_200_OK):
-        response = jsonable_encoder(ResponseData(data=data))
-        return JSONResponse(status_code=status_code, content=response)
-
-    def get_multiple_response(
-        self,
-        count: int,
-        start: int | None,
-        length: int | None,
-        data,
-        status_code=status.HTTP_200_OK,
-    ):
-        response = jsonable_encoder(
-            MultipleResponseData(
-                count=count,
-                start=start,
-                length=length,
-                data=data,
-            )
-        )
-        return JSONResponse(status_code=status_code, content=response)
+        return
 
     def filter_list(self, query_model: QueryCriterionService, result: Query) -> Query:
         result = result.filter(self.sqlModel.deleted_at == None)

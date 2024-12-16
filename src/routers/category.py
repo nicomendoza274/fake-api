@@ -1,21 +1,22 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 from sqlalchemy.orm.session import Session
 
 from core.database.database import get_db
 from core.schemas.response import MultipleResponseData, ResponseData
-from core.schemas.success_schema import SuccessDTO
+from core.utils.query import str_to_query
+from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
 from models.models import User
 from schemas.category import CategoryDTO, CategoryResponseDTO
 from services.category import CategoryService
 
-category_router = APIRouter(
+category = APIRouter(
     prefix="/categories",
     tags=["Categories"],
 )
 
 
-@category_router.get(
+@category.get(
     "",
     response_model=MultipleResponseData[list[CategoryResponseDTO]],
 )
@@ -26,67 +27,87 @@ def list_data(
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = CategoryService(db, user).get_records(start, length, query)
+    query_criteria = str_to_query(query)
+
+    category_list, total_count = CategoryService(db, user).get_records(
+        start, length, query_criteria
+    )
+    response = get_multiple_response(
+        count=total_count,
+        start=start,
+        length=len(category_list) if length == 0 else length,
+        data=category_list,
+    )
     return response
 
 
-@category_router.get(
-    "/{id}",
+@category.get(
+    "/{categoryId}",
     response_model=ResponseData[CategoryResponseDTO],
 )
-def get(id: int, db: Session = Depends(get_db), user: User = Depends(JWTBearer())):
-    response = CategoryService(db, user).get_record(id)
+def get(
+    category_id: int = Path(alias="categoryId"),
+    db: Session = Depends(get_db),
+    user: User = Depends(JWTBearer()),
+):
+    category_data = CategoryService(db, user).get_record(category_id)
+    response = get_response(category_data)
     return response
 
 
-@category_router.post(
+@category.post(
     "",
     status_code=status.HTTP_201_CREATED,
-    response_model=ResponseData[CategoryResponseDTO],
+    response_model=None,
 )
 def create(
     category: CategoryDTO,
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = CategoryService(db, user).create_record(category)
+    CategoryService(db, user).create_record(category)
+    response = get_empty_response(status.HTTP_201_CREATED)
     return response
 
 
-@category_router.put(
-    "",
-    response_model=ResponseData[CategoryResponseDTO],
+@category.put(
+    "/{categoryId}",
+    response_model=None,
 )
 def update(
     category: CategoryDTO,
+    category_id: int = Path(alias="categoryId"),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = CategoryService(db, user).update_record(category, category.category_id)
+    CategoryService(db, user).update_record(category, category_id)
+    response = get_empty_response()
     return response
 
 
-@category_router.delete(
+@category.delete(
     "/multiple",
-    response_model=ResponseData[SuccessDTO],
+    response_model=None,
 )
 async def delete_multiple(
     ids: list[int] = Query(...),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = CategoryService(db, user).delete_multiple(ids)
+    CategoryService(db, user).delete_multiple(ids)
+    response = get_empty_response()
     return response
 
 
-@category_router.delete(
-    "/{id}",
-    response_model=ResponseData[SuccessDTO],
+@category.delete(
+    "/{categoryId}",
+    response_model=None,
 )
 def delete(
-    id: int,
+    category_id: int = Path(alias="categoryId"),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = CategoryService(db, user).delete_record(id)
+    CategoryService(db, user).delete_record(category_id)
+    response = get_empty_response()
     return response

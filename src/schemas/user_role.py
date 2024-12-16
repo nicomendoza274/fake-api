@@ -1,9 +1,10 @@
-from core.schemas.audit_schema import AuditSchema
+from pydantic import Field
+from pydantic.json_schema import SkipJsonSchema
+
 from core.schemas.camel import CamelModel
 
 
-class UserRoleBaseSchema(CamelModel):
-    user_role_id: int | None
+class UserRoleBase(CamelModel):
     role_id: int
     user_id: int
 
@@ -11,9 +12,9 @@ class UserRoleBaseSchema(CamelModel):
         from_attributes = True
 
 
-class UserRoleResponseDTO(UserRoleBaseSchema, AuditSchema):
-    pass
+class UserRoleResponseDTO(UserRoleBase):
+    user_role_id: int | None
 
 
-class UserRoleDTO(UserRoleBaseSchema):
-    user_role_id: int | None = None
+class UserRoleDTO(UserRoleBase):
+    user_role_id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)

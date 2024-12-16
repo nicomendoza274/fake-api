@@ -1,8 +1,9 @@
 import json
 
 import humps
+from fastapi import status
 
-from core.classes.generic_errors import GenericError
+from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_1000
 from core.schemas.query import QueryCriteria
 from core.utils.encrypt import base64_decode
@@ -24,8 +25,8 @@ def str_to_query(query: str | None) -> QueryCriteria | None:
     try:
         query_dict = str_to_dict(query)
         query_criteria = QueryCriteria.model_validate(query_dict)
-    except:
-        raise GenericError(GEN_1000)
+    except ValueError:
+        raise HandleException([GEN_1000], status.HTTP_400_BAD_REQUEST)
     return query_criteria
 
 

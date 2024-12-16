@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class AuditSchema(BaseModel):
+class Audit(BaseModel):
     created_at: datetime | None = None
     created_by: int | None = None
     updated_at: datetime | None = None

@@ -1,21 +1,25 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 from sqlalchemy.orm.session import Session
 
 from core.database.database import get_db
 from core.schemas.response import MultipleResponseData, ResponseData
-from core.schemas.success_schema import SuccessDTO
+from core.utils.query import str_to_query
+from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
 from models.models import User
 from schemas.role import RoleDTO, RoleResponseDTO
 from services.role import RoleService
 
-role_router = APIRouter(
+role = APIRouter(
     prefix="/roles",
     tags=["Roles"],
 )
 
 
-@role_router.get("", response_model=MultipleResponseData[list[RoleResponseDTO]])
+@role.get(
+    "",
+    response_model=MultipleResponseData[list[RoleResponseDTO]],
+)
 def list_data(
     start: int | None = 0,
     length: int | None = 15,
@@ -23,59 +27,86 @@ def list_data(
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = RoleService(db, user).get_records(start, length, query)
+    query_criteria = str_to_query(query)
+    role_list, total_count = RoleService(db, user).get_records(
+        start, length, query_criteria
+    )
+    response = get_multiple_response(
+        count=total_count,
+        start=start,
+        length=len(role_list) if length == 0 else length,
+        data=role_list,
+    )
     return response
 
 
-@role_router.get("/{id}", response_model=ResponseData[RoleResponseDTO])
+@role.get(
+    "/{roleId}",
+    response_model=ResponseData[RoleResponseDTO],
+)
 def get(
-    id: int,
+    role_id: int = Path(alias="roleId"),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = RoleService(db, user).get_record(id)
+    role_data = RoleService(db, user).get_record(role_id)
+    response = get_response(role_data)
     return response
 
 
-@role_router.post(
+@role.post(
     "",
     status_code=status.HTTP_201_CREATED,
-    response_model=ResponseData[RoleResponseDTO],
+    response_model=None,
 )
 def create(
     role: RoleDTO,
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = RoleService(db, user).create_record(role)
+    RoleService(db, user).create_record(role)
+    response = get_empty_response(status.HTTP_201_CREATED)
     return response
 
 
-@role_router.put("", response_model=ResponseData[RoleResponseDTO])
+@role.put(
+    "/{roleId}",
+    response_model=None,
+)
 def update(
     role: RoleDTO,
+    role_id: int = Path(alias="roleId"),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = RoleService(db, user).update_record(role, role.role_id)
+    RoleService(db, user).update_record(role, role_id)
+    response = get_empty_response()
     return response
 
 
-@role_router.delete("/multiple", response_model=ResponseData[SuccessDTO])
+@role.delete(
+    "/multiple",
+    response_model=None,
+)
 async def delete_multiple(
     ids: list[int] = Query(...),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = RoleService(db, user).delete_multiple(ids)
+    RoleService(db, user).delete_multiple(ids)
+    response = get_empty_response()
     return response
 
 
-@role_router.delete("/{id}", response_model=ResponseData[SuccessDTO])
+@role.delete(
+    "/{roleId}",
+    response_model=None,
+)
 def delete(
-    id: int,
+    role_id: int = Path(alias="roleId"),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    response = RoleService(db, user).delete_record(id)
+    RoleService(db, user).delete_record(role_id)
+    response = get_empty_response()
     return response

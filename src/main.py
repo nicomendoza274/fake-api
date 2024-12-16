@@ -3,15 +3,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 
 from core.middlewares.error_handler import ErrorHandler
-from routers.auth import auth_router
-from routers.category import category_router
-from routers.customer import customer_router
-from routers.product import product_router
-from routers.role import role_router
-from routers.user import user_router
+from core.utils.file import create_and_mount_static_directory
+from routers.auth import auth
+from routers.category import category
+from routers.customer import customer
+from routers.product import product
+from routers.role import role
+from routers.user import user
 
 app = FastAPI()
 
+create_and_mount_static_directory(app)
 
 app.title = "Fake API"
 app.description = "This is a template API"
@@ -28,12 +30,12 @@ app.add_middleware(
 )
 
 app.add_middleware(ErrorHandler)
-app.include_router(auth_router, prefix=app_prefix)
-app.include_router(user_router, prefix=app_prefix)
-app.include_router(role_router, prefix=app_prefix)
-app.include_router(customer_router, prefix=app_prefix)
-app.include_router(category_router, prefix=app_prefix)
-app.include_router(product_router, prefix=app_prefix)
+app.include_router(auth, prefix=app_prefix)
+app.include_router(category, prefix=app_prefix)
+app.include_router(customer, prefix=app_prefix)
+app.include_router(product, prefix=app_prefix)
+app.include_router(role, prefix=app_prefix)
+app.include_router(user, prefix=app_prefix)
 
 
 @app.get("/", include_in_schema=False)

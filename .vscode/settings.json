@@ -10,6 +10,7 @@
   "cSpell.language": "en,es",
   "cSpell.words": [
     "apscheduler",
+    "ASGI",
     "decamelize",
     "dotenv",
     "fastapi",
