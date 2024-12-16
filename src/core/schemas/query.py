@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from core.schemas.camel import CamelModel
 
@@ -17,8 +17,8 @@ class FilterCriteria(CamelModel):
 
 
 class QueryCriteria(CamelModel):
-    sorts: List[SortCriteria] | None = None
-    filters: List[FilterCriteria] | None = None
+    sorts: list[SortCriteria] | None = None
+    filters: list[FilterCriteria] | None = None
     search: str | None = None
 
 

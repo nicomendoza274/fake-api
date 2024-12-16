@@ -1,5 +1,3 @@
-from typing import List
-
 import humps
 from sqlalchemy import desc, or_
 from sqlalchemy.orm.query import Query
@@ -15,7 +13,7 @@ class QueryCriterionService:
         self.sql_model = sql_model
         self.query_criteria = str_to_query(query)
 
-    def filters(self, result: Query, property_model_list: List[PropertyModel]) -> Query:
+    def filters(self, result: Query, property_model_list: list[PropertyModel]) -> Query:
         if not self.query_criteria or not self.query_criteria.filters:
             return result
 
@@ -70,7 +68,7 @@ class QueryCriterionService:
 
         return result
 
-    def search(self, result: Query, property_search: List) -> Query:
+    def search(self, result: Query, property_search: list) -> Query:
         if not self.query_criteria or not self.query_criteria.search:
             return result
 
@@ -81,7 +79,7 @@ class QueryCriterionService:
         result = result.filter(or_(*filters))
         return result
 
-    def sorts(self, result: Query, property_model_list: List[PropertyModel]) -> Query:
+    def sorts(self, result: Query, property_model_list: list[PropertyModel]) -> Query:
         if not self.query_criteria or not self.query_criteria.sorts:
             return result
 

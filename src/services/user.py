@@ -1,7 +1,7 @@
 import random
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, cast
+from typing import cast
 
 import pytz
 from fastapi import status
@@ -77,7 +77,7 @@ class UserService(BaseService):
         result = result.all()
         total_count = len(result)
 
-        user_list_adapter = TypeAdapter(List[UserResponseDTO])
+        user_list_adapter = TypeAdapter(list[UserResponseDTO])
         user_list_mapped = user_list_adapter.validate_python(result)
 
         response = self.get_multiple_response(

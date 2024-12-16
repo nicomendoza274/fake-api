@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm.session import Session
 
@@ -19,9 +17,9 @@ customer_router = APIRouter(
 
 @customer_router.get(
     "",
-    response_model=MultipleResponseData[List[CustomerResponseDTO]],
+    response_model=MultipleResponseData[list[CustomerResponseDTO]],
 )
-def list(
+def list_data(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
@@ -73,7 +71,7 @@ def update(
     response_model=ResponseData[SuccessDTO],
 )
 async def delete_multiple(
-    ids: List[int] = Query(...),
+    ids: list[int] = Query(...),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):

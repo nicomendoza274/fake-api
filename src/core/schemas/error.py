@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel
 
 
@@ -11,4 +9,4 @@ class Error(BaseModel):
 
 
 class Errors(BaseModel):
-    Errors: List[Error]
+    Errors: list[Error]

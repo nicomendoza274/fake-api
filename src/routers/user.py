@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm.session import Session
 
@@ -23,8 +21,8 @@ user_router = APIRouter(
 )
 
 
-@user_router.get("", response_model=MultipleResponseData[List[UserResponseDTO]])
-def list(
+@user_router.get("", response_model=MultipleResponseData[list[UserResponseDTO]])
+def list_data(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,

@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from pydantic import DirectoryPath, SecretStr
 
@@ -42,7 +40,7 @@ class EmailService:
     async def send_email(
         self,
         subject: str,
-        recipient: List,
+        recipient: list,
         message: dict,
         template_name: str,
     ):

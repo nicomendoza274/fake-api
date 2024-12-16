@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
@@ -30,8 +28,10 @@ class BaseService:
         self.response_schema = response_schema
         self.result = self.db.query(self.sqlModel)
         self.default_sort = inspect(self.sqlModel).primary_key[0].name  # PK
-        self.property_model_list: List[PropertyModel] = []
-        self.property_search = [getattr(self.sqlModel, "name")] if hasattr(self.sqlModel, "name") else []
+        self.property_model_list: list[PropertyModel] = []
+        self.property_search = (
+            [getattr(self.sqlModel, "name")] if hasattr(self.sqlModel, "name") else []
+        )
 
     def get_records(self, start: int | None, length: int | None, query: str | None):
         result = self.result
@@ -129,7 +129,7 @@ class BaseService:
         self.db.commit()
         return response
 
-    def delete_multiple(self, ids: List[int]):
+    def delete_multiple(self, ids: list[int]):
         for id in ids:
             result = self.db.query(self.sqlModel).get(id)
 

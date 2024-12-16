@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm.session import Session
 
@@ -17,8 +15,8 @@ role_router = APIRouter(
 )
 
 
-@role_router.get("", response_model=MultipleResponseData[List[RoleResponseDTO]])
-def list(
+@role_router.get("", response_model=MultipleResponseData[list[RoleResponseDTO]])
+def list_data(
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
@@ -65,7 +63,7 @@ def update(
 
 @role_router.delete("/multiple", response_model=ResponseData[SuccessDTO])
 async def delete_multiple(
-    ids: List[int] = Query(...),
+    ids: list[int] = Query(...),
     db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
