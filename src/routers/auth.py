@@ -13,20 +13,20 @@ from schemas.auth import (
 )
 from services.auth import AuthService
 
-auth = APIRouter(
+router = APIRouter(
     prefix="/auth",
     tags=["Auth"],
 )
 
 
-@auth.post("/sign-in", response_model=ResponseData[UserLoggedDTO])
+@router.post("/sign-in", response_model=ResponseData[UserLoggedDTO])
 def login(user: UserLoginDTO, db: Session = Depends(get_db)):
     user_data = AuthService(db, None).login_user(user)
     response = get_response(user_data)
     return response
 
 
-@auth.post(
+@router.post(
     "/forgot-password",
     response_model=None,
 )
@@ -39,7 +39,7 @@ async def forgot_password(
     return response
 
 
-@auth.post(
+@router.post(
     "/check-code",
     response_model=None,
 )
@@ -52,7 +52,7 @@ def check_code(
     return response
 
 
-@auth.post(
+@router.post(
     "/reset-password",
     response_model=None,
 )

@@ -10,13 +10,13 @@ from models.models import User
 from schemas.category import CategoryDTO, CategoryResponseDTO
 from services.category import CategoryService
 
-category = APIRouter(
+router = APIRouter(
     prefix="/categories",
     tags=["Categories"],
 )
 
 
-@category.get(
+@router.get(
     "",
     response_model=MultipleResponseData[list[CategoryResponseDTO]],
 )
@@ -41,7 +41,7 @@ def list_data(
     return response
 
 
-@category.get(
+@router.get(
     "/{categoryId}",
     response_model=ResponseData[CategoryResponseDTO],
 )
@@ -55,7 +55,7 @@ def get(
     return response
 
 
-@category.post(
+@router.post(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=None,
@@ -70,7 +70,7 @@ def create(
     return response
 
 
-@category.put(
+@router.put(
     "/{categoryId}",
     response_model=None,
 )
@@ -85,7 +85,7 @@ def update(
     return response
 
 
-@category.delete(
+@router.delete(
     "/multiple",
     response_model=None,
 )
@@ -99,7 +99,7 @@ async def delete_multiple(
     return response
 
 
-@category.delete(
+@router.delete(
     "/{categoryId}",
     response_model=None,
 )

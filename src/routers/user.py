@@ -12,13 +12,13 @@ from models.models import User
 from schemas.user import UserDTO, UserResponseDTO
 from services.user import UserService
 
-user = APIRouter(
+router = APIRouter(
     prefix="/users",
     tags=["Users"],
 )
 
 
-@user.get(
+@router.get(
     "",
     response_model=MultipleResponseData[list[UserResponseDTO]],
 )
@@ -43,7 +43,7 @@ def list(
     return response
 
 
-@user.get(
+@router.get(
     "/{userId}",
     response_model=ResponseData[UserResponseDTO],
 )
@@ -57,7 +57,7 @@ def get(
     return response
 
 
-@user.post(
+@router.post(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=None,
@@ -98,7 +98,7 @@ def create(
     return response
 
 
-@user.put(
+@router.put(
     "/{userId}",
     response_model=None,
 )
@@ -146,7 +146,7 @@ def update(
     return response
 
 
-@user.delete(
+@router.delete(
     "/{userId}",
     response_model=None,
 )

@@ -23,13 +23,13 @@ from models.models import Product, User
 from schemas.product import ProductDTO, ProductResponseDTO
 from services.product import ProductService
 
-product = APIRouter(
+router = APIRouter(
     prefix="/products",
     tags=["Products"],
 )
 
 
-@product.get(
+@router.get(
     "",
     response_model=MultipleResponseData[list[ProductResponseDTO]],
 )
@@ -53,7 +53,7 @@ def list_data(
     return response
 
 
-@product.get(
+@router.get(
     "/{productId}",
     response_model=ResponseData[ProductResponseDTO],
 )
@@ -67,7 +67,7 @@ def get(
     return response
 
 
-@product.post(
+@router.post(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=None,
@@ -108,7 +108,7 @@ def create(
     return response
 
 
-@product.put(
+@router.put(
     "/{productId}",
     response_model=None,
 )
@@ -153,7 +153,7 @@ def update(
     return response
 
 
-@product.put(
+@router.put(
     "/activate/{productId}",
     response_model=None,
 )
@@ -168,7 +168,7 @@ def toggle_active(
     return response
 
 
-@product.delete(
+@router.delete(
     "/multiple",
     response_model=None,
 )
@@ -182,7 +182,7 @@ async def delete_multiple(
     return response
 
 
-@product.delete(
+@router.delete(
     "/{productId}",
     response_model=None,
 )

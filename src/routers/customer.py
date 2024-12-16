@@ -10,13 +10,13 @@ from models.models import User
 from schemas.customer import CustomerDTO, CustomerResponseDTO
 from services.customer import CustomerService
 
-customer = APIRouter(
+router = APIRouter(
     prefix="/customers",
     tags=["Customers"],
 )
 
 
-@customer.get(
+@router.get(
     "",
     response_model=MultipleResponseData[list[CustomerResponseDTO]],
 )
@@ -40,7 +40,7 @@ def list_data(
     return response
 
 
-@customer.get(
+@router.get(
     "/{customerId}",
     response_model=ResponseData[CustomerResponseDTO],
 )
@@ -54,7 +54,7 @@ def get(
     return response
 
 
-@customer.post(
+@router.post(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=None,
@@ -69,7 +69,7 @@ def create(
     return response
 
 
-@customer.put(
+@router.put(
     "/{customerId}",
     response_model=None,
 )
@@ -84,7 +84,7 @@ def update(
     return response
 
 
-@customer.delete(
+@router.delete(
     "/multiple",
     response_model=None,
 )
@@ -98,7 +98,7 @@ async def delete_multiple(
     return response
 
 
-@customer.delete(
+@router.delete(
     "/{customerId}",
     response_model=None,
 )

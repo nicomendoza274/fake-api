@@ -4,12 +4,7 @@ from starlette.responses import RedirectResponse
 
 from core.middlewares.error_handler import ErrorHandler
 from core.utils.file import create_and_mount_static_directory
-from routers.auth import auth
-from routers.category import category
-from routers.customer import customer
-from routers.product import product
-from routers.role import role
-from routers.user import user
+from routers import auth, category, customer, product, role, user
 
 app = FastAPI()
 
@@ -30,12 +25,12 @@ app.add_middleware(
 )
 
 app.add_middleware(ErrorHandler)
-app.include_router(auth, prefix=app_prefix)
-app.include_router(category, prefix=app_prefix)
-app.include_router(customer, prefix=app_prefix)
-app.include_router(product, prefix=app_prefix)
-app.include_router(role, prefix=app_prefix)
-app.include_router(user, prefix=app_prefix)
+app.include_router(auth.router, prefix=app_prefix)
+app.include_router(category.router, prefix=app_prefix)
+app.include_router(customer.router, prefix=app_prefix)
+app.include_router(product.router, prefix=app_prefix)
+app.include_router(role.router, prefix=app_prefix)
+app.include_router(user.router, prefix=app_prefix)
 
 
 @app.get("/", include_in_schema=False)

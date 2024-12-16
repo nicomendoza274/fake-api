@@ -10,13 +10,13 @@ from models.models import User
 from schemas.role import RoleDTO, RoleResponseDTO
 from services.role import RoleService
 
-role = APIRouter(
+router = APIRouter(
     prefix="/roles",
     tags=["Roles"],
 )
 
 
-@role.get(
+@router.get(
     "",
     response_model=MultipleResponseData[list[RoleResponseDTO]],
 )
@@ -40,7 +40,7 @@ def list_data(
     return response
 
 
-@role.get(
+@router.get(
     "/{roleId}",
     response_model=ResponseData[RoleResponseDTO],
 )
@@ -54,7 +54,7 @@ def get(
     return response
 
 
-@role.post(
+@router.post(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=None,
@@ -69,7 +69,7 @@ def create(
     return response
 
 
-@role.put(
+@router.put(
     "/{roleId}",
     response_model=None,
 )
@@ -84,7 +84,7 @@ def update(
     return response
 
 
-@role.delete(
+@router.delete(
     "/multiple",
     response_model=None,
 )
@@ -98,7 +98,7 @@ async def delete_multiple(
     return response
 
 
-@role.delete(
+@router.delete(
     "/{roleId}",
     response_model=None,
 )
