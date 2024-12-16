@@ -6,10 +6,10 @@ from typing import cast
 import pytz
 from fastapi import status
 from sqlalchemy import func
-from sqlalchemy.orm.session import Session
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_2002, GEN_4000
+from core.database.database import SessionDep
 from core.schemas.email import EmailMessage
 from core.services.email import (
     MAIL_FROM,
@@ -32,13 +32,13 @@ from schemas.auth import (
 
 
 class AuthService:
-    def __init__(self, db: Session, user: User | None):
-        self.db = db
+    def __init__(self, session: SessionDep, user: User | None):
+        self.session = session
         self.current_user = user
 
     async def forgot_password(self, user: UserForgotPasswordDTO) -> None:
         result = (
-            self.db.query(User)
+            self.session.query(User)
             .filter(User.email == user.email, User.deleted_at == None)
             .first()
         )
@@ -72,15 +72,15 @@ class AuthService:
         except:
             print("Error to sent mail")
 
-        self.db.add(user_Code)
-        self.db.commit()
-        self.db.refresh(user_Code)
+        self.session.add(user_Code)
+        self.session.commit()
+        self.session.refresh(user_Code)
         return
 
     def check_code(self, user: UserCheckCodeDTO) -> None:
         now = datetime.now(pytz.utc) - timedelta(hours=1)
         result: UserCode | None = (
-            self.db.query(UserCode)
+            self.session.query(UserCode)
             .join(User, User.user_id == UserCode.user_id)
             .filter(
                 UserCode.deleted_at == None,
@@ -96,13 +96,13 @@ class AuthService:
 
         result.deleted_at = cast(datetime, func.now())
 
-        self.db.commit()
-        self.db.refresh(result)
+        self.session.commit()
+        self.session.refresh(result)
         return
 
     def reset_password(self, user: UserResetPasswordDTO) -> None:
         result: User | None = (
-            self.db.query(User)
+            self.session.query(User)
             .join(UserCode, User.user_id == UserCode.user_id)
             .filter(
                 UserCode.code == user.recovery_code,
@@ -116,13 +116,13 @@ class AuthService:
 
         result.hash = user.hash if user.hash else ""
 
-        self.db.commit()
-        self.db.refresh(result)
+        self.session.commit()
+        self.session.refresh(result)
         return
 
     def login_user(self, user: UserLoginDTO) -> UserLoggedDTO:
         result = (
-            self.db.query(
+            self.session.query(
                 User,
                 UserRole.role_id,
             )

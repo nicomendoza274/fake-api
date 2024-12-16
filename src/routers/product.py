@@ -9,9 +9,8 @@ from fastapi import (
     UploadFile,
     status,
 )
-from sqlalchemy.orm.session import Session
 
-from core.database.database import get_db
+from core.database.database import SessionDep
 from core.schemas.active_toggle import ActiveToggleDTO
 from core.schemas.response import MultipleResponseData, ResponseData
 from core.services.file import FileService
@@ -34,14 +33,14 @@ router = APIRouter(
     response_model=MultipleResponseData[list[ProductResponseDTO]],
 )
 def list_data(
+    session: SessionDep,
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
     query_criteria = str_to_query(query)
-    product_list, total_count = ProductService(db, user).get_records(
+    product_list, total_count = ProductService(session, user).get_records(
         start, length, query_criteria
     )
     response = get_multiple_response(
@@ -58,11 +57,11 @@ def list_data(
     response_model=ResponseData[ProductResponseDTO],
 )
 def get(
+    session: SessionDep,
     product_id: int = Path(alias="productId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    product_data = ProductService(db, user).get_record(product_id)
+    product_data = ProductService(session, user).get_record(product_id)
     response = get_response(product_data)
     return response
 
@@ -73,6 +72,7 @@ def get(
     response_model=None,
 )
 def create(
+    session: SessionDep,
     request: Request,
     json_data: str = Form(
         ...,
@@ -80,7 +80,6 @@ def create(
         validation_alias="application/json",
     ),
     picture: UploadFile = File(None),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
     """
@@ -101,9 +100,9 @@ def create(
     """
 
     product = validate_json_data(ProductDTO, json_data)
-    new_file = FileService(db, user).save_file(picture, request)
+    new_file = FileService(session, user).save_file(picture, request)
     product.file_id = new_file.file_id if new_file else None
-    ProductService(db, user).create_record(product)
+    ProductService(session, user).create_record(product)
     response = get_empty_response(status.HTTP_201_CREATED)
     return response
 
@@ -113,6 +112,7 @@ def create(
     response_model=None,
 )
 def update(
+    session: SessionDep,
     request: Request,
     product_id: int = Path(alias="productId"),
     json_data: str = Form(
@@ -121,7 +121,6 @@ def update(
         validation_alias="application/json",
     ),
     picture: UploadFile = File(None),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
     """
@@ -145,10 +144,12 @@ def update(
     product = validate_json_data(ProductDTO, json_data)
 
     if not product.file_id:
-        FileService(db, user).delete_file(Product, product.product_id, "picture_id")
-        new_file = FileService(db, user).save_file(picture, request)
+        FileService(session, user).delete_file(
+            Product, product.product_id, "picture_id"
+        )
+        new_file = FileService(session, user).save_file(picture, request)
         product.file_id = new_file.file_id if new_file else None
-    ProductService(db, user).update_record(product, product_id)
+    ProductService(session, user).update_record(product, product_id)
     response = get_empty_response()
     return response
 
@@ -158,12 +159,12 @@ def update(
     response_model=None,
 )
 def toggle_active(
+    session: SessionDep,
     data: ActiveToggleDTO,
     product_id: int = Path(alias="productId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    ProductService(db, user).toggle_active(data, product_id)
+    ProductService(session, user).toggle_active(data, product_id)
     response = get_empty_response()
     return response
 
@@ -173,11 +174,11 @@ def toggle_active(
     response_model=None,
 )
 async def delete_multiple(
+    session: SessionDep,
     ids: list[int] = Query(...),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    ProductService(db, user).delete_multiple(ids)
+    ProductService(session, user).delete_multiple(ids)
     response = get_empty_response()
     return response
 
@@ -187,10 +188,10 @@ async def delete_multiple(
     response_model=None,
 )
 def delete(
+    session: SessionDep,
     product_id: int = Path(alias="productId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    ProductService(db, user).delete_record(product_id)
+    ProductService(session, user).delete_record(product_id)
     response = get_empty_response()
     return response

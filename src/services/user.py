@@ -1,9 +1,9 @@
 from fastapi import status
 from sqlalchemy import func
-from sqlalchemy.orm.session import Session
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_2001, GEN_4000
+from core.database.database import SessionDep
 from core.schemas.query import QueryCriteria
 from core.services.base_service import BaseService
 from core.services.query import QueryCriterionService
@@ -12,8 +12,8 @@ from schemas.user import UserChangePasswordDTO, UserDTO, UserResponseDTO
 
 
 class UserService(BaseService[User, UserResponseDTO, UserDTO]):
-    def __init__(self, db: Session, user: User | None):
-        super().__init__(db, user, User, UserResponseDTO)
+    def __init__(self, session: SessionDep, user: User | None):
+        super().__init__(session, user, User, UserResponseDTO)
 
     def get_records(
         self,
@@ -22,7 +22,7 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         query_criteria: QueryCriteria | None,
     ) -> tuple[list[UserResponseDTO], int]:
         results = (
-            self.db.query(
+            self.session.query(
                 User,
                 UserRole.role_id,
             )
@@ -65,7 +65,7 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
 
     def get_record(self, id: int) -> UserResponseDTO:
         result = (
-            self.db.query(
+            self.session.query(
                 User,
                 UserRole.role_id,
             )
@@ -105,20 +105,20 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         if self.current_user:
             new_user.created_by = self.current_user.user_id
 
-        self.db.add(new_user)
-        self.db.flush()
-        self.db.refresh(new_user)
+        self.session.add(new_user)
+        self.session.flush()
+        self.session.refresh(new_user)
 
         new_user_rol = UserRole(role_id=user.role_id, user_id=new_user.user_id)
 
-        self.db.add(new_user_rol)
-        self.db.flush()
-        self.db.refresh(new_user_rol)
+        self.session.add(new_user_rol)
+        self.session.flush()
+        self.session.refresh(new_user_rol)
 
         userCreate = UserResponseDTO.model_validate(new_user)
         userCreate.role_id = user.role_id
 
-        self.db.commit()
+        self.session.commit()
         return
 
     def update_record(self, user: UserDTO, id: int) -> None:
@@ -127,7 +127,7 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
             raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
 
         result = (
-            self.db.query(
+            self.session.query(
                 User,
                 UserRole.role_id,
             )
@@ -160,11 +160,11 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         user_data.picture_id = user.picture_id
         user_data.hash = user.hash
 
-        self.db.commit()
+        self.session.commit()
         return
 
     def delete_record(self, id: int) -> None:
-        user_data = self.db.query(User).get(id)
+        user_data = self.session.query(User).get(id)
 
         if not user_data or user_data.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -173,7 +173,7 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         if self.current_user:
             user_data.deleted_by = self.current_user.user_id
 
-        self.db.commit()
+        self.session.commit()
         return
 
     def change_password(self, user: UserChangePasswordDTO):
@@ -182,7 +182,7 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
             raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
 
         result = (
-            self.db.query(
+            self.session.query(
                 User,
                 UserRole.role_id,
             )
@@ -210,18 +210,18 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         if self.current_user:
             user_data.updated_by = self.current_user.user_id
 
-        self.db.flush()
-        self.db.refresh(user_data)
+        self.session.flush()
+        self.session.refresh(user_data)
 
         user_update_password = UserResponseDTO.model_validate(user_data)
         user_update_password.role_id = role_id
 
-        self.db.commit()
+        self.session.commit()
         return
 
     def get_user_by_credentials(self, credentials: dict):
         result: User | None = (
-            self.db.query(User)
+            self.session.query(User)
             .filter(
                 User.user_id == credentials["user_id"],
                 User.deleted_at == None,

@@ -27,8 +27,8 @@
     "pydantic",
     "pyhumps",
     "pytz",
-    "sessionmaker",
     "sqlalchemy",
+    "sqlmodel",
     "starlette",
     "uvicorn",
     "venv"

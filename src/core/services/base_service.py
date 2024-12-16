@@ -3,10 +3,10 @@ from typing import Generic, Type, TypeVar
 from fastapi import status
 from sqlalchemy import func, inspect
 from sqlalchemy.orm.query import Query
-from sqlalchemy.orm.session import Session
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_4000
+from core.database.database import SessionDep
 from core.models.base import BaseAuditModel
 from core.models.user import UserModel
 from core.schemas.active_toggle import ActiveToggleDTO
@@ -22,16 +22,16 @@ W = TypeVar("W", bound=CamelModel)
 class BaseService(Generic[T, K, W]):
     def __init__(
         self,
-        db: Session,
+        session: SessionDep,
         current_user: UserModel | None,
         sqlModel: Type[T],
         response_schema: Type[K] | None = None,
     ) -> None:
-        self.db = db
+        self.session = session
         self.current_user = current_user
         self.sqlModel = sqlModel
         self.response_schema = response_schema
-        self.result = self.db.query(self.sqlModel)
+        self.result = self.session.query(self.sqlModel)
         self.default_sort = inspect(self.sqlModel).primary_key[0].name  # PK
         self.property_model_list: list[PropertyModel] = []
         self.property_search = (
@@ -71,7 +71,7 @@ class BaseService(Generic[T, K, W]):
         return data_response_list, total_count
 
     def get_record(self, id: int) -> K:
-        result = self.db.query(self.sqlModel).get(id)
+        result = self.session.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None or not self.response_schema:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -84,12 +84,12 @@ class BaseService(Generic[T, K, W]):
         new_record = self.sqlModel(**data.model_dump())
         if self.current_user:
             new_record.created_by = self.current_user.user_id
-        self.db.add(new_record)
-        self.db.commit()
+        self.session.add(new_record)
+        self.session.commit()
         return
 
     def update_record(self, data: W, id: int | None) -> None:
-        result = self.db.query(self.sqlModel).get(id)
+        result = self.session.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -103,11 +103,11 @@ class BaseService(Generic[T, K, W]):
             result.updated_by = self.current_user.user_id
 
         result.updated_at = func.now()
-        self.db.commit()
+        self.session.commit()
         return
 
     def toggle_active(self, data: ActiveToggleDTO, id: int) -> None:
-        result = self.db.query(self.sqlModel).get(id)
+        result = self.session.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -117,23 +117,23 @@ class BaseService(Generic[T, K, W]):
             result.updated_by = self.current_user.user_id
         result.updated_at = func.now()
 
-        self.db.commit()
+        self.session.commit()
         return
 
     def delete_multiple(self, ids: list[int]) -> None:
         for id in ids:
-            result = self.db.query(self.sqlModel).get(id)
+            result = self.session.query(self.sqlModel).get(id)
 
             if result and result.deleted_at == None:
                 result.deleted_at = func.now()
                 if self.current_user:
                     result.deleted_by = self.current_user.user_id
 
-        self.db.commit()
+        self.session.commit()
         return
 
     def delete_record(self, id: int) -> None:
-        result = self.db.query(self.sqlModel).get(id)
+        result = self.session.query(self.sqlModel).get(id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -142,7 +142,7 @@ class BaseService(Generic[T, K, W]):
         if self.current_user:
             result.deleted_by = self.current_user.user_id
 
-        self.db.commit()
+        self.session.commit()
         return
 
     def filter_list(self, query_model: QueryCriterionService, result: Query) -> Query:

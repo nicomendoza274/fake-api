@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Path, Query, status
-from sqlalchemy.orm.session import Session
 
-from core.database.database import get_db
+from core.database.database import SessionDep
 from core.schemas.response import MultipleResponseData, ResponseData
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
@@ -21,15 +20,15 @@ router = APIRouter(
     response_model=MultipleResponseData[list[CategoryResponseDTO]],
 )
 def list_data(
+    session: SessionDep,
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
     query_criteria = str_to_query(query)
 
-    category_list, total_count = CategoryService(db, user).get_records(
+    category_list, total_count = CategoryService(session, user).get_records(
         start, length, query_criteria
     )
     response = get_multiple_response(
@@ -46,11 +45,11 @@ def list_data(
     response_model=ResponseData[CategoryResponseDTO],
 )
 def get(
+    session: SessionDep,
     category_id: int = Path(alias="categoryId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    category_data = CategoryService(db, user).get_record(category_id)
+    category_data = CategoryService(session, user).get_record(category_id)
     response = get_response(category_data)
     return response
 
@@ -62,10 +61,10 @@ def get(
 )
 def create(
     category: CategoryDTO,
-    db: Session = Depends(get_db),
+    session: SessionDep,
     user: User = Depends(JWTBearer()),
 ):
-    CategoryService(db, user).create_record(category)
+    CategoryService(session, user).create_record(category)
     response = get_empty_response(status.HTTP_201_CREATED)
     return response
 
@@ -75,12 +74,12 @@ def create(
     response_model=None,
 )
 def update(
+    session: SessionDep,
     category: CategoryDTO,
     category_id: int = Path(alias="categoryId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    CategoryService(db, user).update_record(category, category_id)
+    CategoryService(session, user).update_record(category, category_id)
     response = get_empty_response()
     return response
 
@@ -90,11 +89,11 @@ def update(
     response_model=None,
 )
 async def delete_multiple(
+    session: SessionDep,
     ids: list[int] = Query(...),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    CategoryService(db, user).delete_multiple(ids)
+    CategoryService(session, user).delete_multiple(ids)
     response = get_empty_response()
     return response
 
@@ -104,10 +103,10 @@ async def delete_multiple(
     response_model=None,
 )
 def delete(
+    session: SessionDep,
     category_id: int = Path(alias="categoryId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    CategoryService(db, user).delete_record(category_id)
+    CategoryService(session, user).delete_record(category_id)
     response = get_empty_response()
     return response

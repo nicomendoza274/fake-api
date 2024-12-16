@@ -1,5 +1,8 @@
+from typing import Annotated
+
+from fastapi import Depends
 from sqlalchemy import create_engine
-from sqlalchemy.orm.session import sessionmaker
+from sqlalchemy.orm import Session
 
 from core.classes.settings import settings
 
@@ -7,13 +10,11 @@ DATABASE_URI = settings.DB_URI
 
 engine = create_engine(DATABASE_URI)
 
-session = sessionmaker(bind=engine)
-
 
 # Dependency
-def get_db():
-    db = session()
-    try:
-        yield db
-    finally:
-        db.close()
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+
+SessionDep = Annotated[Session, Depends(get_session)]

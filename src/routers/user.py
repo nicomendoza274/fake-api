@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, File, Form, Path, Request, UploadFile, status
-from sqlalchemy.orm.session import Session
 
-from core.database.database import get_db
+from core.database.database import SessionDep
 from core.schemas.response import MultipleResponseData, ResponseData
 from core.services.file import FileService
 from core.utils.json_validate import validate_json_data
@@ -23,14 +22,14 @@ router = APIRouter(
     response_model=MultipleResponseData[list[UserResponseDTO]],
 )
 def list(
+    session: SessionDep,
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
-    db: Session = Depends(get_db),
     current_user: User = Depends(JWTBearer()),
 ):
     query_criteria = str_to_query(query)
-    user_list, total_count = UserService(db, current_user).get_records(
+    user_list, total_count = UserService(session, current_user).get_records(
         start, length, query_criteria
     )
 
@@ -48,11 +47,11 @@ def list(
     response_model=ResponseData[UserResponseDTO],
 )
 def get(
+    session: SessionDep,
     user_id: int = Path(alias="userId"),
-    db: Session = Depends(get_db),
     current_user: User = Depends(JWTBearer()),
 ):
-    user_data = UserService(db, current_user).get_record(user_id)
+    user_data = UserService(session, current_user).get_record(user_id)
     response = get_response(user_data)
     return response
 
@@ -63,6 +62,7 @@ def get(
     response_model=None,
 )
 def create(
+    session: SessionDep,
     request: Request,
     json_data: str = Form(
         ...,
@@ -70,7 +70,6 @@ def create(
         validation_alias="application/json",
     ),
     picture: UploadFile = File(None),
-    db: Session = Depends(get_db),
     current_user: User = Depends(JWTBearer()),
 ):
     """
@@ -90,10 +89,10 @@ def create(
     * **picture**: This is an image file
     """
     user = validate_json_data(UserDTO, json_data)
-    file_service = FileService(db, current_user)
+    file_service = FileService(session, current_user)
     new_file = file_service.save_file(picture, request)
     user.picture_id = new_file.file_id if new_file else None
-    UserService(db, current_user).create_record(user)
+    UserService(session, current_user).create_record(user)
     response = get_empty_response(status.HTTP_201_CREATED)
     return response
 
@@ -103,6 +102,7 @@ def create(
     response_model=None,
 )
 def update(
+    session: SessionDep,
     request: Request,
     user_id: int = Path(alias="userId"),
     json_data: str = Form(
@@ -111,7 +111,6 @@ def update(
         validation_alias="application/json",
     ),
     picture: UploadFile = File(None),
-    db: Session = Depends(get_db),
     current_user: User = Depends(JWTBearer()),
 ):
     """
@@ -136,12 +135,12 @@ def update(
     user = validate_json_data(UserDTO, json_data)
 
     if not user.picture_id:
-        file_service = FileService(db, current_user)
+        file_service = FileService(session, current_user)
         file_service.delete_file(User, current_user.user_id, "picture_id")
         new_file = file_service.save_file(picture, request)
         user.picture_id = new_file.file_id if new_file else None
 
-    UserService(db, current_user).update_record(user, user_id)
+    UserService(session, current_user).update_record(user, user_id)
     response = get_empty_response()
     return response
 
@@ -151,10 +150,10 @@ def update(
     response_model=None,
 )
 def delete(
+    session: SessionDep,
     user_id: int = Path(alias="userId"),
-    db: Session = Depends(get_db),
     current_user: User = Depends(JWTBearer()),
 ):
-    UserService(db, current_user).delete_record(user_id)
+    UserService(session, current_user).delete_record(user_id)
     response = get_empty_response()
     return response

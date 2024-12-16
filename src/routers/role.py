@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Path, Query, status
-from sqlalchemy.orm.session import Session
 
-from core.database.database import get_db
+from core.database.database import SessionDep
 from core.schemas.response import MultipleResponseData, ResponseData
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
@@ -21,14 +20,14 @@ router = APIRouter(
     response_model=MultipleResponseData[list[RoleResponseDTO]],
 )
 def list_data(
+    session: SessionDep,
     start: int | None = 0,
     length: int | None = 15,
     query: str | None = None,
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
     query_criteria = str_to_query(query)
-    role_list, total_count = RoleService(db, user).get_records(
+    role_list, total_count = RoleService(session, user).get_records(
         start, length, query_criteria
     )
     response = get_multiple_response(
@@ -45,11 +44,11 @@ def list_data(
     response_model=ResponseData[RoleResponseDTO],
 )
 def get(
+    session: SessionDep,
     role_id: int = Path(alias="roleId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    role_data = RoleService(db, user).get_record(role_id)
+    role_data = RoleService(session, user).get_record(role_id)
     response = get_response(role_data)
     return response
 
@@ -60,11 +59,11 @@ def get(
     response_model=None,
 )
 def create(
+    session: SessionDep,
     role: RoleDTO,
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    RoleService(db, user).create_record(role)
+    RoleService(session, user).create_record(role)
     response = get_empty_response(status.HTTP_201_CREATED)
     return response
 
@@ -74,12 +73,12 @@ def create(
     response_model=None,
 )
 def update(
+    session: SessionDep,
     role: RoleDTO,
     role_id: int = Path(alias="roleId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    RoleService(db, user).update_record(role, role_id)
+    RoleService(session, user).update_record(role, role_id)
     response = get_empty_response()
     return response
 
@@ -89,11 +88,11 @@ def update(
     response_model=None,
 )
 async def delete_multiple(
+    session: SessionDep,
     ids: list[int] = Query(...),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    RoleService(db, user).delete_multiple(ids)
+    RoleService(session, user).delete_multiple(ids)
     response = get_empty_response()
     return response
 
@@ -103,10 +102,10 @@ async def delete_multiple(
     response_model=None,
 )
 def delete(
+    session: SessionDep,
     role_id: int = Path(alias="roleId"),
-    db: Session = Depends(get_db),
     user: User = Depends(JWTBearer()),
 ):
-    RoleService(db, user).delete_record(role_id)
+    RoleService(session, user).delete_record(role_id)
     response = get_empty_response()
     return response

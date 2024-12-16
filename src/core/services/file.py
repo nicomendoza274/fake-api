@@ -4,9 +4,9 @@ from typing import Type, TypeVar
 
 from fastapi import Request, UploadFile
 from sqlalchemy import func
-from sqlalchemy.orm.session import Session
 
 from core.constants.file import UPLOAD_DIRECTORY
+from core.database.database import SessionDep
 from core.models.base import Base
 from core.models.file import FileModel
 from core.models.user import UserModel
@@ -15,8 +15,8 @@ T = TypeVar("T", bound=Base)
 
 
 class FileService:
-    def __init__(self, db: Session, user: UserModel | None) -> None:
-        self.db = db
+    def __init__(self, session: SessionDep, user: UserModel | None) -> None:
+        self.session = session
         self.user = user
 
     def save_file(self, file: UploadFile | None, request: Request) -> FileModel | None:
@@ -40,20 +40,20 @@ class FileService:
             created_by=self.user.user_id if self.user else None,
         )
 
-        self.db.add(new_file)
-        self.db.flush()
-        self.db.refresh(new_file)
+        self.session.add(new_file)
+        self.session.flush()
+        self.session.refresh(new_file)
 
         return new_file
 
     def delete_file(self, model: Type[T], id: int | None, file_id_name: str) -> None:
-        result = self.db.query(model).get(id)
+        result = self.session.query(model).get(id)
 
         file_id = getattr(result, file_id_name)
         if not result or result.deleted_at or not file_id:
             return None
 
-        file = self.db.query(FileModel).get(file_id)
+        file = self.session.query(FileModel).get(file_id)
 
         if not file or file.deleted_at:
             return None
@@ -62,7 +62,7 @@ class FileService:
         if self.user:
             file.deleted_by = self.user.user_id
 
-        self.db.flush()
-        self.db.refresh(file)
+        self.session.flush()
+        self.session.refresh(file)
 
         return None
