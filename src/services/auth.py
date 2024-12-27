@@ -48,9 +48,9 @@ class AuthService:
 
         # Send Email
         subject = "Fake API - Change Password"
-        fullName = f"{result.first_name} {result.last_name}"
+        full_name = f"{result.first_name} {result.last_name}"
         recipient = [user.email]
-        message = EmailMessage(fullName=fullName, code=code).model_dump()
+        message = EmailMessage(full_name=full_name, code=code).model_dump()
 
         TEMPLATE_FOLDER = Path(__file__).parent.parent / "templates"
         TEMPLATE_NAME = "forgot.html"
