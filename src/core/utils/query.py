@@ -5,7 +5,7 @@ from fastapi import status
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_1000
-from core.schemas.query import QueryCriteria
+from core.models.query import QueryCriteria
 from core.utils.encrypt import base64_decode
 
 

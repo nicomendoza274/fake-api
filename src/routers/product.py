@@ -11,15 +11,15 @@ from fastapi import (
 )
 
 from core.database.database import SessionDep
-from core.schemas.active_toggle import ActiveToggleDTO
-from core.schemas.response import MultipleResponseData, ResponseData
+from core.models.response import MultipleResponseData, ResponseData
+from core.models.toggle import ActiveToggleDTO
 from core.services.file import FileService
 from core.utils.json_validate import validate_json_data
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
-from models.models import Product, User
-from schemas.product import ProductDTO, ProductResponseDTO
+from models.product import Product, ProductDTO, ProductResponseDTO
+from models.user import User
 from services.product import ProductService
 
 router = APIRouter(
@@ -143,7 +143,7 @@ def update(
 
     product = validate_json_data(ProductDTO, json_data)
 
-    if not product.file_id:
+    if not product.picture_id:
         FileService(session, user).delete_file(
             Product, product.product_id, "picture_id"
         )

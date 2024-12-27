@@ -1,6 +1,6 @@
 from typing import Any
 
-from core.schemas.camel import CamelModel
+from core.models.camel import CamelModel
 
 
 class SortCriteria(CamelModel):

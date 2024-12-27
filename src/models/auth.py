@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
 
-from core.schemas.camel import CamelModel
+from core.models.camel import CamelModel
 from core.utils.encrypt import encrypt_string
 
 

@@ -1,4 +1,4 @@
-from core.schemas.camel import CamelModel
+from core.models.camel import CamelModel
 
 
 class ActiveToggleDTO(CamelModel):

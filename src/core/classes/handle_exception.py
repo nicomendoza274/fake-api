@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import status
 
-from core.schemas.error import Error
+from core.models.error import Error
 
 
 class HandleException(Exception):

@@ -4,9 +4,9 @@ from fastapi import Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from core.schemas.camel import CamelModel
-from core.schemas.error import Error, Errors
-from core.schemas.response import MultipleResponseData, ResponseData
+from core.models.camel import CamelModel
+from core.models.error import Error, Errors
+from core.models.response import MultipleResponseData, ResponseData
 
 T = TypeVar("T", bound=CamelModel)
 

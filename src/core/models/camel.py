@@ -1,8 +1,8 @@
 from humps import camelize
-from pydantic import BaseModel
+from sqlmodel import SQLModel
 
 
-class CamelModel(BaseModel):
+class CamelModel(SQLModel):
     class Config:
         alias_generator = camelize
         populate_by_name = True

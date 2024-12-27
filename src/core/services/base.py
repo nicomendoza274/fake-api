@@ -1,17 +1,17 @@
+from datetime import datetime, timezone
 from typing import Generic, Type, TypeVar
 
 from fastapi import status
-from sqlalchemy import func, inspect
-from sqlalchemy.orm.query import Query
+from sqlmodel import select
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_4000
 from core.database.database import SessionDep
 from core.models.base import BaseAuditModel
+from core.models.camel import CamelModel
+from core.models.query import PropertyModel, QueryCriteria
+from core.models.toggle import ActiveToggleDTO
 from core.models.user import UserModel
-from core.schemas.active_toggle import ActiveToggleDTO
-from core.schemas.camel import CamelModel
-from core.schemas.query import PropertyModel, QueryCriteria
 from core.services.query import QueryCriterionService
 
 T = TypeVar("T", bound=BaseAuditModel)
@@ -31,8 +31,8 @@ class BaseService(Generic[T, K, W]):
         self.current_user = current_user
         self.sqlModel = sqlModel
         self.response_schema = response_schema
-        self.result = self.session.query(self.sqlModel)
-        self.default_sort = inspect(self.sqlModel).primary_key[0].name  # PK
+        self.statement = select(self.sqlModel)
+        self.default_sort = self.sqlModel.get_primary_key_name()
         self.property_model_list: list[PropertyModel] = []
         self.property_search = (
             [getattr(self.sqlModel, "name")] if hasattr(self.sqlModel, "name") else []
@@ -47,31 +47,31 @@ class BaseService(Generic[T, K, W]):
         if not self.response_schema:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
-        result = self.result
+        statement = self.statement
 
         query_model = QueryCriterionService(self.sqlModel, query_criteria)
 
-        result = self.filter_list(query_model, result)
-        result = self.search_list(query_model, result)
-        result = self.sort_list(query_model, result)
-        result = self.sort_by_pk(result)
+        statement = self.filter_list(query_model, statement)
+        statement = self.search_list(query_model, statement)
+        statement = self.sort_list(query_model, statement)
+        statement = self.sort_by_pk(statement)
 
-        total_count = len(result.all())
+        total_count = len(self.session.exec(statement).all())
 
         if length:
-            result = result.limit(length)
+            statement = statement.limit(length)
 
         if start:
-            result = result.offset(start)
+            statement = statement.offset(start)
 
-        result = result.all()
+        result = self.session.exec(statement).all()
 
         data_response_list = [self.response_schema.model_validate(el) for el in result]
 
         return data_response_list, total_count
 
     def get_record(self, id: int) -> K:
-        result = self.session.query(self.sqlModel).get(id)
+        result = self.session.get(self.sqlModel, id)
 
         if not result or result.deleted_at != None or not self.response_schema:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -89,7 +89,7 @@ class BaseService(Generic[T, K, W]):
         return
 
     def update_record(self, data: W, id: int | None) -> None:
-        result = self.session.query(self.sqlModel).get(id)
+        result = self.session.get(self.sqlModel, id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -102,12 +102,12 @@ class BaseService(Generic[T, K, W]):
         if self.current_user:
             result.updated_by = self.current_user.user_id
 
-        result.updated_at = func.now()
+        result.updated_at = datetime.now(timezone.utc)
         self.session.commit()
         return
 
     def toggle_active(self, data: ActiveToggleDTO, id: int) -> None:
-        result = self.session.query(self.sqlModel).get(id)
+        result = self.session.get(self.sqlModel, id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -115,17 +115,17 @@ class BaseService(Generic[T, K, W]):
         result.is_active = data.is_active
         if self.current_user:
             result.updated_by = self.current_user.user_id
-        result.updated_at = func.now()
+        result.updated_at = datetime.now(timezone.utc)
 
         self.session.commit()
         return
 
     def delete_multiple(self, ids: list[int]) -> None:
         for id in ids:
-            result = self.session.query(self.sqlModel).get(id)
+            result = self.session.get(self.sqlModel, id)
 
             if result and result.deleted_at == None:
-                result.deleted_at = func.now()
+                result.deleted_at = datetime.now(timezone.utc)
                 if self.current_user:
                     result.deleted_by = self.current_user.user_id
 
@@ -133,27 +133,27 @@ class BaseService(Generic[T, K, W]):
         return
 
     def delete_record(self, id: int) -> None:
-        result = self.session.query(self.sqlModel).get(id)
+        result = self.session.get(self.sqlModel, id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
-        result.deleted_at = func.now()
+        result.deleted_at = datetime.now(timezone.utc)
         if self.current_user:
             result.deleted_by = self.current_user.user_id
 
         self.session.commit()
         return
 
-    def filter_list(self, query_model: QueryCriterionService, result: Query) -> Query:
-        result = result.filter(self.sqlModel.deleted_at == None)
+    def filter_list(self, query_model: QueryCriterionService, statement):
+        result = statement.where(self.sqlModel.deleted_at == None)
         return query_model.filters(result, self.property_model_list)
 
-    def search_list(self, query_model: QueryCriterionService, result: Query) -> Query:
-        return query_model.search(result, self.property_search)
+    def search_list(self, query_model: QueryCriterionService, statement):
+        return query_model.search(statement, self.property_search)
 
-    def sort_list(self, query_model: QueryCriterionService, result: Query) -> Query:
-        return query_model.sorts(result, self.property_model_list)
+    def sort_list(self, query_model: QueryCriterionService, statement):
+        return query_model.sorts(statement, self.property_model_list)
 
-    def sort_by_pk(self, result: Query) -> Query:
-        return result.order_by(self.default_sort)
+    def sort_by_pk(self, statement):
+        return statement.order_by(self.default_sort)

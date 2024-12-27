@@ -1,4 +1,4 @@
-from sqlalchemy import inspect
+from sqlmodel import inspect
 
 
 def represent_instance(instance) -> str:

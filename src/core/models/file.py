@@ -1,16 +1,34 @@
-from sqlalchemy import BigInteger
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlmodel import BigInteger, Field
 
-from core.models.audit_model import AuditModel
-from core.models.base import Base
+from core.models.base import BaseAuditModel
+from core.models.camel import CamelModel
 
 
-class FileModel(Base, AuditModel):
-    __tablename__ = "files"
+class FileBase(CamelModel):
+    file_id: int | None
+    source_file_name: str
+    cdn_file_name: str
+    mime_type: str
+    file_size: int
+    url: str
 
-    file_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    source_file_name: Mapped[str]
-    cdn_file_name: Mapped[str]
-    mime_type: Mapped[str]
-    file_size: Mapped[int]
-    url: Mapped[str]
+    class Config:
+        from_attributes = True
+
+
+class FileResponseDTO(FileBase):
+    pass
+
+
+class FileDTO(FileBase):
+    file_id: int | None = None
+
+
+class FileModel(BaseAuditModel, table=True):
+    __tablename__ = "files"  # type: ignore
+    file_id: int | None = Field(sa_type=BigInteger, primary_key=True)
+    source_file_name: str = Field()
+    cdn_file_name: str = Field()
+    mime_type: str | None = Field(nullable=True)
+    file_size: int | None = Field(nullable=True)
+    url: str = Field()

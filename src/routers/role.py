@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 
 from core.database.database import SessionDep
-from core.schemas.response import MultipleResponseData, ResponseData
+from core.models.response import MultipleResponseData, ResponseData
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
-from models.models import User
-from schemas.role import RoleDTO, RoleResponseDTO
+from models.role import RoleDTO, RoleResponseDTO
+from models.user import User
 from services.role import RoleService
 
 router = APIRouter(

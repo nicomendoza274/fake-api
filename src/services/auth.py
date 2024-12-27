@@ -1,16 +1,15 @@
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import cast
 
-import pytz
 from fastapi import status
-from sqlalchemy import func
+from sqlmodel import func, select, text
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_2002, GEN_4000
 from core.database.database import SessionDep
-from core.schemas.email import EmailMessage
+from core.models.email import EmailMessage
 from core.services.email import (
     MAIL_FROM,
     MAIL_PASSWORD,
@@ -20,8 +19,7 @@ from core.services.email import (
     EmailService,
 )
 from core.utils.encrypt import create_token
-from models.models import User, UserCode, UserRole
-from schemas.auth import (
+from models.auth import (
     UserCheckCodeDTO,
     UserForgotPasswordDTO,
     UserJWT,
@@ -29,6 +27,9 @@ from schemas.auth import (
     UserLoginDTO,
     UserResetPasswordDTO,
 )
+from models.user import User
+from models.user_code import UserCode
+from models.user_role import UserRole
 
 
 class AuthService:
@@ -37,18 +38,13 @@ class AuthService:
         self.current_user = user
 
     async def forgot_password(self, user: UserForgotPasswordDTO) -> None:
-        result = (
-            self.session.query(User)
-            .filter(User.email == user.email, User.deleted_at == None)
-            .first()
-        )
-
+        result = self.session.exec(select(User).where(User.email == user.email)).first()
         if not result:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
         code = random.randint(100000, 999999)
 
-        user_Code = UserCode(user_id=result.user_id, code=code)
+        user_Code = UserCode(user_code_id=None, user_id=result.user_id, code=code)
 
         # Send Email
         subject = "Fake API - Change Password"
@@ -78,18 +74,18 @@ class AuthService:
         return
 
     def check_code(self, user: UserCheckCodeDTO) -> None:
-        now = datetime.now(pytz.utc) - timedelta(hours=1)
-        result: UserCode | None = (
-            self.session.query(UserCode)
-            .join(User, User.user_id == UserCode.user_id)
-            .filter(
+        # now = datetime.now(pytz.utc) - timedelta(hours=1)
+        statement = (
+            select(UserCode)
+            .join(User, UserCode.user_id == User.user_id)  # type: ignore
+            .where(
                 UserCode.deleted_at == None,
-                now < UserCode.created_at,
+                UserCode.created_at > func.now() - text("INTERVAL '1 hour'"),
                 UserCode.code == user.recovery_code,
                 User.email == user.email,
             )
-            .first()
         )
+        result = self.session.exec(statement).first()
 
         if not result:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -101,15 +97,15 @@ class AuthService:
         return
 
     def reset_password(self, user: UserResetPasswordDTO) -> None:
-        result: User | None = (
-            self.session.query(User)
-            .join(UserCode, User.user_id == UserCode.user_id)
-            .filter(
+        statement = (
+            select(User)
+            .join(UserCode, UserCode.user_id == User.user_id)  # type: ignore
+            .where(
                 UserCode.code == user.recovery_code,
                 User.email == user.email,
             )
-            .first()
         )
+        result = self.session.exec(statement).first()
 
         if not result:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -121,24 +117,17 @@ class AuthService:
         return
 
     def login_user(self, user: UserLoginDTO) -> UserLoggedDTO:
-        result = (
-            self.session.query(
-                User,
-                UserRole.role_id,
-            )
-            .join(
-                UserRole,
-                User.user_id == UserRole.user_id,
-                isouter=True,
-            )
-            .filter(
+        statement = (
+            select(User, UserRole.role_id)
+            .join(UserRole, UserRole.user_id == User.user_id, isouter=True)  # type: ignore
+            .where(
                 User.email == user.email,
                 User.hash == user.hash,
                 User.deleted_at == None,
                 UserRole.deleted_at == None,
             )
-            .first()
         )
+        result = self.session.exec(statement).first()
 
         if not result:
             raise HandleException([GEN_2002], status.HTTP_401_UNAUTHORIZED)

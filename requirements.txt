@@ -4,5 +4,6 @@ fastapi-mail==1.4.2
 pyhumps==3.8.0
 PyJWT==2.10.1
 pytz==2024.2
-SQLAlchemy==2.0.36
+sqlmodel==0.0.22
 psycopg2-binary==2.9.10
+

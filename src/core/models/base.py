@@ -1,13 +1,13 @@
-from sqlalchemy.orm import DeclarativeBase
+from sqlmodel import inspect
 
-from core.models.audit_model import AuditModel
-from core.utils.represent_instance import represent_instance
-
-
-class Base(DeclarativeBase):
-    def __repr__(self) -> str:
-        return represent_instance(self)
+from core.models.audit import AuditModel
 
 
-class BaseAuditModel(Base, AuditModel):
-    __abstract__ = True
+class BaseAuditModel(AuditModel):
+
+    @classmethod
+    def get_primary_key_name(cls) -> str | None:
+        # Inspeccionar el modelo para obtener las claves primarias
+        mapper = inspect(cls)
+        pk_columns = [column.name for column in mapper.primary_key]
+        return pk_columns[0] if pk_columns else None

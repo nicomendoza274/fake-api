@@ -1,17 +1,17 @@
 import shutil
 import uuid
+from datetime import datetime, timezone
 from typing import Type, TypeVar
 
 from fastapi import Request, UploadFile
-from sqlalchemy import func
 
 from core.constants.file import UPLOAD_DIRECTORY
 from core.database.database import SessionDep
-from core.models.base import Base
+from core.models.base import BaseAuditModel
 from core.models.file import FileModel
 from core.models.user import UserModel
 
-T = TypeVar("T", bound=Base)
+T = TypeVar("T", bound=BaseAuditModel)
 
 
 class FileService:
@@ -32,6 +32,7 @@ class FileService:
             shutil.copyfileobj(file.file, buffer)
 
         new_file = FileModel(
+            file_id=None,
             source_file_name=file.filename,
             cdn_file_name=new_filename,
             mime_type=file.content_type,
@@ -47,18 +48,18 @@ class FileService:
         return new_file
 
     def delete_file(self, model: Type[T], id: int | None, file_id_name: str) -> None:
-        result = self.session.query(model).get(id)
+        result = self.session.get(model, id)
 
         file_id = getattr(result, file_id_name)
         if not result or result.deleted_at or not file_id:
             return None
 
-        file = self.session.query(FileModel).get(file_id)
+        file = self.session.get(FileModel, id)
 
         if not file or file.deleted_at:
             return None
 
-        file.deleted_at = func.now()
+        file.deleted_at = datetime.now(timezone.utc)
         if self.user:
             file.deleted_by = self.user.user_id
 
