@@ -7,11 +7,11 @@ from fastapi import Request, UploadFile
 
 from core.constants.file import UPLOAD_DIRECTORY
 from core.database.database import SessionDep
-from core.models.base import BaseAuditModel
-from core.models.file import FileModel
+from core.models.base import BaseAudit
+from core.models.file import File
 from core.models.user import UserModel
 
-T = TypeVar("T", bound=BaseAuditModel)
+T = TypeVar("T", bound=BaseAudit)
 
 
 class FileService:
@@ -19,7 +19,7 @@ class FileService:
         self.session = session
         self.user = user
 
-    def save_file(self, file: UploadFile | None, request: Request) -> FileModel | None:
+    def save_file(self, file: UploadFile | None, request: Request) -> File | None:
         if not file or not file.filename:
             return None
 
@@ -31,7 +31,7 @@ class FileService:
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        new_file = FileModel(
+        new_file = File(
             file_id=None,
             source_file_name=file.filename,
             cdn_file_name=new_filename,
@@ -54,7 +54,7 @@ class FileService:
         if not result or result.deleted_at or not file_id:
             return None
 
-        file = self.session.get(FileModel, id)
+        file = self.session.get(File, id)
 
         if not file or file.deleted_at:
             return None

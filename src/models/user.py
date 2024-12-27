@@ -2,9 +2,9 @@ from pydantic import Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Field, Relationship, and_
 
-from core.models.base import BaseAuditModel
-from core.models.camel import CamelModel
-from core.models.file import FileDTO, FileModel
+from core.models.base import BaseAudit
+from core.models.camel import Camel
+from core.models.file import File, FileDTO
 from core.models.user import UserBase, UserModel
 from core.utils.encrypt import encrypt_string
 
@@ -26,14 +26,14 @@ class UserDTO(UserBase):
         return values
 
 
-class UserUpdateDTO(CamelModel):
+class UserUpdateDTO(Camel):
     first_name: str
     last_name: str
     email: str
     picture_id: int | None = None
 
 
-class UserChangePasswordDTO(CamelModel):
+class UserChangePasswordDTO(Camel):
     new_password: str
     hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
 
@@ -45,14 +45,14 @@ class UserChangePasswordDTO(CamelModel):
         return values
 
 
-class User(UserModel, BaseAuditModel, table=True):
+class User(UserModel, BaseAudit, table=True):
     __tablename__ = "users"  # type: ignore
 
-    picture: FileModel | None = Relationship(
+    picture: File | None = Relationship(
         sa_relationship_kwargs={
             "primaryjoin": lambda: and_(
-                FileModel.file_id == User.picture_id,
-                FileModel.deleted_at == None,
+                File.file_id == User.picture_id,
+                File.deleted_at == None,
             )
         }
     )

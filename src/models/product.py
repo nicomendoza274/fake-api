@@ -1,13 +1,13 @@
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Field, Relationship, and_
 
-from core.models.base import BaseAuditModel
-from core.models.camel import CamelModel
-from core.models.file import FileDTO, FileModel
+from core.models.base import BaseAudit
+from core.models.camel import Camel
+from core.models.file import File, FileDTO
 from models.category import Category, CategoryDTO
 
 
-class ProductBase(CamelModel):
+class ProductBase(Camel):
     name: str = Field()
     price: float = Field()
     is_active: bool = Field()
@@ -21,17 +21,17 @@ class ProductBase(CamelModel):
     )
 
 
-class Product(ProductBase, BaseAuditModel, table=True):
+class Product(ProductBase, BaseAudit, table=True):
     __tablename__ = "products"  # type: ignore
 
     product_id: int | None = Field(default=None, primary_key=True)
 
     # Relationships
-    picture: FileModel | None = Relationship(
+    picture: File | None = Relationship(
         sa_relationship_kwargs={
             "primaryjoin": lambda: and_(
-                FileModel.file_id == Product.picture_id,
-                FileModel.deleted_at == None,
+                File.file_id == Product.picture_id,
+                File.deleted_at == None,
             )
         }
     )

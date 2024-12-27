@@ -3,11 +3,11 @@ from datetime import datetime
 from pydantic import Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
 
-from core.models.camel import CamelModel
+from core.models.camel import Camel
 from core.utils.encrypt import encrypt_string
 
 
-class UserJWT(CamelModel):
+class UserJWT(Camel):
     user_id: int
     email: str
     role_id: int | None = None
@@ -17,7 +17,7 @@ class UserJWT(CamelModel):
         from_attributes = True
 
 
-class UserLoginDTO(CamelModel):
+class UserLoginDTO(Camel):
     email: str
     password: str
     hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
@@ -28,7 +28,7 @@ class UserLoginDTO(CamelModel):
         return values
 
 
-class UserLoggedDTO(CamelModel):
+class UserLoggedDTO(Camel):
     user_id: int
     user_name: str | None = None
     email: str
@@ -45,16 +45,16 @@ class UserLoggedDTO(CamelModel):
         from_attributes = True
 
 
-class UserForgotPasswordDTO(CamelModel):
+class UserForgotPasswordDTO(Camel):
     email: str
 
 
-class UserCheckCodeDTO(CamelModel):
+class UserCheckCodeDTO(Camel):
     recovery_code: str
     email: str
 
 
-class UserResetPasswordDTO(CamelModel):
+class UserResetPasswordDTO(Camel):
     recovery_code: str
     email: str
     password: str

@@ -1,9 +1,9 @@
 from sqlmodel import Field
 
-from core.models.base import BaseAuditModel
+from core.models.base import BaseAudit
 
 
-class UserCode(BaseAuditModel, table=True):
+class UserCode(BaseAudit, table=True):
     __tablename__ = "user_codes"  # type: ignore
     user_code_id: int | None = Field(primary_key=True)
     code: int

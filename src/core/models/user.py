@@ -1,9 +1,9 @@
 from sqlmodel import BigInteger, Field
 
-from core.models.camel import CamelModel
+from core.models.camel import Camel
 
 
-class UserBase(CamelModel):
+class UserBase(Camel):
     first_name: str = Field()
     last_name: str = Field()
     email: str = Field(unique=True)
@@ -14,5 +14,4 @@ class UserBase(CamelModel):
 
 class UserModel(UserBase):
     user_id: int | None = Field(default=None, primary_key=True, sa_type=BigInteger)
-    # role_id: int | None = Field(default=None)
     hash: str = Field()

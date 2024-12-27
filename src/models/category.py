@@ -2,15 +2,15 @@ from pydantic import Field
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Field
 
-from core.models.base import BaseAuditModel
-from core.models.camel import CamelModel
+from core.models.base import BaseAudit
+from core.models.camel import Camel
 
 
-class CategoryBase(CamelModel):
+class CategoryBase(Camel):
     name: str = Field()
 
 
-class Category(CategoryBase, BaseAuditModel, table=True):
+class Category(CategoryBase, BaseAudit, table=True):
     __tablename__ = "categories"  # type: ignore
     category_id: int | None = Field(default=None, primary_key=True)
 

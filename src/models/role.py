@@ -3,15 +3,15 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy import BigInteger
 from sqlmodel import Field
 
-from core.models.base import BaseAuditModel
-from core.models.camel import CamelModel
+from core.models.base import BaseAudit
+from core.models.camel import Camel
 
 
-class RoleBase(CamelModel):
+class RoleBase(Camel):
     name: str = Field()
 
 
-class Role(RoleBase, BaseAuditModel, table=True):
+class Role(RoleBase, BaseAudit, table=True):
     __tablename__ = "roles"  # type: ignore
     role_id: int | None = Field(default=None, primary_key=True, sa_type=BigInteger)
 

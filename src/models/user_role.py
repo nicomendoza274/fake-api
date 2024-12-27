@@ -2,16 +2,16 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy import BigInteger
 from sqlmodel import Field
 
-from core.models.base import BaseAuditModel
-from core.models.camel import CamelModel
+from core.models.base import BaseAudit
+from core.models.camel import Camel
 
 
-class UserRoleBase(CamelModel):
+class UserRoleBase(Camel):
     user_id: int = Field(foreign_key="users.user_id", nullable=True)
     role_id: int = Field(foreign_key="roles.role_id", nullable=True)
 
 
-class UserRole(UserRoleBase, BaseAuditModel, table=True):
+class UserRole(UserRoleBase, BaseAudit, table=True):
     __tablename__ = "user_roles"  # type: ignore
     user_role_id: int = Field(sa_type=BigInteger, primary_key=True)
 

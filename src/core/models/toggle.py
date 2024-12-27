@@ -1,5 +1,5 @@
-from core.models.camel import CamelModel
+from core.models.camel import Camel
 
 
-class ActiveToggleDTO(CamelModel):
+class ActiveToggleDTO(Camel):
     is_active: bool

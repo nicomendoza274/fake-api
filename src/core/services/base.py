@@ -7,16 +7,16 @@ from sqlmodel import select
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_4000
 from core.database.database import SessionDep
-from core.models.base import BaseAuditModel
-from core.models.camel import CamelModel
+from core.models.base import BaseAudit
+from core.models.camel import Camel
 from core.models.query import PropertyModel, QueryCriteria
 from core.models.toggle import ActiveToggleDTO
 from core.models.user import UserModel
 from core.services.query import QueryCriterionService
 
-T = TypeVar("T", bound=BaseAuditModel)
-K = TypeVar("K", bound=CamelModel)
-W = TypeVar("W", bound=CamelModel)
+T = TypeVar("T", bound=BaseAudit)
+K = TypeVar("K", bound=Camel)
+W = TypeVar("W", bound=Camel)
 
 
 class BaseService(Generic[T, K, W]):
@@ -25,12 +25,12 @@ class BaseService(Generic[T, K, W]):
         session: SessionDep,
         current_user: UserModel | None,
         sqlModel: Type[T],
-        response_schema: Type[K] | None = None,
+        response_model: Type[K] | None = None,
     ) -> None:
         self.session = session
         self.current_user = current_user
         self.sqlModel = sqlModel
-        self.response_schema = response_schema
+        self.response_schema = response_model
         self.statement = select(self.sqlModel)
         self.default_sort = self.sqlModel.get_primary_key_name()
         self.property_model_list: list[PropertyModel] = []

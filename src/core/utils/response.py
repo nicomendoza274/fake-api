@@ -4,11 +4,11 @@ from fastapi import Response, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
-from core.models.camel import CamelModel
+from core.models.camel import Camel
 from core.models.error import Error, Errors
 from core.models.response import MultipleResponseData, ResponseData
 
-T = TypeVar("T", bound=CamelModel)
+T = TypeVar("T", bound=Camel)
 
 
 def get_empty_response(status_code: int = status.HTTP_200_OK) -> Response:

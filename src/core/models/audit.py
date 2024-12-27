@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlmodel import Field, SQLModel, func
 
 
-class AuditModel(SQLModel):
+class Audit(SQLModel):
     created_at: datetime | None = Field(default_factory=func.now, nullable=True)
     created_by: int | None = Field(
         default=None, foreign_key="users.user_id", nullable=True

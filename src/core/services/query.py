@@ -60,7 +60,6 @@ class QueryCriterionService:
             elif type_filter == FilterCriteriaEnum.CONTAINS.value:
                 filter_criteria = model_property.like(f"%{value_filter}%")
 
-            # if filter_criteria:
             filters.append(filter_criteria)
 
         result = result.where(*filters)

@@ -1,14 +1,14 @@
 from typing import Any
 
-from core.models.camel import CamelModel
+from core.models.camel import Camel
 
 
-class SortCriteria(CamelModel):
+class SortCriteria(Camel):
     property_name: str
     descending: bool
 
 
-class FilterCriteria(CamelModel):
+class FilterCriteria(Camel):
     property_name: str
     type: str
     value: Any = None
@@ -16,12 +16,12 @@ class FilterCriteria(CamelModel):
     To: Any = None
 
 
-class QueryCriteria(CamelModel):
+class QueryCriteria(Camel):
     sorts: list[SortCriteria] | None = None
     filters: list[FilterCriteria] | None = None
     search: str | None = None
 
 
-class PropertyModel(CamelModel):
+class PropertyModel(Camel):
     property: str
     model: Any
