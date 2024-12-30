@@ -74,7 +74,7 @@ def create(
     """
         * **application/json**: This is a stringify object of user, for example:
 
-        ```
+        ```json
         {
             "firstName": "string",
             "lastName": "string",
@@ -117,7 +117,7 @@ def update(
     ----------
     * **application/json**: This is a stringify object of user, for example:
 
-        ```
+        ```json
         {
             "firstName": "string",
             "lastName": "string",

@@ -11,6 +11,7 @@ from core.utils.encrypt import encrypt_string
 
 class UserResponseDTO(UserBase):
     user_id: int
+    role_id: int | None = None
     picture: FileDTO | None = None
 
 
@@ -36,8 +37,6 @@ class UserUpdateDTO(Camel):
 class UserChangePasswordDTO(Camel):
     new_password: str
     hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
-
-    # model_config = {"json_schema_extra": {"examples": [{"newPassword": "string"}]}}
 
     @model_validator(mode="after")
     def compute_hash(cls, values):

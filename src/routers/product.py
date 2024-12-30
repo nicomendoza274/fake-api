@@ -89,19 +89,20 @@ def create(
 
         ```json
         {
-            categoryId: 0
-            name: "string"
-            price: 0
-            isActive: "boolean"
-            fileId: 0
-        }```
+            "categoryId": 0,
+            "name": "string"
+            "price": 0,
+            "isActive": true,
+            "pictureId": 0
+        }
+        ```
 
     * **picture**: This is an image file
     """
 
     product = validate_json_data(ProductDTO, json_data)
     new_file = FileService(session, user).save_file(picture, request)
-    product.file_id = new_file.file_id if new_file else None
+    product.picture_id = new_file.file_id if new_file else None
     ProductService(session, user).create_record(product)
     response = get_empty_response(status.HTTP_201_CREATED)
     return response
@@ -120,7 +121,7 @@ def update(
         alias="application/json",
         validation_alias="application/json",
     ),
-    picture: UploadFile = File(None),
+    picture: UploadFile | None = File(None),
     user: User = Depends(JWTBearer()),
 ):
     """
@@ -130,13 +131,13 @@ def update(
 
         ```json
         {
-            productId: 0
-            categoryId: 0
-            name: "string"
-            price: 0
-            isActive: "boolean"
-            fileId: 0
-        }```
+            "categoryId": 0,
+            "name": "string",
+            "price": 0,
+            "isActive": true,
+            "pictureId": 0
+        }
+        ```
 
     * **picture**: This is an image file
     """
