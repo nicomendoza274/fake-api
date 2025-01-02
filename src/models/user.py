@@ -19,7 +19,7 @@ class UserDTO(UserBase):
     user_id: SkipJsonSchema[int] | None = Field(default=None, exclude=True)
     role_id: int | None = None
     password: str
-    hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
+    hash: SkipJsonSchema[str] | None = Field(default=None, repr=True)
 
     @model_validator(mode="after")
     def compute_hash(cls, values):
@@ -47,6 +47,7 @@ class UserChangePasswordDTO(Camel):
 class User(UserModel, BaseAudit, table=True):
     __tablename__ = "users"  # type: ignore
 
+    # role_id: int | None = Field(default=None, exclude=True)
     picture: File | None = Relationship(
         sa_relationship_kwargs={
             "primaryjoin": lambda: and_(

@@ -83,7 +83,7 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
 
     def create_record(self, user: UserDTO) -> None:
 
-        new_user = User.model_validate(user.model_dump())
+        new_user = User(**user.model_dump())
 
         if self.current_user:
             new_user.created_by = self.current_user.user_id
@@ -92,8 +92,10 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         self.session.flush()
         self.session.refresh(new_user)
 
-        new_user_rol = UserRole.model_validate(
-            {"role_id": user.role_id, "user_id": new_user.user_id}
+        new_user_rol = UserRole(
+            user_role_id=None,
+            role_id=user.role_id,
+            user_id=new_user.user_id,
         )
 
         self.session.add(new_user_rol)
@@ -134,7 +136,6 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         user_data.first_name = user.first_name
         user_data.last_name = user.last_name
         user_data.email = user.email
-        user_data.role_id = user.role_id
         user_data.picture_id = user.picture_id
         user_data.hash = str(user.hash) if user.hash else ""
 

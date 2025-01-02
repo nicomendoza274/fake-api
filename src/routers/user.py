@@ -79,9 +79,9 @@ def create(
             "firstName": "string",
             "lastName": "string",
             "email": "string",
-            "role_id": 0,
+            "roleId": 0,
             "password": "string",
-            "picture_id": 0
+            "pictureId": 0
         }
         ```
 
