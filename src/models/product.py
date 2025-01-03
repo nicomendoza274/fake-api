@@ -1,5 +1,5 @@
 from pydantic.json_schema import SkipJsonSchema
-from sqlmodel import Field, Relationship, and_
+from sqlmodel import BigInteger, Field, Relationship, and_
 
 from core.models.base import BaseAudit
 from core.models.camel import Camel
@@ -24,7 +24,7 @@ class ProductBase(Camel):
 class Product(ProductBase, BaseAudit, table=True):
     __tablename__ = "products"  # type: ignore
 
-    product_id: int | None = Field(default=None, primary_key=True)
+    product_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
 
     # Relationships
     picture: File | None = Relationship(

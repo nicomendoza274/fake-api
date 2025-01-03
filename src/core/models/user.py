@@ -13,5 +13,5 @@ class UserBase(Camel):
 
 
 class UserModel(UserBase):
-    user_id: int | None = Field(default=None, primary_key=True, sa_type=BigInteger)
+    user_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
     hash: str = Field()

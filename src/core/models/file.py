@@ -15,7 +15,7 @@ class FileBase(Camel):
 
 class File(FileBase, BaseAudit, table=True):
     __tablename__ = "files"  # type: ignore
-    file_id: int | None = Field(sa_type=BigInteger, primary_key=True)
+    file_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
 
 
 class FileResponseDTO(FileBase):

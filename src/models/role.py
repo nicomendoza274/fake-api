@@ -13,7 +13,7 @@ class RoleBase(Camel):
 
 class Role(RoleBase, BaseAudit, table=True):
     __tablename__ = "roles"  # type: ignore
-    role_id: int | None = Field(default=None, primary_key=True, sa_type=BigInteger)
+    role_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
 
 
 class RoleResponseDTO(RoleBase):
