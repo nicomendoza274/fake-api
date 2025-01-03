@@ -84,20 +84,6 @@ def update(
 
 
 @router.delete(
-    "/multiple",
-    response_model=None,
-)
-async def delete_multiple(
-    session: SessionDep,
-    ids: list[int] = Query(...),
-    user: User = Depends(JWTBearer()),
-):
-    CustomerService(session, user).delete_multiple(ids)
-    response = get_empty_response()
-    return response
-
-
-@router.delete(
     "/{customerId}",
     response_model=None,
 )

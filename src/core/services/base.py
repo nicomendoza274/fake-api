@@ -120,18 +120,6 @@ class BaseService(Generic[T, K, W]):
         self.session.commit()
         return
 
-    def delete_multiple(self, ids: list[int]) -> None:
-        for id in ids:
-            result = self.session.get(self.sqlModel, id)
-
-            if result and result.deleted_at == None:
-                result.deleted_at = datetime.now(timezone.utc)
-                if self.current_user:
-                    result.deleted_by = self.current_user.user_id
-
-        self.session.commit()
-        return
-
     def delete_record(self, id: int) -> None:
         result = self.session.get(self.sqlModel, id)
 
