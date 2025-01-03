@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Path, status
 
 from core.database.database import SessionDep
 from core.models.response import MultipleResponseData, ResponseData

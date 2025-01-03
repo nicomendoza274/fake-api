@@ -9,11 +9,13 @@ from core.models.camel import Camel
 from core.models.file import File, FileDTO
 from core.models.user import UserBase, UserModel
 from core.utils.encrypt import encrypt_string
+from models.role import Role, RoleResponseDTO
+from models.user_role import UserRole
 
 
 class UserResponseDTO(UserBase):
     user_id: int
-    role_id: int | None = None
+    roles: list[RoleResponseDTO] = []
     picture: FileDTO | None = None
 
 
@@ -49,7 +51,15 @@ class UserChangePasswordDTO(Camel):
 class User(UserModel, BaseAudit, table=True):
     __tablename__ = "users"  # type: ignore
 
-    # role_id: int | None = Field(default=None, exclude=True)
+    roles: list[Role] | None = Relationship(
+        link_model=UserRole,
+        sa_relationship_kwargs={
+            "primaryjoin": lambda: and_(
+                UserRole.user_id == User.user_id,
+                UserRole.deleted_at == None,
+            )
+        },
+    )
     picture: File | None = Relationship(
         sa_relationship_kwargs={
             "primaryjoin": lambda: and_(
@@ -63,7 +73,7 @@ class User(UserModel, BaseAudit, table=True):
 class UserJWT(Camel):
     user_id: int
     email: str
-    role_id: int | None = None
+    roles: list[RoleResponseDTO] | None = None
     picture_id: int | None = None
 
 
@@ -85,7 +95,7 @@ class UserLoggedDTO(Camel):
     token: str | None = None
     expiration_date: datetime | None = None
     refresh_token: str = ""
-    role_id: int | None = None
+    roles: list[RoleResponseDTO] | None = None
     picture_url: str | None = None
     id: str | None = None
 

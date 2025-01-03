@@ -29,7 +29,6 @@ from models.user import (
     UserResetPasswordDTO,
 )
 from models.user_code import UserCode
-from models.user_role import UserRole
 
 
 class AuthService:
@@ -74,7 +73,6 @@ class AuthService:
         return
 
     def check_code(self, user: UserCheckCodeDTO) -> None:
-        # now = datetime.now(pytz.utc) - timedelta(hours=1)
         statement = (
             select(UserCode)
             .join(User, UserCode.user_id == User.user_id)  # type: ignore
@@ -117,32 +115,23 @@ class AuthService:
         return
 
     def login_user(self, user: UserLoginDTO) -> UserLoggedDTO:
-        statement = (
-            select(User, UserRole.role_id)
-            .join(UserRole, UserRole.user_id == User.user_id, isouter=True)  # type: ignore
-            .where(
-                User.email == user.email,
-                User.hash == user.hash,
-                User.deleted_at == None,
-                UserRole.deleted_at == None,
-            )
+        statement = select(User).where(
+            User.email == user.email,
+            User.hash == user.hash,
+            User.deleted_at == None,
         )
-        result = self.session.exec(statement).first()
+        user_data = self.session.exec(statement).first()
 
-        if not result:
+        if not user_data:
             raise HandleException([GEN_2002], status.HTTP_401_UNAUTHORIZED)
 
-        user_data, user_role_id = result
-
         user_create = UserJWT.model_validate(user_data)
-        user_create.role_id = user_role_id
 
         token, token_expires = create_token(user_create.model_dump())
 
         user_response = UserLoggedDTO.model_validate(user_data)
         user_response.token = token
         user_response.expiration_date = token_expires
-        user_response.role_id = user_role_id
         user_response.picture_url = user_data.picture.url if user_data.picture else None
         user_response.user_name = f"{user_data.first_name} {user_data.last_name}"
         user_response.id = f"U-{user_response.user_id}"
