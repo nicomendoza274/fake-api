@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Field, Relationship, and_
@@ -56,3 +58,54 @@ class User(UserModel, BaseAudit, table=True):
             )
         }
     )
+
+
+class UserJWT(Camel):
+    user_id: int
+    email: str
+    role_id: int | None = None
+    picture_id: int | None = None
+
+
+class UserLoginDTO(Camel):
+    email: str
+    password: str
+    hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
+
+    @model_validator(mode="after")
+    def compute_hash(cls, values):
+        values.hash = encrypt_string(values.password)
+        return values
+
+
+class UserLoggedDTO(Camel):
+    user_id: int
+    user_name: str | None = None
+    email: str
+    token: str | None = None
+    expiration_date: datetime | None = None
+    refresh_token: str = ""
+    role_id: int | None = None
+    picture_url: str | None = None
+    id: str | None = None
+
+
+class UserForgotPasswordDTO(Camel):
+    email: str
+
+
+class UserCheckCodeDTO(Camel):
+    recovery_code: str
+    email: str
+
+
+class UserResetPasswordDTO(Camel):
+    recovery_code: str
+    email: str
+    password: str
+    hash: SkipJsonSchema[str] | None = Field(default=None, exclude=True)
+
+    @model_validator(mode="after")
+    def compute_hash(cls, values):
+        values.hash = encrypt_string(values.password)
+        return values

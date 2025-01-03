@@ -19,7 +19,8 @@ from core.services.email import (
     EmailService,
 )
 from core.utils.encrypt import create_token
-from models.auth import (
+from models.user import (
+    User,
     UserCheckCodeDTO,
     UserForgotPasswordDTO,
     UserJWT,
@@ -27,7 +28,6 @@ from models.auth import (
     UserLoginDTO,
     UserResetPasswordDTO,
 )
-from models.user import User
 from models.user_code import UserCode
 from models.user_role import UserRole
 
