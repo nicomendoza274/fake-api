@@ -1,14 +1,16 @@
+from datetime import datetime, timezone
+
 from fastapi import status
-from sqlalchemy import func
+from sqlmodel import select
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_2001, GEN_4000
 from core.database.database import SessionDep
-from core.schemas.query import QueryCriteria
-from core.services.base_service import BaseService
+from core.models.query import QueryCriteria
+from core.services.base import BaseService
 from core.services.query import QueryCriterionService
-from models.models import User, UserRole
-from schemas.user import UserChangePasswordDTO, UserDTO, UserResponseDTO
+from models.user import User, UserChangePasswordDTO, UserDTO, UserResponseDTO
+from models.user_role import UserRole
 
 
 class UserService(BaseService[User, UserResponseDTO, UserDTO]):
@@ -21,17 +23,11 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         length: int | None,
         query_criteria: QueryCriteria | None,
     ) -> tuple[list[UserResponseDTO], int]:
-        results = (
-            self.session.query(
-                User,
-                UserRole.role_id,
-            )
-            .join(
-                UserRole,
-                User.user_id == UserRole.user_id,
-                isouter=True,
-            )
-            .filter(
+
+        statement = (
+            select(User, UserRole.role_id)
+            .join(UserRole, UserRole.user_id == User.user_id, isouter=True)  # type: ignore
+            .where(
                 User.deleted_at == None,
                 UserRole.deleted_at == None,
             )
@@ -39,20 +35,20 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
 
         query_model = QueryCriterionService(self.sqlModel, query_criteria)
 
-        results = self.filter_list(query_model, results)
-        results = self.search_list(query_model, results)
-        results = self.sort_list(query_model, results)
-        results = self.sort_by_pk(results)
+        statement = self.filter_list(query_model, statement)
+        statement = self.search_list(query_model, statement)
+        statement = self.sort_list(query_model, statement)
+        statement = self.sort_by_pk(statement)
 
-        total_count = len(results.all())
+        total_count = len(self.session.exec(statement).all())
 
         if length:
-            results = results.limit(length)
+            statement = statement.limit(length)
 
         if start:
-            results = results.offset(start)
+            statement = statement.offset(start)
 
-        results = results.all()
+        results = self.session.exec(statement).all()
 
         mapped_users: list[UserResponseDTO] = []
         for result in results:
@@ -64,23 +60,16 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         return mapped_users, total_count
 
     def get_record(self, id: int) -> UserResponseDTO:
-        result = (
-            self.session.query(
-                User,
-                UserRole.role_id,
-            )
-            .join(
-                UserRole,
-                User.user_id == UserRole.user_id,
-                isouter=True,
-            )
-            .filter(
+        statement = (
+            select(User, UserRole.role_id)
+            .join(UserRole, UserRole.user_id == User.user_id, isouter=True)  # type: ignore
+            .where(
                 User.deleted_at == None,
                 UserRole.deleted_at == None,
                 User.user_id == id,
             )
-            .first()
         )
+        result = self.session.exec(statement).first()
 
         if not result:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -94,13 +83,7 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
 
     def create_record(self, user: UserDTO) -> None:
 
-        dto_dict = user.model_dump()
-        user_dict = {
-            key: value
-            for key, value in dto_dict.items()
-            if key in User.__table__.columns
-        }
-        new_user = User(**user_dict)
+        new_user = User(**user.model_dump())
 
         if self.current_user:
             new_user.created_by = self.current_user.user_id
@@ -109,7 +92,11 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         self.session.flush()
         self.session.refresh(new_user)
 
-        new_user_rol = UserRole(role_id=user.role_id, user_id=new_user.user_id)
+        new_user_rol = UserRole(
+            user_role_id=None,
+            role_id=user.role_id,
+            user_id=new_user.user_id,
+        )
 
         self.session.add(new_user_rol)
         self.session.flush()
@@ -126,23 +113,16 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         if not self.current_user:
             raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
 
-        result = (
-            self.session.query(
-                User,
-                UserRole.role_id,
-            )
-            .join(
-                UserRole,
-                User.user_id == UserRole.user_id,
-                isouter=True,
-            )
-            .filter(
+        statement = (
+            select(User, UserRole.role_id)
+            .join(UserRole, UserRole.user_id == User.user_id, isouter=True)  # type: ignore
+            .where(
                 User.deleted_at == None,
                 UserRole.deleted_at == None,
                 User.user_id == id,
             )
-            .first()
         )
+        result = self.session.exec(statement).first()
 
         if not result:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -151,25 +131,24 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
 
         updated_by = self.current_user.user_id if self.current_user else None
 
-        user_data.updated_at = func.now()
+        user_data.updated_at = datetime.now(timezone.utc)
         user_data.updated_by = updated_by
         user_data.first_name = user.first_name
         user_data.last_name = user.last_name
         user_data.email = user.email
-        user_data.role_id = user.role_id
         user_data.picture_id = user.picture_id
-        user_data.hash = user.hash
+        user_data.hash = str(user.hash) if user.hash else ""
 
         self.session.commit()
         return
 
     def delete_record(self, id: int) -> None:
-        user_data = self.session.query(User).get(id)
+        user_data = self.session.get(User, id)
 
         if not user_data or user_data.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
-        user_data.deleted_at = func.now()
+        user_data.deleted_at = datetime.now(timezone.utc)
         if self.current_user:
             user_data.deleted_by = self.current_user.user_id
 
@@ -181,31 +160,24 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         if not self.current_user:
             raise HandleException([GEN_2001], status.HTTP_401_UNAUTHORIZED)
 
-        result = (
-            self.session.query(
-                User,
-                UserRole.role_id,
-            )
-            .join(
-                UserRole,
-                User.user_id == UserRole.user_id,
-                isouter=True,
-            )
-            .filter(
+        statement = (
+            select(User, UserRole.role_id)
+            .join(UserRole, UserRole.user_id == User.user_id, isouter=True)  # type: ignore
+            .where(
                 User.deleted_at == None,
                 UserRole.deleted_at == None,
                 User.user_id == self.current_user.user_id,
             )
-            .first()
         )
+        result = self.session.exec(statement).first()
 
         if not result:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
         user_data, role_id = result
 
-        user_data.hash = user.hash
-        user_data.updated_at = func.now()
+        user_data.hash = str(user.hash)
+        user_data.updated_at = datetime.now(timezone.utc)
 
         if self.current_user:
             user_data.updated_by = self.current_user.user_id
@@ -220,12 +192,9 @@ class UserService(BaseService[User, UserResponseDTO, UserDTO]):
         return
 
     def get_user_by_credentials(self, credentials: dict):
-        result: User | None = (
-            self.session.query(User)
-            .filter(
-                User.user_id == credentials["user_id"],
-                User.deleted_at == None,
-            )
-            .first()
+        statement = select(User).where(
+            User.user_id == credentials["user_id"],
+            User.deleted_at == None,
         )
+        result = self.session.exec(statement).first()
         return result

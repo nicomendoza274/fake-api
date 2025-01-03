@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, File, Form, Path, Request, UploadFile, status
 
 from core.database.database import SessionDep
-from core.schemas.response import MultipleResponseData, ResponseData
+from core.models.response import MultipleResponseData, ResponseData
 from core.services.file import FileService
 from core.utils.json_validate import validate_json_data
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
-from models.models import User
-from schemas.user import UserDTO, UserResponseDTO
+from models.user import User, UserDTO, UserResponseDTO
 from services.user import UserService
 
 router = APIRouter(
@@ -75,14 +74,14 @@ def create(
     """
         * **application/json**: This is a stringify object of user, for example:
 
-        ```
+        ```json
         {
             "firstName": "string",
             "lastName": "string",
             "email": "string",
-            "role_id": 0,
+            "roleId": 0,
             "password": "string",
-            "picture_id": 0
+            "pictureId": 0
         }
         ```
 
@@ -118,7 +117,7 @@ def update(
     ----------
     * **application/json**: This is a stringify object of user, for example:
 
-        ```
+        ```json
         {
             "firstName": "string",
             "lastName": "string",

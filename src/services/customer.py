@@ -1,7 +1,7 @@
 from core.database.database import SessionDep
-from core.services.base_service import BaseService
-from models.models import Customer, User
-from schemas.customer import CustomerDTO, CustomerResponseDTO
+from core.services.base import BaseService
+from models.customer import Customer, CustomerDTO, CustomerResponseDTO
+from models.user import User
 
 
 class CustomerService(BaseService[Customer, CustomerResponseDTO, CustomerDTO]):

@@ -1,16 +1,26 @@
-from sqlalchemy import BigInteger
-from sqlalchemy.orm import Mapped, mapped_column
+from pydantic.json_schema import SkipJsonSchema
+from sqlmodel import BigInteger, Field
 
-from core.models.audit_model import AuditModel
-from core.models.base import Base
+from core.models.base import BaseAudit
+from core.models.camel import Camel
 
 
-class FileModel(Base, AuditModel):
-    __tablename__ = "files"
+class FileBase(Camel):
+    source_file_name: str = Field()
+    cdn_file_name: str = Field()
+    mime_type: str | None = Field(nullable=True)
+    file_size: int | None = Field(nullable=True)
+    url: str = Field()
 
-    file_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    source_file_name: Mapped[str]
-    cdn_file_name: Mapped[str]
-    mime_type: Mapped[str]
-    file_size: Mapped[int]
-    url: Mapped[str]
+
+class File(FileBase, BaseAudit, table=True):
+    __tablename__ = "files"  # type: ignore
+    file_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+
+
+class FileResponseDTO(FileBase):
+    file_id: int
+
+
+class FileDTO(FileBase):
+    file_id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)

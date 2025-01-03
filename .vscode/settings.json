@@ -27,7 +27,6 @@
     "pydantic",
     "pyhumps",
     "pytz",
-    "sqlalchemy",
     "sqlmodel",
     "starlette",
     "uvicorn",

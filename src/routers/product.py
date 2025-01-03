@@ -11,15 +11,15 @@ from fastapi import (
 )
 
 from core.database.database import SessionDep
-from core.schemas.active_toggle import ActiveToggleDTO
-from core.schemas.response import MultipleResponseData, ResponseData
+from core.models.response import MultipleResponseData, ResponseData
+from core.models.toggle import ActiveToggleDTO
 from core.services.file import FileService
 from core.utils.json_validate import validate_json_data
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
-from models.models import Product, User
-from schemas.product import ProductDTO, ProductResponseDTO
+from models.product import Product, ProductDTO, ProductResponseDTO
+from models.user import User
 from services.product import ProductService
 
 router = APIRouter(
@@ -89,19 +89,20 @@ def create(
 
         ```json
         {
-            categoryId: 0
-            name: "string"
-            price: 0
-            isActive: "boolean"
-            fileId: 0
-        }```
+            "categoryId": 0,
+            "name": "string"
+            "price": 0,
+            "isActive": true,
+            "pictureId": 0
+        }
+        ```
 
     * **picture**: This is an image file
     """
 
     product = validate_json_data(ProductDTO, json_data)
     new_file = FileService(session, user).save_file(picture, request)
-    product.file_id = new_file.file_id if new_file else None
+    product.picture_id = new_file.file_id if new_file else None
     ProductService(session, user).create_record(product)
     response = get_empty_response(status.HTTP_201_CREATED)
     return response
@@ -120,7 +121,7 @@ def update(
         alias="application/json",
         validation_alias="application/json",
     ),
-    picture: UploadFile = File(None),
+    picture: UploadFile | None = File(None),
     user: User = Depends(JWTBearer()),
 ):
     """
@@ -130,20 +131,20 @@ def update(
 
         ```json
         {
-            productId: 0
-            categoryId: 0
-            name: "string"
-            price: 0
-            isActive: "boolean"
-            fileId: 0
-        }```
+            "categoryId": 0,
+            "name": "string",
+            "price": 0,
+            "isActive": true,
+            "pictureId": 0
+        }
+        ```
 
     * **picture**: This is an image file
     """
 
     product = validate_json_data(ProductDTO, json_data)
 
-    if not product.file_id:
+    if not product.picture_id:
         FileService(session, user).delete_file(
             Product, product.product_id, "picture_id"
         )

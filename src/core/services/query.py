@@ -1,9 +1,8 @@
 import humps
-from sqlalchemy import desc, or_
-from sqlalchemy.orm.query import Query
+from sqlmodel import desc, or_
 
 from core.enums.filter_criteria import FilterCriteriaEnum
-from core.schemas.query import PropertyModel, QueryCriteria
+from core.models.query import PropertyModel, QueryCriteria
 from core.utils.query import get_property_values
 
 
@@ -13,7 +12,7 @@ class QueryCriterionService:
         self.sql_model = sql_model
         self.query_criteria = query_criteria
 
-    def filters(self, result: Query, property_model_list: list[PropertyModel]) -> Query:
+    def filters(self, result, property_model_list: list[PropertyModel]):
         if not self.query_criteria or not self.query_criteria.filters:
             return result
 
@@ -61,14 +60,13 @@ class QueryCriterionService:
             elif type_filter == FilterCriteriaEnum.CONTAINS.value:
                 filter_criteria = model_property.like(f"%{value_filter}%")
 
-            # if filter_criteria:
             filters.append(filter_criteria)
 
-        result = result.filter(*filters)
+        result = result.where(*filters)
 
         return result
 
-    def search(self, result: Query, property_search: list) -> Query:
+    def search(self, result, property_search: list):
         if not self.query_criteria or not self.query_criteria.search:
             return result
 
@@ -76,10 +74,10 @@ class QueryCriterionService:
 
         filters = [prop.ilike(search) for prop in property_search]
 
-        result = result.filter(or_(*filters))
+        result = result.where(or_(*filters))
         return result
 
-    def sorts(self, result: Query, property_model_list: list[PropertyModel]) -> Query:
+    def sorts(self, result, property_model_list: list[PropertyModel]):
         if not self.query_criteria or not self.query_criteria.sorts:
             return result
 

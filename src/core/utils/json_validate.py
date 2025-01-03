@@ -5,9 +5,9 @@ from pydantic import ValidationError
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_1002
-from core.schemas.camel import CamelModel
+from core.models.camel import Camel
 
-T = TypeVar("T", bound=CamelModel)
+T = TypeVar("T", bound=Camel)
 
 
 def validate_json_data(model: Type[T], json_data: str) -> T:

@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
 from core.database.database import SessionDep
-from core.schemas.response import ResponseData
+from core.models.response import ResponseData
 from core.utils.response import get_empty_response, get_response
-from schemas.auth import (
+from models.auth import (
     UserCheckCodeDTO,
     UserForgotPasswordDTO,
     UserLoggedDTO,

@@ -1,7 +1,7 @@
 from core.database.database import SessionDep
-from core.services.base_service import BaseService
-from models.models import User, UserRole
-from schemas.user_role import UserRoleDTO, UserRoleResponseDTO
+from core.services.base import BaseService
+from models.user import User
+from models.user_role import UserRole, UserRoleDTO, UserRoleResponseDTO
 
 
 class UserRoleService(BaseService[UserRole, UserRoleResponseDTO, UserRoleDTO]):
