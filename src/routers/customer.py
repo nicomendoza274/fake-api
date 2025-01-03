@@ -43,7 +43,7 @@ def list_data(
     "/{customerId}",
     response_model=ResponseData[CustomerResponseDTO],
 )
-def get(
+def get_data(
     session: SessionDep,
     customer_id: int = Path(alias="customerId"),
     user: User = Depends(JWTBearer()),
@@ -58,7 +58,7 @@ def get(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
 )
-def create(
+def create_data(
     customer: CustomerDTO,
     session: SessionDep,
     user: User = Depends(JWTBearer()),
@@ -72,7 +72,7 @@ def create(
     "/{customerId}",
     response_model=None,
 )
-def update(
+def update_data(
     customer: CustomerDTO,
     session: SessionDep,
     customer_id: int = Path(alias="customerId"),
@@ -87,7 +87,7 @@ def update(
     "/{customerId}",
     response_model=None,
 )
-def delete(
+def delete_data(
     session: SessionDep,
     customer_id: int = Path(alias="customerId"),
     user: User = Depends(JWTBearer()),

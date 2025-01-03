@@ -43,7 +43,7 @@ def list_data(
     "/{roleId}",
     response_model=ResponseData[RoleResponseDTO],
 )
-def get(
+def get_data(
     session: SessionDep,
     role_id: int = Path(alias="roleId"),
     user: User = Depends(JWTBearer()),
@@ -58,7 +58,7 @@ def get(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
 )
-def create(
+def create_data(
     session: SessionDep,
     role: RoleDTO,
     user: User = Depends(JWTBearer()),
@@ -72,7 +72,7 @@ def create(
     "/{roleId}",
     response_model=None,
 )
-def update(
+def update_data(
     session: SessionDep,
     role: RoleDTO,
     role_id: int = Path(alias="roleId"),
@@ -87,7 +87,7 @@ def update(
     "/{roleId}",
     response_model=None,
 )
-def delete(
+def delete_data(
     session: SessionDep,
     role_id: int = Path(alias="roleId"),
     user: User = Depends(JWTBearer()),

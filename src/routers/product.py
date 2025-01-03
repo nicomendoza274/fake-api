@@ -56,7 +56,7 @@ def list_data(
     "/{productId}",
     response_model=ResponseData[ProductResponseDTO],
 )
-def get(
+def get_data(
     session: SessionDep,
     product_id: int = Path(alias="productId"),
     user: User = Depends(JWTBearer()),
@@ -71,7 +71,7 @@ def get(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
 )
-def create(
+def create_data(
     session: SessionDep,
     request: Request,
     json_data: str = Form(
@@ -112,7 +112,7 @@ def create(
     "/{productId}",
     response_model=None,
 )
-def update(
+def update_data(
     session: SessionDep,
     request: Request,
     product_id: int = Path(alias="productId"),
@@ -174,7 +174,7 @@ def toggle_active(
     "/{productId}",
     response_model=None,
 )
-def delete(
+def delete_data(
     session: SessionDep,
     product_id: int = Path(alias="productId"),
     user: User = Depends(JWTBearer()),

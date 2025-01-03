@@ -44,7 +44,7 @@ def list_data(
     "/{categoryId}",
     response_model=ResponseData[CategoryResponseDTO],
 )
-def get(
+def get_data(
     session: SessionDep,
     category_id: int = Path(alias="categoryId"),
     user: User = Depends(JWTBearer()),
@@ -59,7 +59,7 @@ def get(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
 )
-def create(
+def create_data(
     category: CategoryDTO,
     session: SessionDep,
     user: User = Depends(JWTBearer()),
@@ -73,7 +73,7 @@ def create(
     "/{categoryId}",
     response_model=None,
 )
-def update(
+def update_data(
     session: SessionDep,
     category: CategoryDTO,
     category_id: int = Path(alias="categoryId"),
@@ -88,7 +88,7 @@ def update(
     "/{categoryId}",
     response_model=None,
 )
-def delete(
+def delete_data(
     session: SessionDep,
     category_id: int = Path(alias="categoryId"),
     user: User = Depends(JWTBearer()),

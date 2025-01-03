@@ -20,7 +20,7 @@ router = APIRouter(
     "",
     response_model=MultipleResponseData[list[UserResponseDTO]],
 )
-def list(
+def list_data(
     session: SessionDep,
     start: int | None = 0,
     length: int | None = 15,
@@ -45,7 +45,7 @@ def list(
     "/{userId}",
     response_model=ResponseData[UserResponseDTO],
 )
-def get(
+def get_data(
     session: SessionDep,
     user_id: int = Path(alias="userId"),
     current_user: User = Depends(JWTBearer()),
@@ -60,7 +60,7 @@ def get(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
 )
-def create(
+def create_data(
     session: SessionDep,
     request: Request,
     json_data: str = Form(
@@ -100,7 +100,7 @@ def create(
     "/{userId}",
     response_model=None,
 )
-def update(
+def update_data(
     session: SessionDep,
     request: Request,
     user_id: int = Path(alias="userId"),
@@ -148,7 +148,7 @@ def update(
     "/{userId}",
     response_model=None,
 )
-def delete(
+def delete_data(
     session: SessionDep,
     user_id: int = Path(alias="userId"),
     current_user: User = Depends(JWTBearer()),
