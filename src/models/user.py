@@ -21,8 +21,7 @@ class UserResponseDTO(UserBase):
 
 class UserDTO(UserBase):
     user_id: SkipJsonSchema[int] | None = Field(default=None, exclude=True)
-    role_id: int | None = None
-    password: str
+    password: str = Field(exclude=True)
     hash: SkipJsonSchema[str] | None = Field(default=None, repr=True)
 
     @model_validator(mode="after")

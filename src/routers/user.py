@@ -79,7 +79,6 @@ def create_data(
             "firstName": "string",
             "lastName": "string",
             "email": "string",
-            "roleId": 0,
             "password": "string",
             "pictureId": 0
         }
@@ -122,7 +121,6 @@ def update_data(
             "firstName": "string",
             "lastName": "string",
             "email": "string",
-            "role_id": 0,
             "password": "string",
             "pictureId": 0
         }
