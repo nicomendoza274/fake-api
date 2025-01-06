@@ -22,7 +22,7 @@ class ProductBase(Camel):
 
 
 class Product(ProductBase, BaseAudit, table=True):
-    __tablename__ = "products"  # type: ignore
+    __tablename__: str = "products"
 
     product_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
 

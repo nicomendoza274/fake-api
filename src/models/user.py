@@ -48,7 +48,7 @@ class UserChangePasswordDTO(Camel):
 
 
 class User(UserModel, BaseAudit, table=True):
-    __tablename__ = "users"  # type: ignore
+    __tablename__: str = "users"
 
     roles: list[Role] | None = Relationship(
         link_model=UserRole,

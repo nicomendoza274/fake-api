@@ -12,7 +12,7 @@ class UserRoleBase(Camel):
 
 
 class UserRole(UserRoleBase, BaseAudit, table=True):
-    __tablename__ = "user_roles"  # type: ignore
+    __tablename__: str = "user_roles"
     user_role_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
 
 

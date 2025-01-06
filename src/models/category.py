@@ -11,7 +11,7 @@ class CategoryBase(Camel):
 
 
 class Category(CategoryBase, BaseAudit, table=True):
-    __tablename__ = "categories"  # type: ignore
+    __tablename__: str = "categories"
     category_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
 
 
