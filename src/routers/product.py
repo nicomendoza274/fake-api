@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, Form, Path, Request, UploadFile, status
+from fastapi import APIRouter, Depends, Form, Path, Request, status
 
 from core.database.database import SessionDep
 from core.models.response import MultipleResponseData, ResponseData
@@ -8,7 +8,7 @@ from core.utils.json_validate import validate_json_data
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
-from models.product import Product, ProductDTO, ProductResponseDTO
+from models.product import CreateProductDTO, Product, ProductDTO, ProductResponseDTO
 from models.user import User
 from services.product import ProductService
 
@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=MultipleResponseData[list[ProductResponseDTO]],
+    response_model=MultipleResponseData[ProductResponseDTO],
 )
 def list_data(
     session: SessionDep,
@@ -64,18 +64,13 @@ def get_data(
 def create_data(
     session: SessionDep,
     request: Request,
-    json_data: str = Form(
-        ...,
-        alias="application/json",
-        validation_alias="application/json",
-    ),
-    picture: UploadFile = File(None),
+    body: CreateProductDTO = Form(..., media_type="multipart/form-data"),
     user: User = Depends(JWTBearer()),
 ):
     """
     Parameters
     ----------
-    * **application/json**: This is a stringify object of product, for example:
+    * **data**: This is a stringify object of product, for example:
 
         ```json
         {
@@ -90,8 +85,8 @@ def create_data(
     * **picture**: This is an image file
     """
 
-    product = validate_json_data(ProductDTO, json_data)
-    new_file = FileService(session, user).save_file(picture, request)
+    product = validate_json_data(ProductDTO, body.data)
+    new_file = FileService(session, user).save_file(body.picture, request)
     product.picture_id = new_file.file_id if new_file else None
     ProductService(session, user).create_record(product)
     response = get_empty_response(status.HTTP_201_CREATED)
@@ -105,19 +100,14 @@ def create_data(
 def update_data(
     session: SessionDep,
     request: Request,
+    body: CreateProductDTO = Form(..., media_type="multipart/form-data"),
     product_id: int = Path(alias="productId"),
-    json_data: str = Form(
-        ...,
-        alias="application/json",
-        validation_alias="application/json",
-    ),
-    picture: UploadFile | None = File(None),
     user: User = Depends(JWTBearer()),
 ):
     """
     Parameters
     ----------
-    * **application/json**: This is a stringify object of product, for example:
+    * **data**: This is a stringify object of product, for example:
 
         ```json
         {
@@ -132,13 +122,13 @@ def update_data(
     * **picture**: This is an image file
     """
 
-    product = validate_json_data(ProductDTO, json_data)
+    product = validate_json_data(ProductDTO, body.data)
 
     if not product.picture_id:
         FileService(session, user).delete_file(
             Product, product.product_id, "picture_id"
         )
-        new_file = FileService(session, user).save_file(picture, request)
+        new_file = FileService(session, user).save_file(body.picture, request)
         product.file_id = new_file.file_id if new_file else None
     ProductService(session, user).update_record(product, product_id)
     response = get_empty_response()

@@ -9,7 +9,7 @@ class MultipleResponseData(BaseModel, Generic[T]):
     count: int
     start: int | None
     length: int | None
-    data: T
+    data: list[T]
 
 
 class ResponseData(BaseModel, Generic[T]):

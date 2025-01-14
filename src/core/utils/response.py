@@ -26,7 +26,7 @@ def get_multiple_response(
     count: int,
     start: int | None,
     length: int | None,
-    data: List[T] | T,
+    data: List[T],
     status_code: int = status.HTTP_200_OK,
 ) -> JSONResponse:
     response = jsonable_encoder(

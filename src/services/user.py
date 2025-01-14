@@ -8,7 +8,6 @@ from core.constants.generic_errors import GEN_2001, GEN_4000
 from core.database.database import SessionDep
 from core.services.base import BaseService
 from models.user import User, UserChangePasswordDTO, UserDTO, UserResponseDTO
-from models.user_role import UserRole
 
 
 class UserService(BaseService[User, UserResponseDTO, UserDTO]):

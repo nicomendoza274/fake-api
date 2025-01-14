@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, Form, Path, Request, UploadFile, status
+from fastapi import APIRouter, Depends, Form, Path, Request, status
 
 from core.database.database import SessionDep
 from core.models.response import MultipleResponseData, ResponseData
@@ -7,7 +7,7 @@ from core.utils.json_validate import validate_json_data
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
 from middlewares.jwt_bearer import JWTBearer
-from models.user import User, UserDTO, UserResponseDTO
+from models.user import CreateUserDTO, User, UserDTO, UserResponseDTO
 from services.user import UserService
 
 router = APIRouter(
@@ -18,7 +18,7 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=MultipleResponseData[list[UserResponseDTO]],
+    response_model=MultipleResponseData[UserResponseDTO],
 )
 def list_data(
     session: SessionDep,
@@ -63,16 +63,11 @@ def get_data(
 def create_data(
     session: SessionDep,
     request: Request,
-    json_data: str = Form(
-        ...,
-        alias="application/json",
-        validation_alias="application/json",
-    ),
-    picture: UploadFile = File(None),
+    body: CreateUserDTO = Form(..., media_type="multipart/form-data"),
     current_user: User = Depends(JWTBearer()),
 ):
     """
-        * **application/json**: This is a stringify object of user, for example:
+        * **data**: This is a stringify object of user, for example:
 
         ```json
         {
@@ -86,9 +81,9 @@ def create_data(
 
     * **picture**: This is an image file
     """
-    user = validate_json_data(UserDTO, json_data)
+    user = validate_json_data(UserDTO, body.data)
     file_service = FileService(session, current_user)
-    new_file = file_service.save_file(picture, request)
+    new_file = file_service.save_file(body.picture, request)
     user.picture_id = new_file.file_id if new_file else None
     UserService(session, current_user).create_record(user)
     response = get_empty_response(status.HTTP_201_CREATED)
@@ -102,19 +97,14 @@ def create_data(
 def update_data(
     session: SessionDep,
     request: Request,
+    body: CreateUserDTO = Form(..., media_type="multipart/form-data"),
     user_id: int = Path(alias="userId"),
-    json_data: str = Form(
-        ...,
-        alias="application/json",
-        validation_alias="application/json",
-    ),
-    picture: UploadFile = File(None),
     current_user: User = Depends(JWTBearer()),
 ):
     """
     Parameters
     ----------
-    * **application/json**: This is a stringify object of user, for example:
+    * **data**: This is a stringify object of user, for example:
 
         ```json
         {
@@ -129,12 +119,12 @@ def update_data(
     * **picture**: This is an image file
     """
 
-    user = validate_json_data(UserDTO, json_data)
+    user = validate_json_data(UserDTO, body.data)
 
     if not user.picture_id:
         file_service = FileService(session, current_user)
         file_service.delete_file(User, current_user.user_id, "picture_id")
-        new_file = file_service.save_file(picture, request)
+        new_file = file_service.save_file(body.picture, request)
         user.picture_id = new_file.file_id if new_file else None
 
     UserService(session, current_user).update_record(user, user_id)

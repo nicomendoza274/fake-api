@@ -1,3 +1,4 @@
+from fastapi import Form, UploadFile
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import BigInteger, Field, Relationship, and_
 
@@ -54,3 +55,8 @@ class ProductResponseDTO(ProductBase):
 
 class ProductDTO(ProductBase):
     product_id: SkipJsonSchema[int | None] = Field(default=None, exclude=True)
+
+
+class CreateProductDTO(Camel):
+    data: str = Form(...)
+    picture: UploadFile | None = None

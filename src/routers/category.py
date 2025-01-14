@@ -17,7 +17,7 @@ router = APIRouter(
 
 @router.get(
     "",
-    response_model=MultipleResponseData[list[CategoryResponseDTO]],
+    response_model=MultipleResponseData[CategoryResponseDTO],
 )
 def list_data(
     session: SessionDep,

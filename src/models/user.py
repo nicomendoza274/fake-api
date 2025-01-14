@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from fastapi import Form, UploadFile
 from pydantic import Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Field, Relationship, and_
@@ -28,6 +29,11 @@ class UserDTO(UserBase):
     def compute_hash(cls, values):
         values.hash = encrypt_string(values.password)
         return values
+
+
+class CreateUserDTO(Camel):
+    data: str = Form(...)
+    picture: UploadFile | None = None
 
 
 class UserUpdateDTO(Camel):
