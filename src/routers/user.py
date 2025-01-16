@@ -7,6 +7,7 @@ from core.services.file import FileService
 from core.utils.json_validate import validate_json_data
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
+from docs.user import USER_DOC
 from middlewares.jwt_bearer import JWTBearer
 from models.user import CreateUserDTO, User, UserDTO, UserResponseDTO
 from services.user import UserService
@@ -63,6 +64,7 @@ def get_data(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
     responses=NOT_422 | NOT_201,
+    description=USER_DOC,
 )
 def create_data(
     session: SessionDep,
@@ -70,21 +72,6 @@ def create_data(
     body: CreateUserDTO = Form(..., media_type="multipart/form-data"),
     current_user: User = Depends(JWTBearer()),
 ):
-    """
-        * **data**: This is a stringify object of user, for example:
-
-        ```json
-        {
-            "firstName": "string",
-            "lastName": "string",
-            "email": "string",
-            "password": "string",
-            "pictureId": 0
-        }
-        ```
-
-    * **picture**: This is an image file
-    """
     user = validate_json_data(UserDTO, body.data)
     file_service = FileService(session, current_user)
     new_file = file_service.save_file(body.picture, request)
@@ -98,6 +85,7 @@ def create_data(
     path="/{userId}",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    description=USER_DOC,
 )
 def update_data(
     session: SessionDep,
@@ -106,24 +94,6 @@ def update_data(
     user_id: int = Path(alias="userId"),
     current_user: User = Depends(JWTBearer()),
 ):
-    """
-    Parameters
-    ----------
-    * **data**: This is a stringify object of user, for example:
-
-        ```json
-        {
-            "firstName": "string",
-            "lastName": "string",
-            "email": "string",
-            "password": "string",
-            "pictureId": 0
-        }
-        ```
-
-    * **picture**: This is an image file
-    """
-
     user = validate_json_data(UserDTO, body.data)
 
     if not user.picture_id:

@@ -8,6 +8,7 @@ from core.services.file import FileService
 from core.utils.json_validate import validate_json_data
 from core.utils.query import str_to_query
 from core.utils.response import get_empty_response, get_multiple_response, get_response
+from docs.product import PRODUCT_DOC
 from middlewares.jwt_bearer import JWTBearer
 from models.product import CreateProductDTO, Product, ProductDTO, ProductResponseDTO
 from models.user import User
@@ -64,6 +65,7 @@ def get_data(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
     responses=NOT_422 | NOT_201,
+    description=PRODUCT_DOC,
 )
 def create_data(
     session: SessionDep,
@@ -71,24 +73,6 @@ def create_data(
     body: CreateProductDTO = Form(..., media_type="multipart/form-data"),
     user: User = Depends(JWTBearer()),
 ):
-    """
-    Parameters
-    ----------
-    * **data**: This is a stringify object of product, for example:
-
-        ```json
-        {
-            "categoryId": 0,
-            "name": "string"
-            "price": 0,
-            "isActive": true,
-            "pictureId": 0
-        }
-        ```
-
-    * **picture**: This is an image file
-    """
-
     product = validate_json_data(ProductDTO, body.data)
     new_file = FileService(session, user).save_file(body.picture, request)
     product.picture_id = new_file.file_id if new_file else None
@@ -101,6 +85,7 @@ def create_data(
     path="/{productId}",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    description=PRODUCT_DOC,
 )
 def update_data(
     session: SessionDep,
@@ -109,24 +94,6 @@ def update_data(
     product_id: int = Path(alias="productId"),
     user: User = Depends(JWTBearer()),
 ):
-    """
-    Parameters
-    ----------
-    * **data**: This is a stringify object of product, for example:
-
-        ```json
-        {
-            "categoryId": 0,
-            "name": "string",
-            "price": 0,
-            "isActive": true,
-            "pictureId": 0
-        }
-        ```
-
-    * **picture**: This is an image file
-    """
-
     product = validate_json_data(ProductDTO, body.data)
 
     if not product.picture_id:
