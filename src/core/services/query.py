@@ -35,30 +35,34 @@ class QueryCriterionService:
                 self.sql_model,
             )
 
-            filter_criteria = None
             model_property = getattr(model, last_property)
-            if type_filter == FilterCriteriaEnum.EQ.value:
-                filter_criteria = model_property == value_filter
-            elif type_filter == FilterCriteriaEnum.NEQ.value:
-                filter_criteria = model_property != value_filter
-            elif type_filter == FilterCriteriaEnum.GT.value:
-                filter_criteria = model_property > value_filter
-            elif type_filter == FilterCriteriaEnum.LT.value:
-                filter_criteria = model_property < value_filter
-            elif type_filter == FilterCriteriaEnum.GTE.value:
-                filter_criteria = model_property >= value_filter
-            elif type_filter == FilterCriteriaEnum.LTE.value:
-                filter_criteria = model_property <= value_filter
-            elif (
-                type_filter == FilterCriteriaEnum.BETWEEN.value
-                and from_filter
-                and to_filter
-            ):
-                filter_criteria = model_property.between(from_filter, to_filter)
-            elif type_filter == FilterCriteriaEnum.LIKE.value:
-                filter_criteria = model_property.like(f"%{value_filter}%")
-            elif type_filter == FilterCriteriaEnum.CONTAINS.value:
-                filter_criteria = model_property.like(f"%{value_filter}%")
+            filter_criteria = {
+                FilterCriteriaEnum.EQ.value: model_property == value_filter,
+                FilterCriteriaEnum.NEQ.value: model_property != value_filter,
+                FilterCriteriaEnum.GT.value: (
+                    model_property > value_filter if value_filter else None
+                ),
+                FilterCriteriaEnum.LT.value: (
+                    model_property < value_filter if value_filter else None
+                ),
+                FilterCriteriaEnum.GTE.value: (
+                    model_property >= value_filter if value_filter else None
+                ),
+                FilterCriteriaEnum.LTE.value: (
+                    model_property <= value_filter if value_filter else None
+                ),
+                FilterCriteriaEnum.BETWEEN.value: (
+                    model_property.between(from_filter, to_filter)
+                    if from_filter and to_filter
+                    else None
+                ),
+                FilterCriteriaEnum.LIKE.value: model_property.like(f"%{value_filter}%"),
+                FilterCriteriaEnum.CONTAINS.value: model_property.like(
+                    f"%{value_filter}%"
+                ),
+            }
+
+            filter_criteria = filter_criteria.get(type_filter, None)
 
             filters.append(filter_criteria)
 
