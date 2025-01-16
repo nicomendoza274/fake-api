@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from core.constants.responses import NOT_200, NOT_422
 from core.database.database import SessionDep
 from core.models.response import ResponseData
 from core.utils.response import get_empty_response, get_response
@@ -18,28 +19,44 @@ router = APIRouter(
 )
 
 
-@router.post("/sign-in", response_model=ResponseData[UserLoggedDTO])
+@router.post(
+    path="/sign-in",
+    response_model=ResponseData[UserLoggedDTO],
+    responses=NOT_422,
+)
 def login(session: SessionDep, user: UserLoginDTO):
     user_data = AuthService(session, None).login_user(user)
     response = get_response(user_data)
     return response
 
 
-@router.post("/forgot-password", response_model=None)
+@router.post(
+    path="/forgot-password",
+    response_model=None,
+    responses=NOT_422 | NOT_200,
+)
 async def forgot_password(session: SessionDep, user: UserForgotPasswordDTO):
     await AuthService(session, None).forgot_password(user)
     response = get_empty_response()
     return response
 
 
-@router.post("/check-code", response_model=None)
+@router.post(
+    path="/check-code",
+    response_model=None,
+    responses=NOT_422 | NOT_200,
+)
 def check_code(session: SessionDep, user: UserCheckCodeDTO):
     AuthService(session, None).check_code(user)
     response = get_empty_response()
     return response
 
 
-@router.post("/reset-password", response_model=None)
+@router.post(
+    path="/reset-password",
+    response_model=None,
+    responses=NOT_422 | NOT_200,
+)
 def reset_password(session: SessionDep, user: UserResetPasswordDTO):
     AuthService(session, None).reset_password(user)
     response = get_empty_response()

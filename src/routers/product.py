@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Form, Path, Request, status
 
+from core.constants.responses import NOT_200, NOT_201, NOT_422
 from core.database.database import SessionDep
 from core.models.response import MultipleResponseData, ResponseData
 from core.models.toggle import ActiveToggleDTO
@@ -19,8 +20,9 @@ router = APIRouter(
 
 
 @router.get(
-    "",
+    path="",
     response_model=MultipleResponseData[ProductResponseDTO],
+    responses=NOT_422,
 )
 def list_data(
     session: SessionDep,
@@ -43,8 +45,9 @@ def list_data(
 
 
 @router.get(
-    "/{productId}",
+    path="/{productId}",
     response_model=ResponseData[ProductResponseDTO],
+    responses=NOT_422,
 )
 def get_data(
     session: SessionDep,
@@ -57,9 +60,10 @@ def get_data(
 
 
 @router.post(
-    "",
+    path="",
     status_code=status.HTTP_201_CREATED,
     response_model=None,
+    responses=NOT_422 | NOT_201,
 )
 def create_data(
     session: SessionDep,
@@ -94,8 +98,9 @@ def create_data(
 
 
 @router.put(
-    "/{productId}",
+    path="/{productId}",
     response_model=None,
+    responses=NOT_422 | NOT_200,
 )
 def update_data(
     session: SessionDep,
@@ -136,8 +141,9 @@ def update_data(
 
 
 @router.put(
-    "/activate/{productId}",
+    path="/activate/{productId}",
     response_model=None,
+    responses=NOT_422 | NOT_200,
 )
 def toggle_active(
     session: SessionDep,
@@ -151,8 +157,9 @@ def toggle_active(
 
 
 @router.delete(
-    "/{productId}",
+    path="/{productId}",
     response_model=None,
+    responses=NOT_422 | NOT_200,
 )
 def delete_data(
     session: SessionDep,
