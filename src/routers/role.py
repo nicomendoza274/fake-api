@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, Depends, Path, Query, status
 
 from core.constants.responses import NOT_200, NOT_201, NOT_422
 from core.database.database import SessionDep
@@ -20,12 +20,13 @@ router = APIRouter(
     path="",
     response_model=MultipleResponseData[RoleResponseDTO],
     responses=NOT_422,
+    summary="List roles",
 )
 def list_data(
     session: SessionDep,
-    start: int | None = 0,
-    length: int | None = 15,
-    query: str | None = None,
+    start: int | None = Query(default=0, description="Starting index for pagination"),
+    length: int | None = Query(default=15, description="Number of items per page"),
+    query: str | None = Query(default=None, description="Base64 encoded string"),
     user: User = Depends(JWTBearer()),
 ):
     query_criteria = str_to_query(query)
@@ -45,6 +46,7 @@ def list_data(
     path="/{roleId}",
     response_model=ResponseData[RoleResponseDTO],
     responses=NOT_422,
+    summary="Get role",
 )
 def get_data(
     session: SessionDep,
@@ -61,6 +63,7 @@ def get_data(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
     responses=NOT_422 | NOT_201,
+    summary="Create role",
 )
 def create_data(
     session: SessionDep,
@@ -76,6 +79,7 @@ def create_data(
     path="/{roleId}",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Update role",
 )
 def update_data(
     session: SessionDep,
@@ -92,6 +96,7 @@ def update_data(
     path="/{roleId}",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Delete role",
 )
 def delete_data(
     session: SessionDep,

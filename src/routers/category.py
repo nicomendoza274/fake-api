@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, status
+from fastapi import APIRouter, Depends, Path, Query, status
 
 from core.constants.responses import NOT_200, NOT_201, NOT_422
 from core.database.database import SessionDep
@@ -20,12 +20,13 @@ router = APIRouter(
     path="",
     response_model=MultipleResponseData[CategoryResponseDTO],
     responses=NOT_422,
+    summary="List categories",
 )
 def list_data(
     session: SessionDep,
-    start: int | None = 0,
-    length: int | None = 15,
-    query: str | None = None,
+    start: int | None = Query(default=0, description="Starting index for pagination"),
+    length: int | None = Query(default=15, description="Number of items per page"),
+    query: str | None = Query(default=None, description="Base64 encoded string"),
     user: User = Depends(JWTBearer()),
 ):
     query_criteria = str_to_query(query)
@@ -46,6 +47,7 @@ def list_data(
     path="/{categoryId}",
     response_model=ResponseData[CategoryResponseDTO],
     responses=NOT_422,
+    summary="Get category",
 )
 def get_data(
     session: SessionDep,
@@ -62,6 +64,7 @@ def get_data(
     status_code=status.HTTP_201_CREATED,
     response_model=None,
     responses=NOT_422 | NOT_201,
+    summary="Create category",
 )
 def create_data(
     category: CategoryDTO,
@@ -77,6 +80,7 @@ def create_data(
     path="/{categoryId}",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Update category",
 )
 def update_data(
     session: SessionDep,
@@ -93,6 +97,7 @@ def update_data(
     path="/{categoryId}",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Delete category",
 )
 def delete_data(
     session: SessionDep,

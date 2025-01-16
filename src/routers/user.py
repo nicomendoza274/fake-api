@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, Path, Request, status
+from fastapi import APIRouter, Depends, Form, Path, Query, Request, status
 
 from core.constants.responses import NOT_200, NOT_201, NOT_422
 from core.database.database import SessionDep
@@ -22,12 +22,13 @@ router = APIRouter(
     path="",
     response_model=MultipleResponseData[UserResponseDTO],
     responses=NOT_422,
+    summary="List users",
 )
 def list_data(
     session: SessionDep,
-    start: int | None = 0,
-    length: int | None = 15,
-    query: str | None = None,
+    start: int | None = Query(default=0, description="Starting index for pagination"),
+    length: int | None = Query(default=15, description="Number of items per page"),
+    query: str | None = Query(default=None, description="Base64 encoded string"),
     current_user: User = Depends(JWTBearer()),
 ):
     query_criteria = str_to_query(query)
@@ -48,6 +49,7 @@ def list_data(
     path="/{userId}",
     response_model=ResponseData[UserResponseDTO],
     responses=NOT_422,
+    summary="Get user",
 )
 def get_data(
     session: SessionDep,
@@ -65,6 +67,7 @@ def get_data(
     response_model=None,
     responses=NOT_422 | NOT_201,
     description=USER_DOC,
+    summary="Create user",
 )
 def create_data(
     session: SessionDep,
@@ -86,6 +89,7 @@ def create_data(
     response_model=None,
     responses=NOT_422 | NOT_200,
     description=USER_DOC,
+    summary="Update user",
 )
 def update_data(
     session: SessionDep,
@@ -111,6 +115,7 @@ def update_data(
     path="/{userId}",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Delete user",
 )
 def delete_data(
     session: SessionDep,

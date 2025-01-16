@@ -23,6 +23,7 @@ router = APIRouter(
     path="/sign-in",
     response_model=ResponseData[UserLoggedDTO],
     responses=NOT_422,
+    summary="Sign in user",
 )
 def login(session: SessionDep, user: UserLoginDTO):
     user_data = AuthService(session, None).login_user(user)
@@ -34,6 +35,7 @@ def login(session: SessionDep, user: UserLoginDTO):
     path="/forgot-password",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Forgot user password",
 )
 async def forgot_password(session: SessionDep, user: UserForgotPasswordDTO):
     await AuthService(session, None).forgot_password(user)
@@ -45,6 +47,7 @@ async def forgot_password(session: SessionDep, user: UserForgotPasswordDTO):
     path="/check-code",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Check code",
 )
 def check_code(session: SessionDep, user: UserCheckCodeDTO):
     AuthService(session, None).check_code(user)
@@ -56,6 +59,7 @@ def check_code(session: SessionDep, user: UserCheckCodeDTO):
     path="/reset-password",
     response_model=None,
     responses=NOT_422 | NOT_200,
+    summary="Reset user password",
 )
 def reset_password(session: SessionDep, user: UserResetPasswordDTO):
     AuthService(session, None).reset_password(user)
