@@ -1,5 +1,6 @@
 import shutil
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Type, TypeVar
 
@@ -14,10 +15,10 @@ from core.models.user import UserModel
 T = TypeVar("T", bound=BaseAudit)
 
 
+@dataclass
 class FileService:
-    def __init__(self, session: SessionDep, user: UserModel | None) -> None:
-        self.session = session
-        self.user = user
+    session: SessionDep
+    user: UserModel | None
 
     def save_file(self, file: UploadFile | None, request: Request) -> File | None:
         if not file or not file.filename:

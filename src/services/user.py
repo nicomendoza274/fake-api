@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
 from fastapi import status
@@ -10,9 +11,12 @@ from core.services.base import BaseService
 from models.user import User, UserChangePasswordDTO, UserDTO, UserResponseDTO
 
 
+@dataclass
 class UserService(BaseService[User, UserResponseDTO, UserDTO]):
-    def __init__(self, session: SessionDep, user: User | None):
-        super().__init__(session, user, User, UserResponseDTO)
+    session: SessionDep
+    current_user: User | None
+    sql_model: type[User] = User
+    response_schema: type[UserResponseDTO] = UserResponseDTO
 
     def change_password(self, user: UserChangePasswordDTO):
 

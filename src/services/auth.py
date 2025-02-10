@@ -1,4 +1,5 @@
 import random
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import cast
@@ -7,17 +8,11 @@ from fastapi import status
 from sqlmodel import func, select, text
 
 from core.classes.handle_exception import HandleException
+from core.classes.settings import settings
 from core.constants.generic_errors import GEN_2002, GEN_4000
 from core.database.database import SessionDep
 from core.models.email import EmailMessage
-from core.services.email import (
-    MAIL_FROM,
-    MAIL_PASSWORD,
-    MAIL_PORT,
-    MAIL_SERVER,
-    MAIL_USERNAME,
-    EmailService,
-)
+from core.services.email import EmailService
 from core.utils.encrypt import create_token
 from models.user import (
     User,
@@ -30,11 +25,17 @@ from models.user import (
 )
 from models.user_code import UserCode
 
+MAIL_USERNAME = settings.MAIL_USERNAME
+MAIL_PASSWORD = settings.MAIL_PASSWORD
+MAIL_FROM = settings.MAIL_FROM
+MAIL_PORT = settings.MAIL_PORT
+MAIL_SERVER = settings.MAIL_SERVER
 
+
+@dataclass
 class AuthService:
-    def __init__(self, session: SessionDep, user: User | None):
-        self.session = session
-        self.current_user = user
+    session: SessionDep
+    current_user: User | None
 
     async def forgot_password(self, user: UserForgotPasswordDTO) -> None:
         result = self.session.exec(select(User).where(User.email == user.email)).first()

@@ -1,41 +1,36 @@
+from dataclasses import dataclass
+
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
 from pydantic import DirectoryPath, SecretStr
 
-from core.classes.settings import settings
 
-MAIL_USERNAME = settings.MAIL_USERNAME
-MAIL_PASSWORD = settings.MAIL_PASSWORD
-MAIL_FROM = settings.MAIL_FROM
-MAIL_PORT = settings.MAIL_PORT
-MAIL_SERVER = settings.MAIL_SERVER
-
-
+@dataclass
 class EmailService:
-    def __init__(
-        self,
-        user_name: str,
-        password: str,
-        mail_from: str,
-        mail_port: int,
-        mail_server: str,
-        template_folder: DirectoryPath,
-        mail_start_tls: bool = True,
-        mail_ssl_tsl: bool = False,
-        use_credentials: bool = True,
-        validate_certs: bool = True,
-    ):
-        self.conf = ConnectionConfig(
-            MAIL_USERNAME=user_name,
-            MAIL_PASSWORD=SecretStr(password),
-            MAIL_FROM=mail_from,
-            MAIL_PORT=mail_port,
-            MAIL_SERVER=mail_server,
-            MAIL_STARTTLS=mail_start_tls,
-            MAIL_SSL_TLS=mail_ssl_tsl,
-            USE_CREDENTIALS=use_credentials,
-            VALIDATE_CERTS=validate_certs,
-            TEMPLATE_FOLDER=template_folder,
+    user_name: str
+    password: str
+    mail_from: str
+    mail_port: int
+    mail_server: str
+    template_folder: DirectoryPath
+    mail_start_tls: bool = True
+    mail_ssl_tsl: bool = False
+    use_credentials: bool = True
+    validate_certs: bool = True
+
+    def get_config(self) -> ConnectionConfig:
+        conf = ConnectionConfig(
+            MAIL_USERNAME=self.user_name,
+            MAIL_PASSWORD=SecretStr(self.password),
+            MAIL_FROM=self.mail_from,
+            MAIL_PORT=self.mail_port,
+            MAIL_SERVER=self.mail_server,
+            MAIL_STARTTLS=self.mail_start_tls,
+            MAIL_SSL_TLS=self.mail_ssl_tsl,
+            USE_CREDENTIALS=self.use_credentials,
+            VALIDATE_CERTS=self.validate_certs,
+            TEMPLATE_FOLDER=self.template_folder,
         )
+        return conf
 
     async def send_email(
         self,
@@ -51,5 +46,5 @@ class EmailService:
             subtype=MessageType.html,
         )
 
-        fm = FastMail(self.conf)
+        fm = FastMail(self.get_config())
         await fm.send_message(msg, template_name)

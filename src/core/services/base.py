@@ -1,8 +1,10 @@
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Generic, Type, TypeVar
 
 from fastapi import status
 from sqlmodel import select
+from sqlmodel.sql.expression import SelectOfScalar
 
 from core.classes.handle_exception import HandleException
 from core.constants.generic_errors import GEN_4000
@@ -19,24 +21,13 @@ K = TypeVar("K", bound=Camel)
 W = TypeVar("W", bound=Camel)
 
 
+@dataclass
 class BaseService(Generic[T, K, W]):
-    def __init__(
-        self,
-        session: SessionDep,
-        current_user: UserModel | None,
-        sqlModel: Type[T],
-        response_model: Type[K] | None = None,
-    ) -> None:
-        self.session = session
-        self.current_user = current_user
-        self.sqlModel = sqlModel
-        self.response_schema = response_model
-        self.statement = select(self.sqlModel)
-        self.default_sort = self.sqlModel.get_primary_key_name()
-        self.property_model_list: list[PropertyModel] = []
-        self.property_search = (
-            [getattr(self.sqlModel, "name")] if hasattr(self.sqlModel, "name") else []
-        )
+    session: SessionDep
+    current_user: UserModel | None
+    sql_model: Type[T]
+    response_schema: Type[K]
+    query_model = QueryCriterionService[T]()
 
     def get_records(
         self,
@@ -47,14 +38,13 @@ class BaseService(Generic[T, K, W]):
         if not self.response_schema:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
 
-        statement = self.statement
-
-        query_model = QueryCriterionService(self.sqlModel, query_criteria)
-
-        statement = self.filter_list(query_model, statement)
-        statement = self.search_list(query_model, statement)
-        statement = self.sort_list(query_model, statement)
-        statement = self.sort_by_pk(statement)
+        statement = self.query_model.validate_query(
+            query_criteria,
+            self.get_statement(),
+            self.get_property_model_list(),
+            self.sql_model,
+            self.get_property_search(),
+        )
 
         total_count = len(self.session.exec(statement).all())
 
@@ -71,7 +61,7 @@ class BaseService(Generic[T, K, W]):
         return data_response_list, total_count
 
     def get_record(self, id: int) -> K:
-        result = self.session.get(self.sqlModel, id)
+        result = self.session.get(self.sql_model, id)
 
         if not result or result.deleted_at != None or not self.response_schema:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -81,7 +71,7 @@ class BaseService(Generic[T, K, W]):
         return data_response
 
     def create_record(self, data: W) -> None:
-        new_record = self.sqlModel(**data.model_dump())
+        new_record = self.sql_model(**data.model_dump())
         if self.current_user:
             new_record.created_by = self.current_user.user_id
         self.session.add(new_record)
@@ -89,7 +79,7 @@ class BaseService(Generic[T, K, W]):
         return
 
     def update_record(self, data: W, id: int | None) -> None:
-        result = self.session.get(self.sqlModel, id)
+        result = self.session.get(self.sql_model, id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -107,7 +97,7 @@ class BaseService(Generic[T, K, W]):
         return
 
     def toggle_active(self, data: ActiveToggleDTO, id: int) -> None:
-        result = self.session.get(self.sqlModel, id)
+        result = self.session.get(self.sql_model, id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -121,7 +111,7 @@ class BaseService(Generic[T, K, W]):
         return
 
     def delete_record(self, id: int) -> None:
-        result = self.session.get(self.sqlModel, id)
+        result = self.session.get(self.sql_model, id)
 
         if not result or result.deleted_at != None:
             raise HandleException([GEN_4000], status.HTTP_404_NOT_FOUND)
@@ -133,15 +123,16 @@ class BaseService(Generic[T, K, W]):
         self.session.commit()
         return
 
-    def filter_list(self, query_model: QueryCriterionService, statement):
-        result = statement.where(self.sqlModel.deleted_at == None)
-        return query_model.filters(result, self.property_model_list)
+    def get_statement(self) -> SelectOfScalar[T]:
+        return select(self.sql_model).where(self.sql_model.deleted_at == None)
 
-    def search_list(self, query_model: QueryCriterionService, statement):
-        return query_model.search(statement, self.property_search)
+    def get_default_sort(self) -> str | None:
+        return self.sql_model.get_primary_key_name()
 
-    def sort_list(self, query_model: QueryCriterionService, statement):
-        return query_model.sorts(statement, self.property_model_list)
+    def get_property_model_list(self) -> list[PropertyModel]:
+        return []
 
-    def sort_by_pk(self, statement):
-        return statement.order_by(self.default_sort)
+    def get_property_search(self) -> list:
+        return (
+            [getattr(self.sql_model, "name")] if hasattr(self.sql_model, "name") else []
+        )
