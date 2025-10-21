@@ -5,7 +5,6 @@ from starlette.responses import RedirectResponse
 from core.classes.settings import settings
 from core.middlewares.error_handler import ErrorHandler
 from core.middlewares.rate_limiter import RateLimitMiddleware
-from core.middlewares.security import SecurityHeadersMiddleware
 from core.utils.file import create_and_mount_static_directory
 from routers import auth, category, customer, health, product, role, user
 
@@ -27,7 +26,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(ErrorHandler)
 
