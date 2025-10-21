@@ -7,7 +7,7 @@ from core.middlewares.error_handler import ErrorHandler
 from core.middlewares.rate_limiter import RateLimitMiddleware
 from core.middlewares.security import SecurityHeadersMiddleware
 from core.utils.file import create_and_mount_static_directory
-from routers import auth, category, customer, product, role, user
+from routers import auth, category, customer, health, product, role, user
 
 app = FastAPI()
 
@@ -27,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(SecurityHeadersMiddleware)
+# app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(ErrorHandler)
 
@@ -37,6 +37,7 @@ app.include_router(customer.router, prefix=app_prefix)
 app.include_router(product.router, prefix=app_prefix)
 app.include_router(role.router, prefix=app_prefix)
 app.include_router(user.router, prefix=app_prefix)
+app.include_router(health.router, prefix=app_prefix)
 
 
 @app.get("/", include_in_schema=False)

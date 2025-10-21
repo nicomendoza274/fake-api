@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import Form, UploadFile
 from pydantic import Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
-from sqlmodel import Field, Relationship, and_
+from sqlmodel import Field, Index, Relationship, and_
 
 from core.models.base import BaseAudit
 from core.models.camel import Camel
@@ -71,6 +71,14 @@ class User(UserModel, BaseAudit, table=True):
                 File.deleted_at == None,
             ),
         }
+    )
+
+    # Database indexes for better performance
+    __table_args__ = (
+        Index("idx_user_email", "email"),  # For login queries
+        Index("idx_user_deleted_at", "deleted_at"),  # For soft delete queries
+        Index("idx_user_created_at", "created_at"),  # For audit queries
+        Index("idx_user_hash", "hash"),  # For authentication queries
     )
 
 

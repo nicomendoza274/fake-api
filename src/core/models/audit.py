@@ -2,12 +2,12 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import TIMESTAMP, BigInteger
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, func
 
 
 class Audit(SQLModel):
     created_at: Optional[datetime] = Field(
-        default=None,
+        default=func.now(),
         nullable=True,
         sa_type=TIMESTAMP(timezone=True),  # type: ignore
     )

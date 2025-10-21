@@ -42,17 +42,17 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         client_ip = self._get_client_ip(request)
         now = datetime.now()
 
-        # Limpiar requests antiguos
+        # Clear old requests
         self._cleanup_old_requests(client_ip)
 
-        # Verificar límite de rate
+        # Check rate limit
         if len(self.requests[client_ip]) >= self.rate_limit:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail=f"Rate limit exceeded. Maximum {self.rate_limit} requests per minute.",
             )
 
-        # Registrar request
+        # Register request
         self.requests[client_ip].append(now)
 
         response = await call_next(request)

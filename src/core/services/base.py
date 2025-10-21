@@ -124,7 +124,20 @@ class BaseService(Generic[T, K, W]):
         return
 
     def get_statement(self) -> SelectOfScalar[T]:
-        return select(self.sql_model).where(self.sql_model.deleted_at == None)
+        """Get base statement with optimized loading"""
+        statement = select(self.sql_model).where(self.sql_model.deleted_at == None)
+
+        # Apply custom statement modifications if available
+        if hasattr(self, "get_optimized_statement"):
+            return self.get_optimized_statement(statement)
+
+        return statement
+
+    def get_optimized_statement(
+        self, base_statement: SelectOfScalar[T]
+    ) -> SelectOfScalar[T]:
+        """Get optimized statement with joins. Must be implemented by each service"""
+        return base_statement
 
     def get_default_sort(self) -> str | None:
         return self.sql_model.get_primary_key_name()

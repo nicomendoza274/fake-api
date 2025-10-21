@@ -3,7 +3,7 @@ from decimal import Decimal
 import sqlalchemy as sa
 from fastapi import Form, UploadFile
 from pydantic.json_schema import SkipJsonSchema
-from sqlmodel import BigInteger, Field, Relationship, and_
+from sqlmodel import BigInteger, Field, Index, Relationship, and_
 
 from core.models.base import BaseAudit
 from core.models.camel import Camel
@@ -54,6 +54,19 @@ class Product(ProductBase, BaseAudit, table=True):
                 Category.deleted_at == None,
             )
         }
+    )
+
+    # Database indexes for better performance
+    __table_args__ = (
+        Index("idx_product_name", "name"),  # For search queries
+        Index("idx_product_category_id", "category_id"),  # For category filtering
+        Index("idx_product_is_active", "is_active"),  # For active/inactive filtering
+        Index("idx_product_deleted_at", "deleted_at"),  # For soft delete queries
+        Index("idx_product_created_at", "created_at"),  # For audit queries
+        Index("idx_product_price", "price"),  # For price range queries
+        Index(
+            "idx_product_category_active", "category_id", "is_active", "deleted_at"
+        ),  # Composite index
     )
 
 
