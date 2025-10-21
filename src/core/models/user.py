@@ -1,17 +1,23 @@
+import sqlalchemy as sa
 from sqlmodel import BigInteger, Field
 
 from core.models.camel import Camel
 
 
 class UserBase(Camel):
-    first_name: str = Field()
-    last_name: str = Field()
-    email: str = Field(unique=True)
+    user_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    first_name: str = Field(sa_column=sa.Column(sa.String, nullable=False))
+    last_name: str = Field(sa_column=sa.Column(sa.String, nullable=False))
+    email: str = Field(sa_column=sa.Column(sa.String, unique=True, nullable=False))
     picture_id: int | None = Field(
-        default=None, foreign_key="files.file_id", nullable=True
+        default=None,
+        sa_column=sa.Column(
+            sa.BigInteger,
+            sa.ForeignKey("files.file_id", use_alter=True, deferrable=True),
+            nullable=True,
+        ),
     )
 
 
 class UserModel(UserBase):
-    user_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
-    hash: str = Field()
+    hash: str = Field(sa_column=sa.Column(sa.String, nullable=False))

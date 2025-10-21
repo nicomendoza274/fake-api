@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from pydantic import Field
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import BigInteger, Field
@@ -7,16 +8,17 @@ from core.models.camel import Camel
 
 
 class CategoryBase(Camel):
-    name: str = Field()
+    category_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    name: str = Field(sa_column=sa.Column(sa.String, nullable=False))
 
 
 class Category(CategoryBase, BaseAudit, table=True):
     __tablename__: str = "categories"
-    category_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    pass
 
 
 class CategoryResponseDTO(CategoryBase):
-    category_id: int
+    pass
 
 
 class CategoryDTO(CategoryBase):

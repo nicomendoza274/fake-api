@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+import sqlalchemy as sa
 from fastapi import Form, UploadFile
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import BigInteger, Field, Relationship, and_
@@ -9,23 +12,30 @@ from models.category import Category, CategoryDTO
 
 
 class ProductBase(Camel):
-    name: str = Field()
-    price: float = Field()
+    product_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    name: str = Field(sa_column=sa.Column(sa.String, nullable=False))
+    price: Decimal = Field(
+        sa_column=sa.Column(sa.Numeric(10, 2), nullable=False), default=Decimal("0.00")
+    )
     is_active: bool = Field()
 
     # Foreign keys
     category_id: int | None = Field(
-        default=None, foreign_key="categories.category_id", nullable=True
+        default=None,
+        foreign_key="categories.category_id",
+        nullable=True,
+        sa_type=BigInteger,
     )
     picture_id: int | None = Field(
-        default=None, foreign_key="files.file_id", nullable=True
+        default=None,
+        foreign_key="files.file_id",
+        nullable=True,
+        sa_type=BigInteger,
     )
 
 
 class Product(ProductBase, BaseAudit, table=True):
     __tablename__: str = "products"
-
-    product_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
 
     # Relationships
     picture: File | None = Relationship(
@@ -48,7 +58,6 @@ class Product(ProductBase, BaseAudit, table=True):
 
 
 class ProductResponseDTO(ProductBase):
-    product_id: int
     category: CategoryDTO | None
     picture: FileDTO | None = None
 

@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from pydantic import Field
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy import BigInteger
@@ -8,16 +9,17 @@ from core.models.camel import Camel
 
 
 class RoleBase(Camel):
-    name: str = Field()
+    role_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    name: str = Field(sa_column=sa.Column(sa.String, nullable=False))
 
 
 class Role(RoleBase, BaseAudit, table=True):
     __tablename__: str = "roles"
-    role_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    pass
 
 
 class RoleResponseDTO(RoleBase):
-    role_id: int
+    pass
 
 
 class RoleDTO(RoleBase):

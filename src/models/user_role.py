@@ -7,17 +7,26 @@ from core.models.camel import Camel
 
 
 class UserRoleBase(Camel):
-    user_id: int | None = Field(foreign_key="users.user_id", nullable=True)
-    role_id: int | None = Field(foreign_key="roles.role_id", nullable=True)
+    user_role_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    user_id: int | None = Field(
+        foreign_key="users.user_id",
+        nullable=True,
+        sa_type=BigInteger,
+    )
+    role_id: int | None = Field(
+        foreign_key="roles.role_id",
+        nullable=True,
+        sa_type=BigInteger,
+    )
 
 
 class UserRole(UserRoleBase, BaseAudit, table=True):
     __tablename__: str = "user_roles"
-    user_role_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    pass
 
 
 class UserRoleResponseDTO(UserRoleBase):
-    user_role_id: int | None
+    pass
 
 
 class UserRoleDTO(UserRoleBase):

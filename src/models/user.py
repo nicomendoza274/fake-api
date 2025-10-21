@@ -15,7 +15,6 @@ from models.user_role import UserRole
 
 
 class UserResponseDTO(UserBase):
-    user_id: int
     roles: list[RoleResponseDTO] = []
     picture: FileDTO | None = None
 
@@ -70,7 +69,7 @@ class User(UserModel, BaseAudit, table=True):
             "primaryjoin": lambda: and_(
                 File.file_id == User.picture_id,
                 File.deleted_at == None,
-            )
+            ),
         }
     )
 

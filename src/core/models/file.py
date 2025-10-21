@@ -1,3 +1,4 @@
+import sqlalchemy as sa
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import BigInteger, Field
 
@@ -6,20 +7,21 @@ from core.models.camel import Camel
 
 
 class FileBase(Camel):
-    source_file_name: str = Field()
-    cdn_file_name: str = Field()
-    mime_type: str | None = Field(nullable=True)
-    file_size: int | None = Field(nullable=True)
-    url: str = Field()
+    file_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    source_file_name: str = Field(sa_column=sa.Column(sa.String, nullable=False))
+    cdn_file_name: str = Field(sa_column=sa.Column(sa.String, nullable=False))
+    mime_type: str | None = Field(sa_column=sa.Column(sa.String, nullable=False))
+    file_size: int | None = Field(sa_column=sa.Column(sa.Integer, nullable=False))
+    url: str = Field(sa_column=sa.Column(sa.String, nullable=False))
 
 
 class File(FileBase, BaseAudit, table=True):
     __tablename__: str = "files"
-    file_id: int | None = Field(sa_type=BigInteger, default=None, primary_key=True)
+    pass
 
 
 class FileResponseDTO(FileBase):
-    file_id: int
+    pass
 
 
 class FileDTO(FileBase):
