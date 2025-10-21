@@ -11,6 +11,7 @@ from core.database.database import SessionDep
 from core.models.base import BaseAudit
 from core.models.file import File
 from core.models.user import UserModel
+from core.utils.file_validation import validate_upload_file
 
 T = TypeVar("T", bound=BaseAudit)
 
@@ -23,6 +24,9 @@ class FileService:
     def save_file(self, file: UploadFile | None, request: Request) -> File | None:
         if not file or not file.filename:
             return None
+
+        # Validar archivo antes de guardarlo
+        validate_upload_file(file)
 
         file_extension = file.filename.split(".")[-1]
         new_filename = f"{uuid.uuid4()}.{file_extension}"

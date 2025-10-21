@@ -47,26 +47,10 @@ Follow these steps to set up and run the project on your local machine:
 
 - **Create environment files in root**
 
-  `.env.dev`, `.env.ds`, `.env.qa`, `.env.prod`
+  Copy env.example and change it to create all environment: `.env.dev`, `.env.qa`, `.env.prod`
 
   ```sh
-  #Auth
-  SECRET_KEY=[SECRET_KEY]
-
-  #Database
-  DB_HOST=localhost
-  DB_PORT=5432
-  DB_NAME=fakeapi
-  DB_USER=admin
-  DB_PASSWORD=123456
-
-  # Mail
-  MAIL_USERNAME=emailaddress@test.com
-  MAIL_PASSWORD=password
-  MAIL_FROM=emailaddress@test.com
-  MAIL_PORT=587
-  MAIL_SERVER=smtp.gmail.com
-
+  cp env.example .env.dev
   ```
 
 - **Move to src folder**
