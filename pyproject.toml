@@ -1,0 +1,16 @@
+[project]
+name = "fake-api"
+version = "2.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "apscheduler>=3.11.0",
+    "fastapi-mail>=1.5.7",
+    "fastapi[standard]>=0.119.1",
+    "psycopg2-binary>=2.9.11",
+    "pyhumps>=3.8.0",
+    "pyjwt>=2.10.1",
+    "pytz>=2025.2",
+    "sqlmodel>=0.0.27",
+]
