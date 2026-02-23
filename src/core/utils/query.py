@@ -3,10 +3,10 @@ import json
 import humps
 from fastapi import status
 
-from core.classes.handle_exception import HandleException
-from core.constants.generic_errors import GEN_1000
-from core.models.query import QueryCriteria
-from core.utils.encrypt import base64_decode
+from src.core.classes.handle_exception import HandleException
+from src.core.constants.generic_errors import GEN_1000
+from src.core.models.query import QueryCriteria
+from src.core.utils.encrypt import base64_decode
 
 
 def str_to_dict(query: str) -> dict:

@@ -1,6 +1,6 @@
 from sqlmodel import inspect
 
-from core.models.audit import Audit
+from src.core.models.audit import Audit
 
 
 class BaseAudit(Audit):

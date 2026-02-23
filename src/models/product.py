@@ -5,10 +5,10 @@ from fastapi import Form, UploadFile
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import BigInteger, Field, Index, Relationship, and_
 
-from core.models.base import BaseAudit
-from core.models.camel import Camel
-from core.models.file import File, FileDTO
-from models.category import Category, CategoryDTO
+from src.core.models.base import BaseAudit
+from src.core.models.camel import Camel
+from src.core.models.file import File, FileDTO
+from src.models.category import Category, CategoryDTO
 
 
 class ProductBase(Camel):

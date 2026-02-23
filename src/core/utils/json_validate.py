@@ -3,9 +3,9 @@ from typing import Type, TypeVar
 from fastapi import status
 from pydantic import ValidationError
 
-from core.classes.handle_exception import HandleException
-from core.constants.generic_errors import GEN_1002
-from core.models.camel import Camel
+from src.core.classes.handle_exception import HandleException
+from src.core.constants.generic_errors import GEN_1002
+from src.core.models.camel import Camel
 
 T = TypeVar("T", bound=Camel)
 

@@ -1,6 +1,6 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from functions.test_tasks import run_test
+from src.functions.test_tasks import run_test
 
 scheduler = BackgroundScheduler()
 

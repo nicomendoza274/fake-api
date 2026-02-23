@@ -4,7 +4,7 @@ from typing import Any, Dict
 from sqlalchemy import text
 from sqlmodel import Session
 
-from core.database.database import engine
+from src.core.database.database import engine
 
 
 class DatabaseHealthChecker:

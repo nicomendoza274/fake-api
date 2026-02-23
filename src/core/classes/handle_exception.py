@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import status
 
-from core.models.error import Error
+from src.core.models.error import Error
 
 
 @dataclass

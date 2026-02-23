@@ -1,11 +1,11 @@
 from fastapi import HTTPException, Request, status
 from fastapi.security import HTTPBearer
 
-from core.classes.handle_exception import HandleException
-from core.constants.generic_errors import GEN_2000, GEN_2001, GEN_4000
-from core.database.database import SessionDep
-from core.utils.encrypt import validate_token
-from services.user import UserService
+from src.core.classes.handle_exception import HandleException
+from src.core.constants.generic_errors import GEN_2000, GEN_2001, GEN_4000
+from src.core.database.database import SessionDep
+from src.core.utils.encrypt import validate_token
+from src.services.user import UserService
 
 
 class JWTBearer(HTTPBearer):

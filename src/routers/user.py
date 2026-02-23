@@ -1,16 +1,20 @@
 from fastapi import APIRouter, Depends, Form, Path, Query, Request, status
 
-from core.constants.responses import NOT_200, NOT_201, NOT_422
-from core.database.database import SessionDep
-from core.models.response import MultipleResponseData, ResponseData
-from core.services.file import FileService
-from core.utils.json_validate import validate_json_data
-from core.utils.query import str_to_query
-from core.utils.response import get_empty_response, get_multiple_response, get_response
-from docs.user import USER_DOC
-from middlewares.jwt_bearer import JWTBearer
-from models.user import CreateUserDTO, User, UserDTO, UserResponseDTO
-from services.user import UserService
+from src.core.constants.responses import NOT_200, NOT_201, NOT_422
+from src.core.database.database import SessionDep
+from src.core.models.response import MultipleResponseData, ResponseData
+from src.core.services.file import FileService
+from src.core.utils.json_validate import validate_json_data
+from src.core.utils.query import str_to_query
+from src.core.utils.response import (
+    get_empty_response,
+    get_multiple_response,
+    get_response,
+)
+from src.docs.user import USER_DOC
+from src.middlewares.jwt_bearer import JWTBearer
+from src.models.user import CreateUserDTO, User, UserDTO, UserResponseDTO
+from src.services.user import UserService
 
 router = APIRouter(
     prefix="/users",

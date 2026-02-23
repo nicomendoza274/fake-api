@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from core.database.database import SessionDep
-from core.services.base import BaseService
-from models.category import Category, CategoryDTO, CategoryResponseDTO
-from models.user import User
+from src.core.database.database import SessionDep
+from src.core.services.base import BaseService
+from src.models.category import Category, CategoryDTO, CategoryResponseDTO
+from src.models.user import User
 
 
 @dataclass

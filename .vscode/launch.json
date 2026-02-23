@@ -2,30 +2,28 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Fake-API QA",
+            "name": "Fake-API DEV",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
-            "cwd": "${workspaceFolder}/src",
-            "envFile": "${workspaceFolder}/.env.qa",
+            "envFile": "${workspaceFolder}/.env.dev",
             "args": [
-                "main:app",
+                "src.main:app",
                 "--reload"
             ],
             "jinja": true,
         },
         {
-            "name": "Fake-API DEV",
+            "name": "Fake-API QA",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
-            "cwd": "${workspaceFolder}/src",
-            "envFile": "${workspaceFolder}/.env.dev",
+            "envFile": "${workspaceFolder}/.env.qa",
             "args": [
-                "main:app",
+                "src.main:app",
                 "--reload"
             ],
             "jinja": true,
-        },
+        }
     ]
 }

@@ -1,7 +1,7 @@
 from fastapi import status
 
-from core.enums.error import ErrorEnum
-from core.models.error import Error
+from src.core.enums.error import ErrorEnum
+from src.core.models.error import Error
 
 GEN_1000 = Error(
     Code=ErrorEnum.GEN_1000.value,

@@ -7,14 +7,14 @@ from typing import cast
 from fastapi import status
 from sqlmodel import func, select, text
 
-from core.classes.handle_exception import HandleException
-from core.classes.settings import settings
-from core.constants.generic_errors import GEN_2002, GEN_4000
-from core.database.database import SessionDep
-from core.models.email import EmailMessage
-from core.services.email import EmailService
-from core.utils.encrypt import create_token
-from models.user import (
+from src.core.classes.handle_exception import HandleException
+from src.core.classes.settings import settings
+from src.core.constants.generic_errors import GEN_2002, GEN_4000
+from src.core.database.database import SessionDep
+from src.core.models.email import EmailMessage
+from src.core.services.email import EmailService
+from src.core.utils.encrypt import create_token
+from src.models.user import (
     User,
     UserCheckCodeDTO,
     UserForgotPasswordDTO,
@@ -23,7 +23,7 @@ from models.user import (
     UserLoginDTO,
     UserResetPasswordDTO,
 )
-from models.user_code import UserCode
+from src.models.user_code import UserCode
 
 MAIL_USERNAME = settings.MAIL_USERNAME
 MAIL_PASSWORD = settings.MAIL_PASSWORD

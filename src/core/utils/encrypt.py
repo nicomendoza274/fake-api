@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import pytz
 from jwt import decode, encode
 
-from core.classes.settings import settings
+from src.core.classes.settings import settings
 
 
 def encrypt_string(hash_string: str) -> str:

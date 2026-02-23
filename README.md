@@ -12,67 +12,155 @@ The actual version is [v2.1.0](https://github.com/nicomendoza274/fake-api/releas
 
   ```sh
   git clone git@github.com:nicomendoza274/fake-api.git
+  cd fake-api
   ```
 
 ## Installation
 
-Follow these steps to set up and run the project on your local machine:
+Elige una de las siguientes opciones según la herramienta que quieras usar: **Virtualenv**, **UV** o **Docker**.
 
-- **Install Python 3.10+**
+---
 
-- **Create a Virtual Environment:**
+### Opción 1: Virtualenv
 
-  ```sh
-  python3 -m venv venv
-  ```
+Requisitos: **Python 3.13+**
 
-- **Activate the Virtual Environment:**
-  On macOS/Linux:
+1. **Crear y activar el entorno virtual**
 
-  ```sh
-  source venv/bin/activate
-  ```
+   macOS/Linux:
 
-  On Windows:
+   ```sh
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-  ```sh
-  .\venv\Scripts\activate
-  ```
+   Windows:
 
-- **Install Dependencies:**
+   ```sh
+   python -m venv .venv
+   .\.venv\Scripts\activate
+   ```
 
-  ```sh
-  pip install -r requirements.txt
-  ```
+2. **Instalar dependencias**
 
-- **Create environment files in root**
+   ```sh
+   pip install -r requirements.txt
+   ```
 
-  Copy env.example and change it to create all environment: `.env.dev`, `.env.qa`, `.env.prod`
+3. **Configurar variables de entorno**
 
-  ```sh
-  cp env.example .env.dev
-  ```
+   Copia el ejemplo y crea tus archivos de entorno (por ejemplo `.env.dev`, `.env.qa`, `.env.prod`):
 
-- **Move to src folder**
+   ```sh
+   cp env.example .env.dev
+   ```
 
-  ```sh
-  cd src/
-  ```
+   Edita el archivo y configura las variables (base de datos, secretos, etc.).
 
-- **Run the Project:**
+4. **Ejecutar el proyecto**
 
-  Development
+   Desarrollo:
 
-  ```sh
-  uvicorn main:app --env-file ../.env.dev --reload
-  ```
+   ```sh
+   uvicorn src.main:app --env-file .env.dev --reload
+   ```
 
-  QA
+   QA:
 
-  ```sh
-  uvicorn main:app --env-file ../.env.qa --reload
-  ```
+   ```sh
+   uvicorn src.main:app --env-file .env.qa --reload
+   ```
 
-  > Or select your **profile debugger** and press **F5**. **F5** run QA default.
+   También puedes usar el **perfil del debugger** en VS Code y pulsar **F5** (por defecto usa QA).
 
-  Once the project is up and running, you can access it through your [browser](http://localhost:8000/)
+---
+
+### Opción 2: UV
+
+Requisitos: [UV](https://docs.astral.sh/uv/) instalado y **Python 3.13+**.
+
+1. **Crear y activar el entorno virtual con UV**
+
+   ```sh
+   uv python install 3.13
+   uv venv
+   ```
+
+2. **Instalar dependencias**
+
+   ```sh
+   uv sync
+   ```
+
+3. **Configurar variables de entorno**
+
+   ```sh
+   cp env.example .env.dev
+   ```
+
+   Edita `.env.dev` con tu configuración.
+
+4. **Ejecutar el proyecto**
+
+   Desarrollo:
+
+   ```sh
+   uv run uvicorn src.main:app --env-file .env.dev --reload
+   ```
+
+   QA:
+
+   ```sh
+   uv run uvicorn src.main:app --env-file .env.qa --reload
+   ```
+
+---
+
+### Opción 3: Docker
+
+Requisitos: **Docker** y **Docker Compose**.
+
+La API y PostgreSQL se levantan con Docker Compose. No necesitas instalar Python ni dependencias en tu máquina.
+
+1. **Configurar variables de entorno**
+
+   Crea un archivo `.env` en la raíz del proyecto (o copia desde `env.example`):
+
+   ```sh
+   cp env.example .env
+   ```
+
+   Ajusta al menos `DB_NAME`, `DB_USER` y `DB_PASSWORD` si quieres valores distintos a los por defecto (`fake_api_db`, `postgres`, `password`). Con Docker, `DB_HOST` debe ser `db` (ya viene definido en el compose).
+
+2. **Levantar los servicios**
+
+   ```sh
+   docker compose up --build
+   ```
+
+   Para ejecutar en segundo plano:
+
+   ```sh
+   docker compose up -d --build
+   ```
+
+3. **Acceder a la API**
+   - API: [http://localhost:8000](http://localhost:8000)
+   - Documentación Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
+   - PostgreSQL: `localhost:5432` (usuario y base según tu `.env`)
+
+4. **Detener los servicios**
+
+   ```sh
+   docker compose down
+   ```
+
+   Para eliminar también el volumen de la base de datos:
+
+   ```sh
+   docker compose down -v
+   ```
+
+---
+
+Una vez el proyecto esté en marcha (con cualquiera de las opciones), puedes abrir [http://localhost:8000](http://localhost:8000) en el navegador.

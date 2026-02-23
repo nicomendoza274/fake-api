@@ -5,13 +5,13 @@ from pydantic import Field, model_validator
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import Field, Index, Relationship, and_
 
-from core.models.base import BaseAudit
-from core.models.camel import Camel
-from core.models.file import File, FileDTO
-from core.models.user import UserBase, UserModel
-from core.utils.encrypt import encrypt_string
-from models.role import Role, RoleResponseDTO
-from models.user_role import UserRole
+from src.core.models.base import BaseAudit
+from src.core.models.camel import Camel
+from src.core.models.file import File, FileDTO
+from src.core.models.user import UserBase, UserModel
+from src.core.utils.encrypt import encrypt_string
+from src.models.role import Role, RoleResponseDTO
+from src.models.user_role import UserRole
 
 
 class UserResponseDTO(UserBase):

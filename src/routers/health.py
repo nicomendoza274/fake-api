@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-from core.database.database import SessionDep
-from core.database.health import DatabaseHealthChecker
-from core.models.response import ResponseData
+from src.core.database.database import SessionDep
+from src.core.database.health import DatabaseHealthChecker
+from src.core.models.response import ResponseData
 
 router = APIRouter(
     prefix="/health",

@@ -2,13 +2,13 @@ from dataclasses import dataclass
 
 from sqlmodel import select
 
-from core.database.database import SessionDep
-from core.models.file import File
-from core.models.query import PropertyModel
-from core.services.base import BaseService
-from models.category import Category
-from models.product import Product, ProductDTO, ProductResponseDTO
-from models.user import User
+from src.core.database.database import SessionDep
+from src.core.models.file import File
+from src.core.models.query import PropertyModel
+from src.core.services.base import BaseService
+from src.models.category import Category
+from src.models.product import Product, ProductDTO, ProductResponseDTO
+from src.models.user import User
 
 
 @dataclass

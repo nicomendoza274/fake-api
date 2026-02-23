@@ -3,8 +3,8 @@ from typing import TypeVar
 
 from sqlmodel import or_
 
-from core.models.base import BaseAudit
-from core.models.query import QueryCriteria
+from src.core.models.base import BaseAudit
+from src.core.models.query import QueryCriteria
 
 T = TypeVar("T", bound=BaseAudit)
 

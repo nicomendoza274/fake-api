@@ -2,8 +2,8 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy import BigInteger
 from sqlmodel import Field
 
-from core.models.base import BaseAudit
-from core.models.camel import Camel
+from src.core.models.base import BaseAudit
+from src.core.models.camel import Camel
 
 
 class UserRoleBase(Camel):

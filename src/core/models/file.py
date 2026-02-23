@@ -2,8 +2,8 @@ import sqlalchemy as sa
 from pydantic.json_schema import SkipJsonSchema
 from sqlmodel import BigInteger, Field
 
-from core.models.base import BaseAudit
-from core.models.camel import Camel
+from src.core.models.base import BaseAudit
+from src.core.models.camel import Camel
 
 
 class FileBase(Camel):

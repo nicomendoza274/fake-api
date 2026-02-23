@@ -1,18 +1,22 @@
 from fastapi import APIRouter, Depends, Form, Path, Query, Request, status
 
-from core.constants.responses import NOT_200, NOT_201, NOT_422
-from core.database.database import SessionDep
-from core.models.response import MultipleResponseData, ResponseData
-from core.models.toggle import ActiveToggleDTO
-from core.services.file import FileService
-from core.utils.json_validate import validate_json_data
-from core.utils.query import str_to_query
-from core.utils.response import get_empty_response, get_multiple_response, get_response
-from docs.product import PRODUCT_DOC
-from middlewares.jwt_bearer import JWTBearer
-from models.product import CreateProductDTO, Product, ProductDTO, ProductResponseDTO
-from models.user import User
-from services.product import ProductService
+from src.core.constants.responses import NOT_200, NOT_201, NOT_422
+from src.core.database.database import SessionDep
+from src.core.models.response import MultipleResponseData, ResponseData
+from src.core.models.toggle import ActiveToggleDTO
+from src.core.services.file import FileService
+from src.core.utils.json_validate import validate_json_data
+from src.core.utils.query import str_to_query
+from src.core.utils.response import (
+    get_empty_response,
+    get_multiple_response,
+    get_response,
+)
+from src.docs.product import PRODUCT_DOC
+from src.middlewares.jwt_bearer import JWTBearer
+from src.models.product import CreateProductDTO, Product, ProductDTO, ProductResponseDTO
+from src.models.user import User
+from src.services.product import ProductService
 
 router = APIRouter(
     prefix="/products",

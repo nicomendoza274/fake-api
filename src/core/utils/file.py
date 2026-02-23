@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from core.constants.file import UPLOAD_DIRECTORY
+from src.core.constants.file import UPLOAD_DIRECTORY
 
 
 def create_and_mount_static_directory(app: FastAPI) -> None:

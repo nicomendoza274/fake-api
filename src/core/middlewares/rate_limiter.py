@@ -5,7 +5,7 @@ from typing import Dict
 from fastapi import HTTPException, Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from core.classes.settings import settings
+from src.core.classes.settings import settings
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):

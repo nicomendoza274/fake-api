@@ -1,7 +1,7 @@
 import sqlalchemy as sa
 from sqlmodel import BigInteger, Field
 
-from core.models.camel import Camel
+from src.core.models.camel import Camel
 
 
 class UserBase(Camel):

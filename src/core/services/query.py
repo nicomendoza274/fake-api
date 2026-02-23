@@ -3,11 +3,11 @@ from typing import Generic, Type, TypeVar
 
 from sqlmodel.sql.expression import SelectOfScalar
 
-from core.classes.filter import FilterCriteria
-from core.classes.search import SearchCriteria
-from core.classes.sort import SortCriteria
-from core.models.base import BaseAudit
-from core.models.query import PropertyModel, QueryCriteria
+from src.core.classes.filter import FilterCriteria
+from src.core.classes.search import SearchCriteria
+from src.core.classes.sort import SortCriteria
+from src.core.models.base import BaseAudit
+from src.core.models.query import PropertyModel, QueryCriteria
 
 T = TypeVar("T", bound=BaseAudit)
 

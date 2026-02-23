@@ -1,14 +1,18 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 
-from core.constants.responses import NOT_200, NOT_201, NOT_422
-from core.database.database import SessionDep
-from core.models.response import MultipleResponseData, ResponseData
-from core.utils.query import str_to_query
-from core.utils.response import get_empty_response, get_multiple_response, get_response
-from middlewares.jwt_bearer import JWTBearer
-from models.customer import CustomerDTO, CustomerResponseDTO
-from models.user import User
-from services.customer import CustomerService
+from src.core.constants.responses import NOT_200, NOT_201, NOT_422
+from src.core.database.database import SessionDep
+from src.core.models.response import MultipleResponseData, ResponseData
+from src.core.utils.query import str_to_query
+from src.core.utils.response import (
+    get_empty_response,
+    get_multiple_response,
+    get_response,
+)
+from src.middlewares.jwt_bearer import JWTBearer
+from src.models.customer import CustomerDTO, CustomerResponseDTO
+from src.models.user import User
+from src.services.customer import CustomerService
 
 router = APIRouter(
     prefix="/customers",

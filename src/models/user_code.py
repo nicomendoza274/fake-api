@@ -1,6 +1,6 @@
 from sqlmodel import BigInteger, Field
 
-from core.models.base import BaseAudit
+from src.core.models.base import BaseAudit
 
 
 class UserCode(BaseAudit, table=True):

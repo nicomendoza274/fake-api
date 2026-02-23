@@ -4,11 +4,11 @@ from datetime import datetime, timezone
 from fastapi import status
 from sqlmodel import select
 
-from core.classes.handle_exception import HandleException
-from core.constants.generic_errors import GEN_2001, GEN_4000
-from core.database.database import SessionDep
-from core.services.base import BaseService
-from models.user import User, UserChangePasswordDTO, UserDTO, UserResponseDTO
+from src.core.classes.handle_exception import HandleException
+from src.core.constants.generic_errors import GEN_2001, GEN_4000
+from src.core.database.database import SessionDep
+from src.core.services.base import BaseService
+from src.models.user import User, UserChangePasswordDTO, UserDTO, UserResponseDTO
 
 
 @dataclass

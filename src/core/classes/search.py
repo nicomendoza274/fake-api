@@ -4,9 +4,9 @@ from typing import Type, TypeVar
 import humps
 from sqlmodel import desc
 
-from core.models.base import BaseAudit
-from core.models.query import PropertyModel, QueryCriteria
-from core.utils.query import get_property_values
+from src.core.models.base import BaseAudit
+from src.core.models.query import PropertyModel, QueryCriteria
+from src.core.utils.query import get_property_values
 
 T = TypeVar("T", bound=BaseAudit)
 

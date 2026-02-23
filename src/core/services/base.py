@@ -6,15 +6,15 @@ from fastapi import status
 from sqlmodel import select
 from sqlmodel.sql.expression import SelectOfScalar
 
-from core.classes.handle_exception import HandleException
-from core.constants.generic_errors import GEN_4000
-from core.database.database import SessionDep
-from core.models.base import BaseAudit
-from core.models.camel import Camel
-from core.models.query import PropertyModel, QueryCriteria
-from core.models.toggle import ActiveToggleDTO
-from core.models.user import UserModel
-from core.services.query import QueryCriterionService
+from src.core.classes.handle_exception import HandleException
+from src.core.constants.generic_errors import GEN_4000
+from src.core.database.database import SessionDep
+from src.core.models.base import BaseAudit
+from src.core.models.camel import Camel
+from src.core.models.query import PropertyModel, QueryCriteria
+from src.core.models.toggle import ActiveToggleDTO
+from src.core.models.user import UserModel
+from src.core.services.query import QueryCriterionService
 
 T = TypeVar("T", bound=BaseAudit)
 K = TypeVar("K", bound=Camel)

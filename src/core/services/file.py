@@ -6,12 +6,12 @@ from typing import Type, TypeVar
 
 from fastapi import Request, UploadFile
 
-from core.constants.file import UPLOAD_DIRECTORY
-from core.database.database import SessionDep
-from core.models.base import BaseAudit
-from core.models.file import File
-from core.models.user import UserModel
-from core.utils.file_validation import validate_upload_file
+from src.core.constants.file import UPLOAD_DIRECTORY
+from src.core.database.database import SessionDep
+from src.core.models.base import BaseAudit
+from src.core.models.file import File
+from src.core.models.user import UserModel
+from src.core.utils.file_validation import validate_upload_file
 
 T = TypeVar("T", bound=BaseAudit)
 

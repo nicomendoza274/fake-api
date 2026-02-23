@@ -2,7 +2,7 @@ import os
 
 from fastapi import HTTPException, UploadFile, status
 
-from core.classes.settings import settings
+from src.core.classes.settings import settings
 
 
 class FileValidationError(Exception):

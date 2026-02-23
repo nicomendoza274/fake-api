@@ -1,17 +1,17 @@
 from fastapi import APIRouter
 
-from core.constants.responses import NOT_200, NOT_422
-from core.database.database import SessionDep
-from core.models.response import ResponseData
-from core.utils.response import get_empty_response, get_response
-from models.user import (
+from src.core.constants.responses import NOT_200, NOT_422
+from src.core.database.database import SessionDep
+from src.core.models.response import ResponseData
+from src.core.utils.response import get_empty_response, get_response
+from src.models.user import (
     UserCheckCodeDTO,
     UserForgotPasswordDTO,
     UserLoggedDTO,
     UserLoginDTO,
     UserResetPasswordDTO,
 )
-from services.auth import AuthService
+from src.services.auth import AuthService
 
 router = APIRouter(
     prefix="/auth",
